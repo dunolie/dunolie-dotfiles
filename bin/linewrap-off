@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# http://discussions.apple.com/thread.jspa?threadID=1682458
+# turn line wrap off
+#
+# \e (escape)
+# [  (open square bracket)
+# ?  (question mark)
+# 7  (seven)
+# l  (el - lowercase L)
+# \c (tells echo to suppress the newline; this is optional)
+
+echo -e "\e[?7l\c"

@@ -1,0 +1,188 @@
+#!/bin/bash
+# Author: see http://bashcurescancer.com/improve-this-script-win-100-dollars.html
+# Modified and extended by "Chris F.A. Johnson" <cfajohnson@gmail.com>, 2007-02-25 
+# Web site: http://cfaj.freeshell.org
+
+## Features:
+##  Will use non-standard port if specified in URL
+##     (e.g., http://example.com:8080/index.html)
+##  Checks for successful connection
+##  Moderately meaningful exit codes
+##  Parses headers for
+##     Successful request
+##     Content-Type
+##     Content-Length
+##     Transfer-Encoding: chunked (the reason for f19 before and 0 after HTML)
+##  Stores headers in shell array
+##  Command-line options:
+##     Save output to a file
+##     Save headers to a file
+##     Verbose output in various degrees
+##  Works in KornShell93 as well as bash
+
+## To do:
+##     Better usage function, including command-line options
+##     Automatically follow redirections (301, 302, 303)
+##     More selective verbosity
+##     Strip CRs from chunked encoded text
+##     Add From: line to request
+##     More comments
+
+## References:
+##   HTTP Made Really Easy:
+##      A Practical Guide to Writing Clients and Servers
+##      <http://www.jmarshall.com/easy/http/#http1.1c2>
+
+httpClient()
+{
+  local URL=$1
+  local type=
+  local HEADERS HOST RESOURCE PORT=$PORT
+
+  case $URL in
+      http://*) ;;
+      "") die "$ERR_USAGE" "$USAGE" ;;
+      *) die "$ERR_URL" "$URL not a valid URL. Must start with http://" ;;
+  esac
+
+  # Get the host
+  HOST=${URL#http://} ## Discard http://
+  case $HOST in
+      */*) RESOURCE=/${HOST#*/}       # Extract resource from URL
+           HOST=${HOST%"$RESOURCE"}
+           ;;
+      *) 
+          ;;
+  esac
+  case $HOST in
+      *:*) PORT=${HOST##*:}
+           HOST=${HOST%:*}
+           ;;
+  esac
+
+  [ $verbose -gt 0 ] && {
+      echo "HOST=$HOST"
+      echo "PORT=$PORT"
+      echo "RESOURCE=$RESOURCE"
+  }
+
+  exec 3<> /dev/tcp/$HOST/$PORT       # Open connection
+  ERR=$?
+  [ "$ERR" -ne 0 ] && die "$ERR_CONNECT" "Error $ERR: COULD NOT CONNECT"
+
+  request >&3
+  [ $verbose -gt 2 ] && request >&2
+
+  ## Get headers
+  while :
+  do
+    IFS= read -r -u 3 -t ${TIMEOUT:=1} || die "$ERR_HEADER"
+    LINE=${REPLY%"$CR"}
+    [ $verbose -gt 0 ] && printf "%s\n" "$LINE"
+    case $LINE in
+        "") break ;; ## end of headers
+        HTTP/1.[01]*) ;;  ## Add redirection here
+        Transfer-Encoding:*chunked*) type=chunked ;;
+        Content-Length:*) length=${LINE#Content-Length: } ;;
+        Content-Type:*) type=$type${LINE#Content-Type: } ;;
+    esac
+    HEADERS[${#HEADERS[@]}]=$LINE  # Save headers, for no reason
+  done
+
+  ## Redirect stdout to file if specified
+  [ -n "$outfile" ] && {
+      exec > "$outfile" || die "$ERR_WRITE" "Could not write to $outfile"
+  }
+
+  ## Print body to stdout (assumes text)
+  [ $verbose -eq 2 ] && {
+      while IFS= read -u3 -r -t1 line
+      do
+        printf "%s\n" "${line%"$CR"}"
+      done
+      exit
+  }
+
+  ## Get the body
+  case $type in
+      chunked*) while read_chunk; do :; done ;;
+      Text/*)
+          while :
+          do
+            IFS= read -r -u 3 -t "$TIMEOUT" ||   # read from server
+            die "$ERR_TIMEOUT" "Server timed out"
+            printf "%s\n" "${REPLY%$CR}"   # Eliminate \r, we are using UNIX
+          done
+          ;;
+      *) dd bs=$length count=1 <&3 2>/dev/null ;;
+  esac
+
+  exec 3<&-
+}
+
+request()
+{
+    printf "GET %s HTTP/1.1\r\n" "${RESOURCE:-/}"  # Request resource, only care about gets.
+    printf "host: %s:%d\r\n" "$HOST" "$PORT"       # Send host header, what about encoding?
+    printf "User-agent: %s %s\r\n" "$progname" "$version" # Send user agent
+    printf "\r\n"                                  # End request
+}
+
+read_chunk()
+{
+  IFS= read -r -t1 num
+  num=${num%%[!0-9a-fA-F]*}
+  case $num in
+      "") return 0 ;;
+  esac
+  size=$( printf "%d\n" "0x${num#0[xX]}" )
+  [ $verbose -gt 2 ] && printf "CHUNK SIZE: %d (%s)\n" "$size" "$num" >&2
+  [ "$size" -eq 0 ] && return 1
+  dd bs=$size count=1 2>/dev/null
+} <&3
+
+die() {
+    result=$1
+    shift
+    [ -n "$*" ] && printf "%s\n" "$*" >&2
+    exec 3<&-
+
+    [ -n "$headerfile" ] && printf "%s\n" "${HEADERS[@]}" > "$headerfile"
+    exit $result
+}
+
+CR=$'\r'
+NL=$'\n'
+progname=${0##*/}
+version=0.1
+USAGE="Usage: $progname [OPTIONS] http://URL"
+ERR_USAGE=1
+ERR_URL=2
+ERR_CONNECT=3
+ERR_REQUEST=4
+ERR_HEADER=5
+ERR_TIMEOUT=6
+ERR_WRITE=7
+
+PORT=80
+headerfile=
+outfile=
+verbose=0
+
+## Save options (for future redirection)
+COMMAND_LINE=( "$@" )
+
+while getopts h:o:v opt
+do
+  case $opt in
+      h) headerfile=$OPTARG ;;
+      o) outfile=$OPTARG ;;
+      v) verbose=$(( $verbose + 1 )) ;;
+  esac
+done
+shift "$(( $OPTIND - 1 ))"
+
+httpClient "$@"
+
+[ -n "$headerfile" ] && printf "%s\n" "${HEADERS[@]}" > "$headerfile"
+

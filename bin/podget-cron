@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: podget-cron
+#        Created: TIMESTAMP
+#  Last Modified: TIMESTAMP
+# -------------------------------------------------------------------------------
+#       Comments: grab my pocasts daily via cron using the ~/bin/podget script
+#    Description:
+# -------------------------------------------------------------------------------
+podget get 1
+podget get 2
+podget get 3
+#podget get 4;
+
+
+latest=/Volumes/DZ-Audio-270GB/Music/Podcasts/cutting-through-the-matrix/*.mp3
+id3tag --artist="Alan Watt" --album="Cutting Through the Matrix Podcasts" --genre="podcast" --comment="http://www.cuttingthroughthematrix.com/AlanWattPodCast.xml" --year="`date +%Y`" $latest
+
+mv /Volumes/DZ-Audio-270GB/Music/Podcasts/cutting-through-the-matrix/*2009*.mp3 /Volumes/DZ-Audio-270GB/Music/Podcasts/cutting-through-the-matrix/2009-Episodes
+mv /Volumes/DZ-Audio-270GB/Music/Podcasts/cutting-through-the-matrix/*2010*.mp3 /Volumes/DZ-Audio-270GB/Music/Podcasts/cutting-through-the-matrix/2010-Episodes
+
+
+growlnotify -s -a "Terminal" -t "podcasts" -m "podcasts have been checked for"

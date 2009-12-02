@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Tuesday,16 December, 2008
+# Description: trash reminder script for Oban flat.
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines if need and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()	
+#
+#########################################################################
+
+growlnotify -s -I "/Users/$USER/RobbieGrowl/Icons/FullTrash" -t "Take Out the Rubbish" -m "It gets collected in the morning"

@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,11 December, 2008
+# Description: ipod sync script
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+# run by LaunchD hook on mounting of podrock and syncs files, gives growl alert
+#########################################################################
+# Net Growl Support : uncomment lines if need and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()	
+#
+#########################################################################
+
+folderToBackup="/Users/robbie/Sync"
+backupVolume="/Volumes/podrock"
+backupTo="${backupVolume}/Backup-MiniLep-Sync"
+sleepFor=60
+
+# growl message to inform on start
+#growlnotify -a "iSync" -t "Sync non files on iPod" -m "~/Sync"
+
+echo -n "[*]-- Autobackup envoked at `date`" | logger
+echo -n "[*]-- Sleeping for ${sleepFor} seconds..." | logger
+sleep ${sleepFor}
+
+if [ ! -e ${backupVolume} ]
+then
+echo -n "[*]-- BackupVolume NOT connected - Exiting" | logger
+exit 0
+else
+echo -n "[*]-- BackupVolume Connected - Continuing" | logger
+fi
+
+
+# Create the folder to back up the data to (defined above)
+
+if [ ! -e ${backupTo} ]
+then
+echo -n "[*]-- Backupdir does not exist... Creating...)" | logger
+mkdir -p ${backupTo}
+else
+echo -n "[*]-- Backupdir exists! - Continuing" | logger
+fi
+
+# Copy the files over. Here we are using rsync.
+for i in ${folderToBackup}
+do
+echo -n "[*]-- Starting Rsync of ${i} to ${backupTo}" | logger
+rsync -aqE --delete ${i} ${backupTo}
+
+echo -n "[*]-- rsync of ${i} to ${backupTo} complete..."| logger
+done
+#rsync -aqE --delete $folderToBackup $backupTo
+
+# Optionally, once the rsync is done, unmount the drive.
+
+#hdiutil detach $backupVolume
+# growl alert so we know what's happening
+/usr/local/bin/growlnotify -I "/Volumes/podrock" -t "podrock sync" -m "Synced to podrock
+
+~/Sync"
+exit 0
+#--end
+

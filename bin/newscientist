@@ -1,0 +1,463 @@
+:
+##########################################################################
+# Title      :	dailynews - get daily news messages
+# Author     :	Heiner Steven <heiner.steven@odn.de>
+# Date       :	1999-12-03
+# Requires   :	dumphtmltbl, html2iso, striphtml, wget, wordwrap
+# Category   :	WWW, Desktop
+# SCCS-Id.   :	@(#) dailynews	1.52 05/12/06
+##########################################################################
+# Description
+#
+##########################################################################
+
+PN=`basename "$0"`			# Program name
+VER='1.52'
+
+##########################################################################
+
+newssources="scientist"
+NEWSCNT=20			# max. number of head articles
+
+##########################################################################
+
+# Get HTML page by URL, write to stdout
+: ${GETURL:=wget}
+: ${GETURLFLAGS="-q -O-"}
+
+: ${EGREP:=egrep}
+
+usage () {
+    echo >&2 "$PN - get daily news headlines, $VER (stv '99)
+usage: $PN [-n maxarticles] [newssource ...]
+    -n:  limit the number of articles (per news source), default: $NEWSCNT
+
+If no news source was specified, all will be consulted.
+
+Valid news sources:
+    $newssources"
+    exit 1
+}
+
+msg () {
+    for msgLine
+    do echo "$PN: $msgLine" >&2
+    done
+}
+
+fatal () { msg "$@"; exit 1; }
+
+##########################################################################
+# Formatting helper functions - may need adjustments
+##########################################################################
+
+# numberlist - indent and number lines
+
+numberlist () {
+    cat "$@" |
+    nl -s'. ' |			# number lines, number separator is '. '
+    sed "$maxlines{s|.*|	[more...]|;q;}" | # limit max. number
+    wordwrap -o 9
+}
+
+# "canonical" white space - replace multiple blanks with exactly one blank
+
+canonws () {
+    sed 's/	/ /g;s/  */ /g' "$@"
+}
+
+# trim - remove leading or trailing whitespace characters of a line
+
+trim () {
+    sed 's/^[ 	]*//; s/[ 	]*$//' "$@"
+}
+
+rmemptylines () {
+     $EGREP -v "^[ 	]*$" "$@"
+}
+
+jointagline () {
+    $NAWK '
+    {
+    	s = $0; gsub (/[^<]*/, "", s)
+	nopen += length (s);
+    	s = $0; gsub (/[^>]*/, "", s)
+	nclose += length (s);
+
+	if ( nopen && nopen == nclose ) {
+	    lastopen = match ($0, "<")
+	    lastclose = match ($0, ">")
+	    multiline = (lastopen > lastclose)
+	}
+
+	#print nopen, nclose, $0 | "cat >&2"
+
+	if ( nopen == nclose && !multiline ) {
+	    print
+	    #print "o", nopen, nclose, $0 | "cat >&2"
+	    nopen = nclose = 0
+	} else {
+	    #print "+", nopen, nclose, $0 | "cat >&2"
+	    printf "%s", $0
+	    multiline = 1
+	}
+    }
+    END {
+    	if ( multiline ) print ""
+    }
+' "$@"
+}
+
+preproc () {
+    canonws "$@" |
+    	trim |
+	rmemptylines
+}
+
+# getrsstitle - get <title> lines of an RSS feed
+getrsstitle () {
+    $NAWK '
+	/\<[ 	]*[iI][tT][eE][mM][ 	]*\>/ {
+	    while (getline >= 0) {
+		print
+		if ($0 ~ /<[ 	]*\/[iI][tT][eE][mM][ 	]*>/) break
+	    }
+
+	}'
+}
+
+###############################################################################
+# searchprog - search program using search PATH
+# usage: searchprog program
+###############################################################################
+
+searchprog () {
+    _search=$1; shift
+
+    for _dir in `echo "$PATH" | sed "s/^:/.:/;s/:\$/:./;s/:/ /g"`
+    do
+        [ -x "$_dir/$_search" ] || continue
+        echo "$_dir/$_search"
+        return 0
+    done
+
+    return 1
+}
+
+###############################################################################
+# MAIN PROGRAM
+
+###############################################################################
+# We need a "new" NAWK implementation with functions, "getline()",
+# gsub()
+
+: ${NAWK:=`searchprog mawk || searchprog gawk || searchprog nawk || echo awk`}
+
+set -- `getopt hn: "$@"` || usage
+[ $# -lt 1 ] && usage			# "getopt" detected an error
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+    	-n)
+	    NewsCnt=$2; shift
+	    case "$NewsCnt" in
+	    	*[!0-9]*)	fatal "invalid number: $NewsCnt";;
+	    esac
+	    ;;
+	--)	shift; break;;
+	-h)	usage;;
+	-*)	usage;;
+	*)	break;;			# First file name
+    esac
+    shift
+done
+
+[ $# -lt 1 ] && set -- $newssources
+
+maxlines=${NewsCnt:-$NEWSCNT}
+maxlines=`expr "$maxlines" + 1`
+: ${maxlines:=$NEWSCNT}
+
+isodate=`date +%Y-%m-%d`
+LongDate=`date '+%d.%m.%Y'`
+echo "News $isodate"
+
+for src
+do
+    case "$src" in
+    zdf)
+	#################################################################
+	# Headlines from the "Zweites Deutsches Fernsehen" ZDF
+	#################################################################
+
+	url="http://www.heute.de/ZDFheute"
+	echo "
+$url"
+
+	$GETURL $GETURLFLAGS "$url" |
+		egrep 'aufmacher-teasertext|meldung-text' |
+		sed 's|.*title="\([^">]*\)".*|\1|g' |
+		sed 's|.*\(<h2.*</h2>\).*|\1|g' |
+		sed 's/<[bB][rR]>/ /g' | # "striphtml": no new line for <br>
+		html2iso |
+		striphtml |
+		preproc |
+		numberlist		# number lines, indent
+	;;
+
+
+    heise)
+	#################################################################
+	# Current news from the "Heise" publishing company
+	#################################################################
+
+	url="http://www.heise.de/newsticker/"
+	echo "
+$url"
+	$GETURL $GETURLFLAGS "$url" |
+	    $NAWK '
+		# Create one large line of each multi-line <div>...</div>
+		# element.
+
+		/<[dD][iI][vV][ 	>]/ {
+		    line = $0
+		    while ( $0 !~ /<\/[dD][iI][vV]>/ && getline >= 0 ) {
+			if ( line != "" ) line = line " "
+			line = line $0
+		    }
+		    print line
+		    next
+		}
+		{ print }
+	    ' |
+	    html2iso |		# convert German "Umlaute" to ISO 8859
+	    striphtml |		# remove HTML tags
+	    preproc |		# remove whitespace
+	    $NAWK '
+		$1 == "'"$LongDate"'" {
+		    $1 = ""; print
+		    while ( getline >= 0 &&	\
+			$1 !~ /^[0-3][0-9]\.[0-9][0-9]\.2[0-9][0-9][0-9]/) {
+			if ( $0 ~ /^[ 	]*$/ ) continue
+			print
+		    }
+		}
+	    ' |
+	    numberlist
+	;;
+
+    zdnet)
+	#################################################################
+	# Newsticker of ZDNet
+	#################################################################
+
+	url='http://news.zdnet.de/'
+
+	year=`date +%Y`
+
+	# End pattern matches German date output format, e.g.
+	#	Montag, 12. April 2004
+	headerstart="[A-Z][a-z][a-z][a-z][a-z][a-z][a-z]*, [0-9][0-9]\. [A-Z][a-z][a-z][a-z][a-z]* $year"
+	start="News Letzte Meldungen"
+	end="[A-Z][a-z][a-z][a-z][a-z][a-z][a-z]*, [0-9][0-9]\. [A-Z][a-zä][a-zä][a-zä]* $year"
+
+	echo "
+$url"
+	$GETURL $GETURLFLAGS "$url" |
+	    tr -d '\015' |			# Remove carriage-return
+	    html2iso |
+	    striphtml |
+	    trim |
+	    # Start and end of data is tagged by current/yesterday's
+	    # date
+	    $NAWK '
+		/'"$headerstart"'/ && !headerseen {
+		    while ( getline >= 0 && $0 == "" ) ;
+		    print
+		    while ( getline >= 0 && $0 == "" ) ;
+		    print "DUMMYREMOVE Uhr", $0
+		    headerseen = 1
+		}
+		/'"$start"'/,/'"$end"'/' |
+	    sed -n '3d;$q; p' |	# ignore third (header) and last line
+	    $NAWK '
+		{
+		    # Concatenate multi-line paragraphs, separated
+		    # by newlines
+		    do {
+			for ( line=""; $0 !~ /^[ 	]*$/; getline ) {
+			    if ( line != "" ) line = line " "
+			    #print "!" NF, $0
+			    if ( $2 == "Uhr") {
+				    $1 = ""; $2 = "-"
+			    }
+			    line = line $0
+			}
+			print line
+		    } while ( getline >= 0 && $0 != "" ) 
+		}
+	    ' |
+	    rmemptylines |
+	    numberlist
+	;;
+
+    cnet)
+	#################################################################
+	# Current news from C|Net
+	#################################################################
+
+	url="http://news.cnet.com/"
+	echo "
+$url"
+	$GETURL $GETURLFLAGS "$url" |
+	    tr -d '' |
+	    $NAWK '
+		$0 ~ /<[hH]3>.*\?tag=nefd\.lede/ { # main head lines
+		    line = ""
+		    while ( $0 != "" ) {
+			if ( line != "" ) line = line " "
+			gsub(/<\/[hH]3>/, " - ")
+			line = line $0
+			getline
+		    }
+		    print line
+		}
+		$0 ~ /\?tag=nefd\.top/ { print }
+	    ' |
+	    sed 's/<[^>]*>//g' |	# "striphtml", but no <br> handling
+	    preproc |
+	    numberlist
+	;;
+
+    scientist)
+	#################################################################
+	# Headlines from the "New Scientist"
+	#################################################################
+
+	url="http://www.newscientist.com/news.ns"
+	echo "
+$url"
+	today=`date "+%d %B %Y"`
+	yesterday=`TZ=GMT+24 date "+%d %B %Y"`
+	$GETURL $GETURLFLAGS "$url" |
+	    $NAWK '
+		/<div[ 	][^>]*class=.*newslisting.*>/ {
+		    #while ( getline >= 0 && $1 !~ /<\/div>/ )
+		    print
+		    while (getline > 0) {
+			print
+		    }
+		}' |
+	    html2iso |
+	    striphtml |
+	    preproc |
+	    $NAWK '
+		{
+		    line [i%3] = $0
+		    if ( i % 3 == 2 ) {
+			head = line [0]
+			text = line [1]
+			date = line [2]
+			if (date ~ /[0-9][0-9]*:[0-9][0-9]*.*'"$today"'/ \
+				|| date ~ \
+				/[0-9][0-9]*:[0-9][0-9]*.*'"$yesterday"'/ \
+				) {
+			    #print "head=", head
+			    #print "text=", text
+			    #print "date=", date
+			    print head, "-", text
+			} else {
+			    #print date " <> " "'"$today"'"
+			}
+		    }
+		    ++i
+		}' |
+	    numberlist
+	;;
+
+    nbc)
+	#################################################################
+	# Current news from NBC -- NOT USED
+	#################################################################
+
+	url="http://www.msnbc.com/news/news_front.asp"
+	echo "
+$url"
+
+	$GETURL $GETURLFLAGS "$url" |
+		striphtml |
+		sed -n '/TOP[ 	]*STORIES/,$p' |
+		sed -n 's/^ \(.*\)/\1/p' |
+		numberlist
+	;;
+
+    slashdot | /.)
+	#################################################################
+	# Current news from SlashDot
+	#################################################################
+
+	url="http://slashdot.org/"
+	echo "
+$url"
+	$GETURL $GETURLFLAGS "$url" |
+	    $NAWK '
+	    	/<div.*class="generaltitle">/ {
+		    while (getline >= 1 && $0 !~ /<\/div>/) {
+			print
+		    }
+		}
+	    ' |
+	    striphtml |
+	    preproc |
+	    numberlist
+	;;
+
+    spiegel)
+	#################################################################
+	# Current news from "Spiegel Online"
+	#################################################################
+
+	url="http://www.spiegel.de/schlagzeilen/tops/"
+
+	echo "
+$url"
+
+	todayexp=`date '+%d\.%m\.%Y'`
+
+	$GETURL $GETURLFLAGS "$url" |
+	    $NAWK '
+	    	/class="gesperrt"/ { doprint = 1 }
+		doprint != 0 { print }
+	    ' |
+	    sed 's/\<\/div\>/<br>/g' |
+	    html2iso |
+	    striphtml |
+	    $NAWK '
+	    	!firstseen {
+		    printf "%s: ", $0
+		    getline
+		    firstseen = 1
+		}
+		{
+		    previous = $0
+		    while (getline >= 1 && $0 !~ /\('"$todayexp"'\)/)
+		    	;
+		    if ($0 ~ /\('"$todayexp"'\)/) {
+		    	#print "-", $0
+			print previous
+		    }
+		}
+	    ' |
+	    numberlist
+	;;
+
+
+    *)
+    	fatal "invalid news source: $src
+	valid: $newssources"
+	;;
+    esac
+done
+
+exit 0

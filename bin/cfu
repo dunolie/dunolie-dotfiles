@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+# commandlinefu.com random entry parser
+use warnings;
+use HTTP::Request;
+use LWP::UserAgent;
+use HTML::Entities;
+
+my $url="http://www.commandlinefu.com/commands/random";
+my $ua = LWP::UserAgent->new();
+my $doc="";
+$ua->agent("Parseheaders");
+$ua->max_size('100000');
+my $req = HTTP::Request->new( GET => "$url" );
+my $result= $ua->request($req);
+if ($result->is_success) {
+	$doc = $result->content();
+}
+else { print "FAIL!";}
+
+#load the file to @CF so we can move between $line and $line+1
+open my $fh, '<', \$doc or die $!;
+my @CF = <$fh>;
+close($fh);
+
+my $size = @CF;
+for(my $i = 0; $i < $size; $i++){
+        if ($CF[$i] =~ /<div class=\"command\">/) {
+		$CF[$i] =~ s/.*<div class=\"command\">(.*)<\/div>/$1/g;
+		$CF[$i] = decode_entities($CF[$i]);
+		print "CMD: $CF[$i]";
+	}
+        if ($CF[$i] =~ /<div class=\"description\">/) {
+		$CF[$i+1] =~ s/.*<p>(.*)<\/p>/$1/g;
+		$CF[$i+1] = decode_entities($CF[$i+1]);
+		if ($CF[$i+1] =~ /\w/) {
+			print "Description: $CF[$i+1]";
+		}
+	}
+        if ($CF[$i] =~ /<div class=\"summary\">/) {
+		$CF[$i+1] =~ s/.*<a href=\"(.*)\" title=\".*\">(.*)<\/a>/URL=http:\/\/www.commandlinefu.com$1  Title=$2/g;
+		$CF[$i+1] = decode_entities($CF[$i+1]);
+		print "$CF[$i+1]";
+	}
+}

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: urlview-mutt
+#        Created: TIMESTAMP
+#  Last Modified: TIMESTAMP
+# -------------------------------------------------------------------------------
+#       Comments: A lot of mailing lists have headers with URLs in them,
+#                 which I don’t want to see in the list of links.
+#                 I made a wrapper to chop them out.
+#    Description: http://log.antiflux.org/grant/2006/11/22/mutt-with-imap-and-ssl-on-os-x
+# -------------------------------------------------------------------------------
+# throw away mail headers to avoid list URLs
+ruby -e 'gets until /^\n$/; print while gets' $@ | /opt/local/bin/urlview
+

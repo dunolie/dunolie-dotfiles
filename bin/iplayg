@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Monday,09 March, 2009
+# Description: download files with iplayer (get_iplayer.pl)
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#####################################################################
+
+#if [ -d /Volumes/DZ-Movies-250GB ]
+#then
+#iplayer -g $1 --type tv,itv,podcast,radio --subtitles --whitespace --file-prefix '<name>-<episode>' --output /Volumes/DZ-Movies-250GB/TV-UK-Downloaded --subdir --command 'growlnotify -s -I "~/Sync/Bash/bin/growl-icons/iplayer" -t "iPlayer download finished" -m "<name> - <channel>
+#
+#<filename>"'
+#else
+iplayer -g $1 --rtmp-tv-opts --hashes,--quiet --raw --modes iphone,flashhd,flashhd1 --liveradiomode flashaac,realaudio --nopurge --nocopyright --type tv,podcast,radio --file-prefix '<name>-<episode>' --output /Volumes/DZ-Movies-250GB/TV-UK-Downloaded --subdir --command 'growlnotify -s -I "~/Sync/Bash/bin/growl-icons/iplayer" -t "iPlayer download finished" -m "<name> - <channel>
+
+<filename>"'

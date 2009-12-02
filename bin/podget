@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#       podget
+#
+#       Copyright 2009 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+#
+#       Redistribution and use in source and binary forms, with or without
+#       modification, are permitted provided that the following conditions are
+#       met:
+#
+#       * Redistributions of source code must retain the above copyright
+#         notice, this list of conditions and the following disclaimer.
+#       * Redistributions in binary form must reproduce the above
+#         copyright notice, this list of conditions and the following disclaimer
+#         in the documentation and/or other materials provided with the
+#         distribution.
+#       * Neither the name of the author nor the names of its
+#         contributors may be used to endorse or promote products derived from
+#         this software without specific prior written permission.
+#
+#       THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#       "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#       LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#       A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#       OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#       SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#       LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#       DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#       THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#       (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#       OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+from sys import stderr, argv
+from podget import PodGet, PodGetException
+
+# trying to use colors
+try:
+    from colors import light_blue, light_red, red, white
+except:
+    light_blue = light_red = red = white = lambda(x): str(x)
+
+
+def main():
+    try:
+        podget = PodGet()
+        if len(argv) == 2:
+            if argv[1] == 'list':
+                print red('Available feeds:')
+                for id, name in podget.list_podcasts():
+                    print ' '*4, light_blue(id), '-', white(name)
+            else:
+                raise PodGetException('Invalid option.')
+        elif len(argv) == 3:
+            podcast = podget.get_name_by_id(argv[2])
+            if argv[1] == 'get':
+                print red('Downloading the latest chapter of:'), white(podcast)
+                url, filepath = podget.get_latest(argv[2])
+                print ' '*4, light_blue('URL:'), white(url)
+                print ' '*4, light_blue('Saving to:'), white(filepath)
+                print
+                podget.download(url, filepath)
+            elif argv[1] == 'play':
+                print red('Playing the latest chapter of:'), white(podcast)
+                latest_file = podget.get_latest_to_play(argv[2])
+                print ' '*4, light_blue('File:'), white(latest_file)
+                print
+                podget.play(latest_file)
+            else:
+                raise PodGetException('Invalid option.')
+        else:
+            print """
+%s - A simple podcast client that runs on CLI
+
+Options:
+
+    list      - List all RSS feeds available
+    get [id]  - Download the latest chapter available on specified feed
+    play [id] - Play the latest chapter downloaded from specified feed
+
+Configuration:
+
+    Section podcast:
+        names and urls of the RSS feeds
+
+    Section config:
+        limit_rate: Limit rate of the doownload bandwidth (on KB/s)
+        media_dir: Directory to save the files
+
+Example of config file (~/.podget):
+
+[podcast]
+na_geral = http://www.radiobandeirantes.com.br/rss/xmls/humor.xml
+phpspcast = http://feeds2.feedburner.com/phpspcast
+nerdcast = http://jovemnerd.ig.com.br/?feed=rss2&cat=42
+
+[config]
+limit_rate = 40
+media_dir = /home/rafael/podcast
+""" % argv[0]
+    except KeyboardInterrupt:
+        print >> stderr, light_red('Interrupted.')
+        exit(1)
+    except PodGetException, error:
+        print >> stderr, light_red('Error:'), white(error)
+        exit(1)
+    except:
+        print >> stderr, light_red('An error was occured!')
+        exit(1)
+
+
+if __name__ == '__main__':
+    main()

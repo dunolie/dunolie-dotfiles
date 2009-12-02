@@ -1,0 +1,75 @@
+#!/bin/bash
+
+quit() { 
+	E=$1
+	shift
+	echo "$@"
+	exit $E
+}
+
+USER="" #FILL ME IN
+PASS="" #ME TOO LOL
+COOKIES=`mktemp`
+LIST=`mktemp`
+TMPFILE=`mktemp`
+URL="$1"
+
+[[ -z $USER || -z $PASS ]] && quit 1 "USER/PASS not set"
+
+[[ -z $URL ]] && quit 1 "Usage: $0 url-to-html-page-with-rapidshare-links"
+
+if [[ $URL == http* ]]
+then
+	echo "Downloading file list"
+	curl "$URL" > $TMPFILE
+elif [[ -f $URL ]] 
+then
+	echo "Using list from file"
+	cat "$URL" > $TMPFILE
+else
+	quit 3 "$URL does not appear to be an URL or existing disk file"
+fi
+
+if grep -q '<[aA]' $TMPFILE
+then
+	cat $TMPFILE | sed -e 's/[hH][rR][eE][fF]="*\(http[^">< ]*\)/\n\1\n/g;'  | grep -i '^http.*rapidshare' > $LIST
+else
+	echo "$URL appears not to be HTML. Using as plain list."
+	cat "$TMPFILE" > $LIST
+fi
+
+echo "The following URLs were found:"
+cat $LIST
+echo "End of list"
+
+if tty > /dev/null
+then
+	echo "If this doesn't look right, hit CTRL-C to abort. Otherwise, Enter."
+	read
+fi
+
+echo "Attempting to log in"
+#Login
+curl -s --insecure -c $COOKIES -b $COOKIES -d login=$USER -d password=$PASS 'https://ssl.rapidshare.com/cgi-bin/premiumzone.cgi' > $TMPFILE
+
+if grep -q 'If you have forgotten your login' $TMPFILE 
+then
+	quit 2 "Eek, the login appeared to be invalid. See $TMPFILE"
+fi
+
+TOTAL=$(wc -l < $LIST)
+
+while read URL
+do
+	echo "Downloading $TOTAL files, currently ${URL##*/}"
+	curl -L -c $COOKIES -b $COOKIES -O "$URL" 
+	(( TOTAL-- ))
+done < $LIST
+
+echo "All files downloaded. Attempting to log out."
+
+#Logout
+curl -b $COOKIES -c $COOKIES 'http://rapidshare.com/cgi-bin/premium.cgi?logout=1' > $TMPFILE
+rm $COOKIES
+rm $LIST
+rm $TMPFILE

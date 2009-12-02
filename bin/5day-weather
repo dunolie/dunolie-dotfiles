@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Saturday,12 September, 2009
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+
+wxurl="http://wwwa.accuweather.com"
+wxurl="$wxurl/ukie/index-forecast.asp?postalcode=PA34%204AA"
+size=999; shift
+size=5
+echo 
+lynx -source "${wxurl}$1" | \
+sed -n '/Start - Forecast Cell/,/End - Forecast Cell/p' | \
+sed 's/<[^>]*>//g;s/^ [ ]*//g' | \
+uniq | \
+head -97489
+exit 0
+
+
+

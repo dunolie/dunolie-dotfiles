@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,16 September, 2009
+# Description: wget a website :)
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : MreDD :)
+#########################################################################
+SAVE="$HOME/tmp/sites"
+cd $SAVE
+WEBURL=$1
+if [ -z "$WEBURL" ];then
+    echo " Please Provide a URL Link.. (Example: http://www.google.com) "
+else
+    unset response
+wget --random-wait -q -r -p -e robots=off -U mozilla $1
+fi
+growlnotify -a "Firefox" -t "sitegrabbed to ~/tmp/sites" -m "$1"

@@ -1,0 +1,131 @@
+#! /bin/bash
+
+
+# options
+
+savedir="/Users/robbie/Pictures/imagerips"
+
+# no need to edit below here, unless u know what your doing
+
+version="0.1"
+target="$2"
+
+function remoter (){
+# remote rip
+
+echo "Scanning $target for images"
+
+declare -a images
+
+images=($(lynx -dump $target | grep "http://" | grep ".jpg\|.png" | sed 's/\[/DELME/' | grep -v "DELME" | cut -d: -f2))
+
+echo -n "${#images[@]} images to rip. Do you want to continue? [y/n] "
+
+read
+
+if [ "$REPLY" == "n" ]
+then
+	echo Shutting down .............
+	exit 0
+else
+	cd $savedir
+	for i in ${images[@]}
+do
+	echo "Saved image http:$i to $savedir"
+	wget -q http:"$i"  
+done
+fi
+
+}
+
+function usage() {
+#space for usage help
+echo
+echo
+echo "`basename $0` v$version - http://lazyasses.net"
+echo
+echo "Usage: `basename $0` [options] [url]"
+echo "	Options:"
+echo "	-r - Remote linked images (EXAMPLE: http://example.com/images/example.jpg)"
+#echo "	-l - Localy linked images (EXAMPLE: images/example.jpg)"
+echo
+echo "EXAMPLE: `basename $0` -r http://example.com/images.html"
+echo "	 Would scan images.html on the server example.com for links to images "
+echo "   that are formatted http://server.com/folder/image.jpg"
+echo
+echo
+echo
+
+}
+
+function update(){
+
+rver=$( lynx -dump http://lazyasses.net/projects/versions | grep "`basename $0`" | cut -d: -f2)
+if [ "$version" != "$rver" ]
+then
+	echo Your version is $version - Updated version is $rver
+	echo -n Do you want to retrieve it? [y/n]  
+	read
+if [ "$REPLY" == "y" ]
+then
+	cd $HOME
+	echo "Downloading `basename $0` Version $rver"
+	wget -q http://lazyasses.net/projects/`basename $0`
+	echo "The new file is saved in your home directory, please move it in place of the old one"
+	exit 0
+else
+	echo "Not updating `basename $0`"
+fi
+else
+	echo "`basename $0` up-to-date"
+	exit 0
+fi
+
+}
+
+function localr(){
+# Space for local rip
+server="$target"
+echo "Scanning $target for images"
+#declare -a images
+
+lynx -source $target | grep ".jpg"> temp.txt
+
+}
+
+if [ -z "$1" ]
+then
+echo "ERROR:No option specified"
+usage
+exit 0
+fi
+
+if [ "$1" == "-update" ]
+then
+update
+exit 0
+fi
+
+if [ -z "$2" ]
+then
+echo "ERROR:No url specified"
+usage
+exit 0
+fi
+
+if [ "$1" == "-r" ]
+then
+usage
+remoter
+exit 0
+fi
+
+
+
+# if [ "$1" == "-l" ]
+# then
+# localr
+# exit 0
+# fi
+
+exit 0

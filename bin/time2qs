@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,27 September, 2009
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+date "+%Y/%m/%d (%a) @ %H:%M:%S" | qs
+

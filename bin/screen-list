@@ -1,0 +1,26 @@
+
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sun  1 Feb 22:54:52 2009
+# Description: lists active screens with growl for use in irssi/screen
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()
+#
+#########################################################################
+sleep 20;
+
+growlnotify -I /Users/$USER/bin/growl-icons/irssi -t "Active Screen Socket" -m "$(screen -ls)"

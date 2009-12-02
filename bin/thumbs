@@ -1,0 +1,2140 @@
+#!/bin/bash
+
+# default parameters, normally you don't have to change anything here
+NAME="thumbs"
+DATE=`date +%d%m%Y`
+VERSION="0.63"
+OLDIFS=$IFS
+URL="http://www.cathedrallabs.org/thumbs/"
+CONVERTOPT="-scale"
+OLDIFS=$IFS
+IFS='
+'
+SUPPORTED_VIDEOS="mpeg mov avi"
+
+# configuration
+WIDTH=640		# size of picture shown
+HEIGHT=480		#
+
+THUMB_SIZE="69x69"	# size of thumbnail
+COLLECTION="$DATE"	# default name for collection
+
+# to edit these, exif -i <picture taken with your camera>
+# choose ids of information that you want to be shown
+EXIF_TAGS="0x010f 0x0110 0x0132 0x829a 0x829d 0x8822 0x8827 0x9101 0x9102 0x9204 0x9205 0x9207 0x9208 0x9209 0x920a 0xa001 0xa002 0xa003"
+EXIF_ROTATE_TAG=0x0112	# tag with orientation
+
+HAVE_EXIF="yes"
+HAVE_MPGTX="no"
+HAVE_UUDECODE="no"
+
+# order does matter here
+CONFIG_FILES="/etc/thumbsrc $HOME/.thumbsrc"
+
+############################ options ########################################
+# thumbnail size option
+THUMB_SIZE_OPTION_LETTER="s"
+THUMB_SIZE_LONG_OPTION="thumb-size"
+
+# collection name
+COLLECTION_NAME_OPTION_LETTER="n"
+COLLECTION_NAME_LONG_OPTION="name"
+
+# only order option
+ONLY_ORDER="no"
+ONLY_ORDER_OPTION_LETTER="o"
+ONLY_ORDER_LONG_OPTION="only-order"
+
+# ignore video files option
+IGNORE_VIDEO_FILES="no"
+IGNORE_VIDEO_FILES_OPTION_LETTER="v"
+IGNORE_VIDEO_LONG_OPTION="no-video"
+
+# ignore comments option
+IGNORE_COMMENTS="no"
+IGNORE_COMMENTS_OPTION_LETTER="c"
+IGNORE_COMMENTS_LONG_OPTION="no-comments"
+
+# ignore diary file option
+IGNORE_DIARY="no"
+IGNORE_DIARY_LONG_OPTION="nodiary"
+
+# help command
+HELP="no"
+HELP_OPTION_LETTER="h"
+HELP_LONG_OPTION="help"
+
+# version command
+VERSION_SHOW="no"
+VERSION_OPTION_LETTER="V"
+VERSION_LONG_OPTION="version"
+
+# exif info
+IGNORE_EXIF="no"
+IGNORE_EXIF_OPTION_LETTER="e"
+IGNORE_EXIF_LONG_OPTION="exif"
+
+# mpegtx info
+NO_MPEG_INFO="no"
+NO_MPEG_INFO_OPTION_LETTER="m"
+NO_MPEG_INFO_LONG_OPTION="no-mpeg-info"
+
+# don't move files to collection dir. copy them instead 
+KEEP_FILES="yes"
+KEEP_FILES_OPTION_LETTER="k"
+KEEP_FILES_LONG_OPTION="keep-files"
+
+# the return url present in all pages
+RETURN_URL="../"
+RETURN_URL_OPTION_LETTER="u"
+RETURN_URL_LONG_OPTION="return-url"
+
+# output format
+OUTPUT_FORMAT=jpg
+OUTPUT_FORMAT_LONG_OPTION="output-format"
+
+# show current picture number and the remaining
+PIC_COUNT="yes"
+PIC_COUNT_LONG_OPTION="picture-count"
+
+# splited indexing
+#SPLIT_INDEX="yes"
+SPLIT_INDEX="no"
+SPLIT_INDEX_COUNT=25
+SPLIT_INDEX_OPTION_LETTER="l"	# only to enable/disable
+SPLIT_INDEX_LONG_OPTION="split-index-count"
+
+# links to full size on pictures
+LINK_BIG="no"
+LINK_BIG_LONG_OPTION="link-big"
+
+# quiet
+QUIET="no"
+QUIET_OPTION_LETTER="q"
+ECHO="echo"
+
+# dump configuration
+DUMP_CONFIG="no"
+DUMP_CONFIG_LONG_OPTION="dump-config"
+
+# collection title
+COLLECTION_TITLE=$COLLECTION;
+COLLECTION_TITLE_OPTION_LETTER="t"
+
+# size information
+SHOW_SIZE="yes"
+SHOW_SIZE_LONG_OPTION="show-file-size"
+
+# stylesheet
+CSS_FILE=""
+CSS_FILE_LONG_OPTION="css"
+
+# logo
+LOGO="built-in"
+LOGO_LONG_OPTION="logo"
+
+# make thumbnails of movies if possible
+MOVIE_THUMBS="no"
+MOVIE_THUMBS_LONG_OPTION="movie-thumbs"
+
+# comments on the fly
+COMMENTS_ONTHEFLY="no"
+COMMENTS_ONTHEFLY_LONG_OPTION="comment"
+COMMENTS_EDITOR="vi"
+COMMENTS_EDITOR_LONG_OPTION="editor"
+COMMENTS_PICPREVIEW="display"
+COMMENTS_PICPREVIEW_LONG_OPTION="picpreview"
+COMMENTS_VIDPREVIEW="mplayer"
+COMMENTS_VIDPREVIEW_LONG_OPTION="vidpreview"
+
+# info
+INFO="no"
+INFO_LONG_OPTION="info"
+
+# mozilla prefetching
+USE_PREFETCH="no";
+USE_PREFETCH_LONG_OPTION="use_prefetch";
+
+# debug mode
+DEBUG="no";
+DEBUG_LONG_OPTION="debug";
+
+#############################################################################
+
+########################## functions ########################################
+# in this section we have functions used in the rest of script
+##
+function do_help
+{
+	echo "$NAME version $VERSION options:"
+	echo -e "-$THUMB_SIZE_OPTION_LETTER AxB, --$THUMB_SIZE_LONG_OPTION=AxB"\
+		"\tsize of thumbnail ($THUMB_SIZE)"
+	echo -e "-$COLLECTION_TITLE_OPTION_LETTER title"\
+		"\t\t\ttitle of collection ($COLLECTION_TITLE)"
+	echo -e "-$COLLECTION_NAME_OPTION_LETTER name, --$COLLECTION_NAME_LONG_OPTION=name"\
+		"\t\tname of collection ($COLLECTION)"
+	echo -e "-$ONLY_ORDER_OPTION_LETTER, --$ONLY_ORDER_LONG_OPTION"\
+		"\t\tjust ordenate files, do not create html files ($ONLY_ORDER)"
+	echo -e "-$IGNORE_VIDEO_FILES_OPTION_LETTER, --$IGNORE_VIDEO_LONG_OPTION"\
+		"\t\t\tignore video files ($IGNORE_VIDEO_FILES)"
+	echo -e "-$IGNORE_EXIF_OPTION_LETTER, --$IGNORE_EXIF_LONG_OPTION"\
+		"\t\t\tignore exif header ($IGNORE_EXIF)"
+	echo -e "-$KEEP_FILES_OPTION_LETTER, --$KEEP_FILES_LONG_OPTION"\
+		"\t\tdon't move files to collection; copy them instead ($KEEP_FILES)"
+	echo -e "-$NO_MPEG_INFO_OPTION_LETTER, --$NO_MPEG_INFO_LONG_OPTION"\
+		"\t\tdo not generate video information ($NO_MPEG_INFO)"
+	echo -e "-$RETURN_URL_OPTION_LETTER, --$RETURN_URL_LONG_OPTION"\
+		"\t\turl for 'return' link ($RETURN_URL)"
+	echo -e "-$SPLIT_INDEX_OPTION_LETTER"\
+		"\t\t\t\tsplit main index in multiple pages ($SPLIT_INDEX)"
+	echo -e "-$QUIET_OPTION_LETTER"\
+		"\t\t\t\truns without printing anything ($QUIET)"
+	echo -e "--$OUTPUT_FORMAT_LONG_OPTION=format"\
+		"\t\toutput format ($OUTPUT_FORMAT)"
+	echo -e "--$PIC_COUNT_LONG_OPTION"\
+		"\t\tpicture count in individual pages ($PIC_COUNT)"
+	echo -e "--$SHOW_SIZE_LONG_OPTION"\
+		"\t\tshow picture/video file size in index ($SHOW_SIZE)"
+	echo -e "--$SPLIT_INDEX_LONG_OPTION=<number>"\
+		"\t<number> of pictures in each splited index"\
+		"($SPLIT_INDEX_COUNT)"
+	echo -e "--$LINK_BIG_LONG_OPTION"\
+		"\t\t\tmakes normal size picture be a link to a full size\n"\
+		"\t\t\t\tfile if it exists ($LINK_BIG)"
+	echo -e "--$CSS_FILE_LONG_OPTION=file"\
+		"\t\t\tuse <file> as stylesheet ($CSS_FILE)"
+	echo -e "--$LOGO_LONG_OPTION=file,built-in,none"\
+		"\tuse <file> as logo. use \"none\" for no logo and \n"\
+		"\t\t\t\t\"built-in\" for built-in logo ($LOGO)"
+	echo -e "--$MOVIE_THUMBS_LONG_OPTION"\
+		"\t\t\tmake thumbnails of movies if possible ($MOVIE_THUMBS)"
+	echo -e "--$USE_PREFETCH_LONG_OPTION"\
+		"\t\t\tuse Mozilla's prefetch to load next pages faster";
+	echo;
+	echo -e "--$IGNORE_DIARY_LONG_OPTION"\
+		"\t\t\tignore 'diary' file ($IGNORE_DIARY)"
+	echo -e "-$IGNORE_COMMENTS_OPTION_LETTER, --$IGNORE_COMMENTS_LONG_OPTION"\
+		"\t\tignore 'comments' file ($IGNORE_COMMENTS)"
+	echo -e "--$COMMENTS_ONTHEFLY_LONG_OPTION"\
+		"\t\t\tgenerate comments on the fly ($COMMENTS_ONTHEFLY)"
+	echo -e "\t--$COMMENTS_EDITOR_LONG_OPTION=<editor>"\
+		"\tchanges comments editor to <editor> ($COMMENTS_EDITOR)"
+	echo -e "\t--$COMMENTS_PICPREVIEW_LONG_OPTION=<preview>"\
+		"\tchanges software used to preview a picture"\
+		"($COMMENTS_PICPREVIEW)";
+	echo -e "\t--$COMMENTS_VIDPREVIEW_LONG_OPTION=<preview>"\
+		"\tchanges software used to preview a movie"\
+		"($COMMENTS_VIDPREVIEW)";
+	echo;
+	echo -e "-$HELP_OPTION_LETTER, --$HELP_LONG_OPTION"\
+		"\t\t\tthis help"
+	echo -e "-$VERSION_OPTION_LETTER, --$VERSION_LONG_OPTION"\
+		"\t\t\tshow version information and exit"
+	echo -e "--$DUMP_CONFIG_LONG_OPTION"\
+		"\t\t\tdump current configuration"
+	echo -e "--$INFO_LONG_OPTION"\
+		"\t\t\tshow information about needed and optional software"
+	echo -e "--$DEBUG_LONG_OPTION"\
+		"\t\t\tenable debug mode"
+	echo;
+	echo "This script needs, in order to work, ImageMagick with JPEG support"
+	echo "Optionally, if ImageMagick has MPEG support, thumbnails of videos"
+	echo "would be generated. Debian users should read /usr/share/doc/imagemagick"
+	echo "You can get it at http://www.imagemagick.org/"
+	echo "To have EXIF format support download exif package. Grab it from"
+	echo "http://www.sourceforge.net/projects/libexif"
+	echo "To more information on software, call thumbs --info"
+}
+
+function do_info
+{
+echo "
+Here is the table of needed and optional software for Thumbs!
+ -----------------------------------------------------------------------------
+| software       | it is... | url                                             |
+ -----------------------------------------------------------------------------
+| ImageMagick    | needed   | http://www.imagemagick.org/                     |
+| exif           | optional | http://www.sourceforge.net/projects/libexif/    |
+| uudecode       | optional | http://www.gnu.org/software/sharutils/          |
+| mpgtx          | optional | http://mpgtx.sourceforge.net/                   |
+| mpeg2decode    | optional | http://www.kashpureff.org/nic/linux/softlist.en/|
+|                |          | mpeg2decode.html                                |
+ -----------------------------------------------------------------------------
+"
+}
+
+function do_version
+{
+	echo "Thumbs! version $VERSION"
+	echo "Get the latest Thumbs! freely at $URL"
+	echo "Thumbs! is distributed under GNU GPL license (http://www.gnu.org/licenses/gpl.html)"
+}
+
+# drops thumbs logo on output directory
+# $1 = output directory
+function make_thumbs_logo
+{
+	echo \
+"
+begin-base64 644 $2
+R0lGODlhQAAyAPZqAAAAAB4ZGCofDyIcGCokGTImDjQpFT0wDD4yEyomJDIs
+JzMvMDYxLTo2NEEuFEg3DEc3EVM+EkE8OUM/Q1dDD1hFEkRBPWJLDmJME2tV
+D2pTEXRdDnNcE3xiDnpiEklGRVFNS1NRTlhVVF5gYmFdW2JeYGNgXWlnZW9z
+a3FtbHFwbnl3dYdrDYZrEo1xDo1xEJh5Dpd4EqN/EYF9fZ+BDZ2CGaWDDaiH
+EbKODLGOEbmTDLqWE4OCfsWdDsObEMyiC8ukEtaqDdesEdyxDNuyEue5DOa6
+EPK+Cu7ACvfEA/LCEoqHhY6Qi5GOjZORjpmXlqKenqCfoaOhnKimpbCtrLGw
+rbi3tb/BwMC9u8W+yMXEvsjGxsrQydHNzNDP1tLSzdnX1t/f4N/h3OHe3OHh
+3Ojn5vDu7PTu+PP07v39/QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEBAGoA
+LAAAAABAADIAAAf+gGpqampqamonIGpqampqampqampqampqampqampqampq
+ampqampqampqampqampqaksfT2pqampqampqampqampqampqampbDA1qampq
+ampqampqampqampqampqampqampqampqampqampqampqamozAR9qampqampq
+ampqaoBqampqampqaicJCVtqampqampqampqampqampqampqampqampqampq
+ampqampqampqaiIJCVtqampqampqampqampqampqamoSMwwnampqampqampq
+ampqamphKQ0fCQ0gIStqampqampqampqampqamoSKxIiampqampqamr+gGpq
+ampqampqamUNVisgZmpqampqampqampqIh8LCQoNEhINCQkNHyJqampqampq
+ampqak8KWycgampqampqampqampqampqampbDVtgCSlqampqampqamozDQkN
+IicpKioqKionIAkJIk9qampqampqamMhIWkrH2pqampqaoBqampqampqampq
+amANW2lLDCdqampqampqIgoLIyoqKioqKioqKicqKSAJC09qampqampqIgpd
+aSshampqampqampqampqampqampqDVNpaScLM2pqampqHwkfKioqKioqKioq
+KioqKiopJw0JH2pqampqIglUaWkhImpqamr+gGpqampqampqampqampqISdp
+aWcrCiBPZmoiCSIqKioqKioqKioqKioqKioqKicSCUtqVisWC1ZpaWYJS2pq
+ampqampqampqampqampqajMJYGlpaVsiCQ0KCSEqKioqKioqKioqKioqKioq
+KioqKQwLDQwJK2VpaWlPDWpqaoBqampqampqampqampqampqahYnaWlpaWll
+VAsNKioqKioqKioqKioqKioqKioqKioqJwQnW2dpaWlpZQohampqampqampq
+ampqampqampqampLC0tpaWlpaVwJJyoqKioqKioqKioqKioqKioqKioqKiog
+DWlpaWlpZh8gZWr+gGpqampqampqampqampqampqampqKwwrZmlpaSkSKioq
+KioqKSopJycnJycpKSkqKioqKiopCVZpaWlgFg1Pampqampqampqampqampq
+ampqampqamorHw1OYGYJIyoqJyIfDQsJAwMDCQMDAwkJCxIgIyoqKg0pZ1sq
+CSBgaoBqampqampqampqampqampqampqampqampWIQQGCQQjHwkJAQEBCVZl
+Sx9lC1RoUwMBAQMNCQwhIQEJAR8pampqampqampqampqampqampqampqampq
+ampqXw0xRS0BAyFWZU4pTWBgJw1gaVYKPGFcSylTZ2AiCwQDOxkJIEv+gGpq
+ampqampqampqampqampqampqampqampqJwhFSS8nUwo8VFZUSyAJM2VpaWlg
+JwkiTlVWVCsLXWMEQ0k6FAoiU2pqampqampqampqampqampqampqampqZhIx
+SUkaT2leMyIgIitUZmlpaWlpaWllUysiISJLZGlpFjpJSYBJOQgfW2pqampq
+ampqampqampqampqampqamopB0VJRQVjaWlpaV0iChIrZGlSICBPaWlpaWlp
+aWlpaWlNG0lJSUlFECFqampqampqampqampqampqampqampkEi5JSTIhaWlp
+aVsGMEE9GwopCDc4EStpaWlpaWlpaWlpYAb+gEZJSUlJQQRPampqampqampq
+ampqampqampqampLBUZJSRhRaWlpaRI2SUlJSTgPQUlJQgVgVk9TYGlpaWlp
+aR8xMR1ISUgOK2pqampqampqampqampqampqampqJxBHSUkQW2lpaVYHR0lJ
+SUlJSElJSUkaBBEcGAZPaWlpaYBpKgQNChxIPgRSampqampqampqampqampq
+ampqamonEEhJSRBbaWlbCjBJSUlJSUlJSUlJSUM+SUlJQAlmaWlpaSsfaiYN
+BgQhampqampqampqampqampqampqampqSwQ7SUkVU2lmCjlJSUlJSUlJSUlJ
+SUlJSElBQUgQWGn+gGlpaSEiampaK0tqampqampqampqampqampqampqampq
+aicEHC0IImlVFEhJSUlJSUlJSUlJR0lJSTAFCEMwFmhpaWQJTWpqampqampq
+ampqampqampqampqampqampqampqKx8gIQpbUxhJSUlJST84SUlJSA8VLRUW
+XSoIN4AVM2lpKh9qampqampqampqampqampqampqampqampqampqampqampq
+IQ1WBkZJSUlCCAQeQT8VJFNLU2hpaVUNBgNbUgkzampqampqampqampqampq
+ampqampqampqampqampqampqal0hDQ0RPkI2B0tlJwwMK2ZpaWlpaWn+gGlp
+VSEiCipqampqampqampqampqampqampqampqampqampqampqampqampgIQQJ
+BAkgVmlpaWlnaWlpaWlpaWlpaVshDEshDSI8ampqampqampqampqampqampq
+ampqampqampqampqampqamoqDQkiTmBpaWlpaWlpaWlpaYBpVjMfCR9PHxA2
+GwpMampqampqampqampqampqampqampqampqampqampqampqampqSyANCU1p
+aWlpaWlpaWllIAoSIVRqTARCSUgRJ2pqampqampqampqampqampqampqampq
+ampqZysNHyUNDCpqampqaicJS2lpaWlpaWn+gGUfElNqampqTQRDSUkeH2pq
+ampqampqampqampqampqampqampqampcIgYVAwUxLAQpampqamohCiRdaWlp
+aFQLHytqampqamANOklJOA1qampqampqampqampqampqampqamphKyANEgZA
+GAMySUkeFmpqampqak4fCQsfEoAJDSJeampqampqahItSUlDCU9qampqampq
+ampqampqampqaWhlIg0FGCw3RTcKCzhJSS8SampqampqampNJwkLK1Nqampq
+ampqamoiFUlJSQgnampqampqampqampqampqampVHwY2RklJSTgGIhYySUkv
+H2pqampqampqamr+gGpqampqampqampqampWCj1JSRwfampqampqampqampq
+ampqamUNFUVJSUlJFAogagsuR0keIWpqURYJDSFqampqampqampqampqampq
+ah8YSUk4DWpqampqampqampqampqamonCEVJSUlJSTEKJ2oTLElJHglqah8U
+OR0KUYBqZE1LWk9LVWpqampqampqTwQ/SUUFTmpqampqampqamQqDU9qahIs
+SUk/LElJSTcJPCIbSUkaEh9VBEFJRxQgaiIEBBYGBQofM2pqKg0fImogHElJ
+GiFqampqampqWyINBhUEImoNOklJLwRBSUlJFCAiG0lJGAQDDQQ/SUn+gD0E
+Two6HAQ7Sj8ZCSFQCi0dBCgzBENJOA1WVU9jampUHwYwRkg3BlgSNkhHFQ0G
+MUlJNhIgG0lJQkNFMQIQRUdJGx8GRBARSUlJST8UDAdISTkEKRIxSUYEDQQE
+DCJmHxVDSUlJMQ1gJwQcFA1PKwY9SUMEJRtJSUcyET4aA4AZR0lFBgVFHAdI
+SUlJSUo2G0k+QC0NIhhJSRoDEC01BScERUlJPRcEI2pqKg0fS2pqHyxJQQQk
+G0lJFwwgBjELEjBJST9DSS4FRklJSUVJSUlJHAdCCCoFRUkvDSINHDYEFUlJ
+SSwQBQknampqampqag05SS0SEjJJQwRTYCL+gAYCKQY6SUlJRxUCQ0lJOAIt
+SUlJMgEaLRIMOEk6DWpLBkQFBUZJSUlJSTcNampqampqTARGQgQrCkFJMA1d
+al4fAR8iBTtGQBcMCT9JSS4SCi1JST0KBDENHxlJRAQzKwZGCAsQMTcvHEc0
+DWpqampqaisOShUfKQRBShAhaoBqaksTC04WCgUKHysSOklJGh8zCjBIQQoT
+HAorBENJLAgONEYFSyENChYERy0fampqampqKwdACktqIAYODU9qampqKiJP
+alQrW2pqEjlJSRUWaiIMERANIggDUR8XR0lJSUccH1ZqaicNHUYIIWpqampq
+al8KGBJlak4rJ1OzgGpqampqampqampqampqHxQ/NwkzampUIiFVUwoDICsN
+CC82LRANK2poIgovQBQLVmpqampqamofARZqampqampqampqampqampqampq
+alQfCQonampqampqamomAw1PTyISCRIiU2pqHwMVGgQgJ2pqampqampqKwxO
+ampqaoBqampqampqampqampqampqamZgYmpqampqampqal4qIk9qampqampq
+amoiDQ0fJ2pqaoEAOw==
+====
+" | uudecode -o $1/$2
+}
+
+# make movie thumbnail
+function make_movie_logo
+{
+echo "begin-base64 644 movie.gif
+R0lGODlhRQBAAPcAAAICAjYqFmpWNKaMWsGNTvXRdbq6u87OzsrGph4eEqaa
+erJuMs+QUdjAhhcWFZJ6RFpKKv3utvvxxtqSSqqifpRjM1cvGh8FA9q6jtvX
+uRMSCeO2bzxCOnJuWquqquugTtra2hEOBYZaMvzjoMGhbE8qGBACBPSwVzo6
+OnxZMtrSpsrKygIKAvKcS19eXZaKanlPKeK/e8SwiLKysjwjEc6dY9LKojcY
+CsbGxvPRj25OMAIGB456VuLGjfWnS0MwGu7qxubCfi4YCPLx8ejdsbKSZD4y
+HvzGbTQkEf2nRMqFOvTQiJ6AXF03HsLCwurmwikYDJKOdmJiYdGvdOq2Y9yw
+dgoCA+3Jh2hSNPK+ZIJ+Wk87IqmDTba2th4eHoaCZvHgrsC2lN7Oou26b4V1
+WW5aOvnOf6aigpNtPz4rEw8GAywQB1ZCKiYmJvLHgdLS0hsNA1ZKLvqmTfG2
+Yvvekaaihv33ye2nUgYGBuKlW+rCglJQPv2uRt7e3o6OjiIXC/XWfm5qUsK6
+mgYCA+rq6PfVn7mBQ/2iSW5FIaaafmZWPuzu6FBEN76+v4JmQu7Yiu7muvW6
+ZpKSk/yqTv7OfKamind2d/SoVPbJfMbCqPXAcCsqK/2xV/nYkoqKbigiG15W
+QhoaGkM9OSMQBubm5TYyIv2iVPu2WQoGBoSEhW5qVg4KEuCeaHx8fP76vg4O
+DpuVkpuamgICCjouHvHdmr52LqKiorq3sxYIAubiwq6ur5d2QuupX+ehXvzp
+sPzCbvq2ZczAovy6Ys64hOCbU0NCRM6igv3JeP3QhuHi4iIiIvrXibSOWv3P
+cz0+PQoKClZWVTIyMv7SfU5OTkpKS5WWl56eniseDk4mCv3zuba+tqempmtq
+aP6mS6JuPk8xHTc2NvzQkPncnfKeXqt4QRAKBy4uLcC+ovzKgollOnBwb/3i
+rhwSCmBAHM+mZwYCC/3Kb/nSfvrWcoqKivy/Y/rqpmZmZkdGRlpaWlJSU/bp
+u2JCLdbW1hISEoqGiv///yH5BAEKAP8AIf4VQ3JlYXRlZCB3aXRoIFRoZSBH
+SU1QACwAAAAARQBAAAAI/gD//fv379+/f//+/fvHz0A1P62kuHBhqZoTUv/+
+/fv379+/f//+/fv379+/f//+/fv379+/f//+/fv379+/f//+/fv379+/f//+
+/fv379+/f//+/fv37x+Ibfg29cODBw8AAAAAPAsFzt+Kf//+/fv379+/f//+
+/fv379+/f//+/fv379+/f//+/fv379+/f//+/fv379+/f//+/fv379+/f/+c
+qDP3Cg8ePAAAAAAAAAAAPDsA4FFmid+/f//+/fv379+/f//+/fv379+/f//+
+/fv379+/f//+/fv379+/f//+/fv379+/f//+/ft3QJ0DPHgAAMDT7x40fNNC
+/gEA4OAVHgB4dmzyQ+rfv3///v379+/fv3///v379+/fP4D//v379+/fv3//
+/v379+/fv3///v379+/fv3//dEV7BgDAqzYA8LhYcYCfE2cAXtnC0QoFqh0A
+njmz9e/fv3///v379+/fv3///v379+/fv3///v379+/fv3///v379+/fv3//
+/v379y+WFwAAAGzi5u8VAGgzunTxAA7AKw///h0ABwAPAACh5hH69+/fv3//
+/v379+/fv3///v379+/fv3///v379+/fv3///v379+/fv3//cCgDsOPZNGsz
+Yj0DkK9LlxkeogEIZW0GjhXO8OAJ9QzPM2j8/v37/vfv379///79+/fv379/
+//79+/fv379///79+/fv379///79+/fvX6N+ePAU89BlRqxXeKitWGHAmjIA
+yqx16WLNC0AAz6qlUobn2SYc//79+/fv379///79+/fv379///79+/fv379/
+//79+/fv379///79+9co1CAA1Lp06WLNC4Bp//45ieUFADgnjbrEcgDglYF/
+BsDhAbBJ179///79+/fv379///79+/fv379///79+/fv379///79+/eP0IF/
+pKz1A7ADxYo+2mx5AUDt379G1rwMKvbvHw5JDvD0s/XPzoF7eAA4SPXv379/
+//79+/fv379///79+/fv/t+/f//+/fv379+/f//+VYv1r5E1ZYMAFPv3z4At
+ZQCogVhhrVUoAND+/VvhDw+AULEM/PtnbwcAAM+49fn379+/f//+/fv379+/
+f//+/fv379+/f//+/fv3758Bc37+GbDVBiAAPBz+/TPQyguAfl68OHCwA0Ao
+aPMkpQIAYJOHGV2cUAOABw+AV9Qa/fv379+/f//+/fv379+/f//+/fv379+/
+f//+/cMBjoW/f06stQEwKFofXcUc4AEAAACAHQB2AAAA4Fm/TQAAgHvjpIuH
+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
+6GLgwD8nXXStcLJNHThl/q9QPQsVqh8ePHie4ekXTYqfbQBvdenz79+/f//+
+/fv379+/f//+/fv379+/f//+/fv379+/f//+/fv37x+pN066zJhhoEuXLsn+
+/QPhwVosSZL8WLKXT0orSZL86OrSZUajPv/+/fv379+/f//+/fv379+/f//+
+/fv379+/f//+/fv379+/f//+/fv371+yN05mzOjSBQcIQm90zQDx79+/NzO6
+/Pv3D8eMGTMMrCD079+/f//+/fv379+/f//+/fv379+/f//+/fv379+/f//+
+/fv379+/f//+/fv371+fAwZudenSqNGMLgcILSJ04JaBFSu6dOliAAeIf//+
+pP379+/fv3///v379+/fv3///v379+/fv3///v379+/fv3///v379+/fv3//
+/v37949QMoD8cDQyYKCLAQONGnXpYqBLly5ODvT59+/fv3///v379+/fv3//
+/v379+/fv3///v379+/fv3///v379+/fv3///v379+/fv3///v379+/fv3//
+kvXp0ydZn2R9+vTpk+zfv3///v379+/fv3///gUEADs=
+====
+" | uudecode -o $1/$2;
+}
+
+# function to make book thumbnail
+function make_diary_logo
+{
+echo "begin-base64 644 book.gif
+R0lGODlhRQBAAPeUAAAAAAkIEg0RDhUHCBcXFxkbJR8fMB4gHB4gKiQLCSgN
+ESsQCCgXFTcVEyUcJj4ZIyMiHDIiHyYnJycoNS8xLiwzNTc3NzU1RjY9UTtA
+PDpASEUWFVkeIFUrLXwdIXwlK3woO0BBO0ZGRkdIVUpXTE5SX1FPWFhYWEtM
+YFNPa1hZZlxaeFxpdW9daGFjXWZmZmtrf2p1dXJzbXd3d2pohWxymXh1j3d5
+mniEiIwaKIUpKIQuOpYtL5EvMJ8zJKQ3NLQ1NLg6RplPUq1CSMU9QNQ9RtdD
+PM9BQtZESN1LU99SWtFdaexGSe1YX/9HT/VJVfhUU+ZdYPNiWPpnZ/Zsd4B/
+nfB8loGEf/6Bf4eHh4+NmYmVlpiYmIaGqYuJtYaTpJ2aoJSSupWjqpeps5W1
+qaKKiKampqm2s7Gtp7e3t5mZx5+f1JylyKKcz6OkzKWj1qi2w6y02bS+xLW7
+1q/BvrbHybTD3fqHhv2PkfiUivuclPqeofGznvukpfy6tfXDvsXFxcHS19fX
+18nb6Mvb8svi5szi8tTm69Xo+Nvx7Nz2+eHX1v3E1/LW1ffo3+fn5+D2+vjr
+5fvy5Pb29gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAACH5BAEBAJQALAAAAABFAEAAAAj+AClRokSJEiVK
+lChRokSJEiVKlChRokSJEiVKlChRokSJEiVKlChRokSJ0iNAgNCY4ZLlESVK
+lChRokSJEiVKlChRokSJEiVKlChRokSJEiVKlChRokSJEiVKlChRokSJEiVK
+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
+SpQoBQQAOw==
+====
+" | uudecode -o $1/$2;
+}
+
+# dumps current configuration
+function dump_config
+{
+echo "
+# thumbs! version $VERSION generated config file
+
+# default \"normal\" picture size
+WIDTH=$WIDTH
+HEIGHT=$HEIGHT
+
+# size of thumbnail
+THUMB_SIZE=$THUMB_SIZE
+
+# only order option
+ONLY_ORDER=$ONLY_ORDER
+
+# ignore video files option
+IGNORE_VIDEO_FILES=$IGNORE_VIDEO_FILES
+
+# ignore comments option
+IGNORE_COMMENTS=$IGNORE_COMMENTS
+
+# exif info
+IGNORE_EXIF=$IGNORE_EXIF
+
+# mpegtx info
+NO_MPEG_INFO=$NO_MPEG_INFO
+
+# don't move files to collection dir. copy them instead 
+KEEP_FILES=$KEEP_FILES
+
+# the return url present in all pages
+RETURN_URL=$RETURN_URL
+
+# output format
+OUTPUT_FORMAT=$OUTPUT_FORMAT
+
+# show current picture number and the remaining
+PIC_COUNT=$PIC_COUNT
+
+# show picture/movie file size
+SHOW_SIZE=$SHOW_SIZE
+
+# splited indexing
+SPLIT_INDEX=$SPLIT_INDEX
+SPLIT_INDEX_COUNT=$SPLIT_INDEX_COUNT
+
+# links to full size on pictures
+LINK_BIG=$LINK_BIG
+
+# default css file
+CSS_FILE=$CSS_FILE
+
+# thumbs logo
+# use \"built-in\" for built-in logo
+# use filename to specify other logo
+# use \"none\" for no logo at all
+LOGO=$LOGO
+
+# make thumbnails of movies if possible
+# WARNING: for mpeg files, imagemagick will have to uncompress *ALL* frames.
+# this means that you'll have to wait and have enough disk space
+MOVIE_THUMBS=$MOVIE_THUMBS
+
+# comments on the fly options
+COMMENTS_EDITOR=$COMMENTS_EDITOR
+COMMENTS_PICPREVIEW=$COMMENTS_PICPREVIEW
+COMMENTS_VIDPREVIEW=$COMMENTS_VIDPREVIEW
+
+# quiet
+QUIET=$QUIET
+"
+}
+
+# comments on the fly section. heavily based on cyber's comments on the fly
+# feature
+function comments_get_option
+{
+	input=""
+	while [ -z "$input" ]; do
+		echo "[C]omment picture [N] Don't do anything"
+		echo "[D]ont ask me anymore, repeat last command ($OPTION)"
+
+		read -p "your option (or enter to don't do anything): " -n 1 -s input;
+		case $input in
+			C | c)
+				OPTION="c";
+			;;
+			n | N)
+				OPTION="n";
+			;;
+			d | D)
+				if [ -n "$OPTION" ]; then
+					input="repeat";
+				fi
+			;;
+			*)
+				input="";
+			;;
+		esac
+		echo;
+	done
+}
+
+function comments_run_option
+{
+	if [ "$2" = "c" ]; then
+		# comment
+		$COMMENTS_EDITOR comments;
+	fi
+}
+
+# doing comments on the fly...
+function do_comments_onthefly
+{
+	count=1;
+
+	echo "# comments on the fly #####################";
+
+	if [ -f comments ]; then
+		mv comments comments-backup-`date +%s`;
+	fi
+
+	echo "# comments file" >comments;
+	echo "# all lines that begins with a '#' will be ignored" >>comments;
+	echo "#" >>comments;
+	echo "# title of the collection" >>comments;
+	echo "title:$COLLECTION_TITLE" >>comments;
+	echo >>comments;
+	echo "# head: comments for title" >>comments;
+	echo "head:" >>comments;
+	echo >>comments;
+	echo "# pictures/movies" >>comments;
+
+	input="";
+	while [ $count -le $ALLCOUNT ]; do
+		long_count=`printf "%003i" $count`;
+		file=$COLLECTION-$long_count;
+
+		echo "$long_count:" >>comments;
+
+		# checking if it's a video
+		# XXX - this is an ugly hack, fix it later
+		if [ ! -f $COLLECTION/$file.$OUTPUT_FORMAT ]; then
+			# it's a video
+			$COMMENTS_VIDPREVIEW $COLLECTION/$file.* \
+				>/dev/null 2>/dev/null;
+		else
+			# it's a picture
+			$COMMENTS_PICPREVIEW $COLLECTION/$file.$OUTPUT_FORMAT \
+				>/dev/null 2>/dev/null;
+		fi
+
+		if [ ! "$input" = "repeat" ]; then
+			comments_get_option;
+		fi
+
+		comments_run_option $count $OPTION;
+
+		if [ "$input" = "repeat" ]; then
+			if [ "$OPTION" = "n" ]; then
+				break;
+			fi
+		fi
+
+		count=$(($count+1));
+	done
+
+	# making diary skel
+	if [ -f diary ]; then
+		mv diary diary-backup-`date +%s`;
+	fi
+
+	echo "#<html><head><title>diary entry</title></head>" >diary;
+	echo "#<body>" >>diary;
+	echo "# lines starting with '#' will be ignored by thumbs" >>diary;
+	echo "# this is a sample diary entry. i can tell here the" >>diary;
+	echo "# story of these pictures. soon you'll be able to link" >>diary;
+	echo "# collection's pictures here. please bug us to make this" >>diary;
+	echo "# on thumbs@cathedrallabs.org" >>diary;
+	echo "#" >>diary;
+	echo "# if all lines are commented, thumbs will ignore this" >>diary;
+	echo "# diary file. just leave unchanged if you don't want a" >>diary;
+	echo "# diary" >>diary;
+	echo "#</body></html>" >>diary;
+
+	$COMMENTS_EDITOR diary;
+
+	lines=$((`grep -v "^#" diary | wc -l`));
+	if [ $lines -le 1 ]; then
+		# nothing was done
+		rm -f diary;
+	fi
+}
+
+# process diary file
+function process_diary
+{
+	if [ -f diary ]; then
+		cat diary | grep -v "^#" >$COLLECTION/diary.html;
+		if [ "$HAVE_UUDECODE" = "yes" ]; then
+			make_diary_logo $COLLECTION diary.gif;
+		fi
+	fi
+}
+
+# check for title entry on comments file
+function check_title
+{
+	if [ ! -f comments ]; then
+		return;
+	fi
+
+	title=`grep ^title: comments | cut -f 2- -d ':'`;
+
+	if [ -n "$title" ]; then
+		COLLECTION_TITLE=$title;
+	fi
+}
+
+# function to invert selection
+function do_switch
+{
+	if [ $1 = "yes" ]; then
+		echo "no";
+	else
+		echo "yes";
+	fi
+}
+
+# function to calculate wich index picture belongs. used to determine right
+# index link
+# $1 = number of pictures/movies per index
+# $2 = picture's number
+# returns: number of index
+function get_index_num
+{
+	return $(($(($2-1))/$1));
+}
+
+# function that identifies if a file is a video
+# $1 = file to be tested
+# returns: 1 if the file is a video, 0 otherwise
+function is_video
+{
+	# first, try using imagemagick
+	identify "$1" >/dev/null 2>/dev/null;
+	if [ ! $? = 0 ]; then
+		# error. it's possible that imagemagick doens't have support
+		# for this type of movie. using file...
+		# XXX - here is a potential bug: we're considering that the
+		# filename doesn't has ':' on it. if you're braindead enough
+		# to use it in your filename, i'm sorry
+		file_type=`file -L $1 | cut -f 2 -d ':' | cut -f 2 -d ' ' | \
+			dd conv=lcase 2>/dev/null`;
+		if [ -n "`echo $SUPPORTED_VIDEOS | grep $file_type`" ]; then
+			# it's a video
+			return 1;
+		else
+			return 0;
+		fi
+	else
+		lines=$((`identify $1 | wc -l`));
+		if [ $lines = 1 ]; then
+			# it's not a video, it's a single image
+			return 0;
+		else
+			return 1;
+		fi
+	fi
+}
+
+# function that returns a video name with correct extension
+# $1 = original filename
+# $2 = output file suffix
+# returns: nothing, prints the name
+function get_video_name
+{
+	ext=`file -L $1 | cut -f 2 -d ':' | cut -f 2 -d ' ' | \
+		dd conv=lcase 2>/dev/null`;
+
+	echo "$2.$ext";
+}
+
+# create generic thumbnail for video
+# $1 = collection
+# $2 = output filename
+function do_video_thumb
+{
+	if [ "$HAVE_UUDECODE" = "yes" ]; then
+		date=`date +%s`
+		make_movie_logo /tmp $date.gif;
+		convert /tmp/$date.gif $1/$2;
+		rm -f /tmp/$date.gif;
+	fi
+}
+
+# function that creates a thumbnail for specified movie, using built-in
+# thumbnail or extracting it
+# $1 = file
+# $2 = collection
+# $3 = counter
+# $4 = output format
+function do_movie_thumb
+{
+	file=$1;
+	collection=$2;
+	counter=$3;
+	output_format=$4;	
+	output_file=$collection-`printf "%003i" $counter`-mini.$output_format;
+
+	if [ "$MOVIE_THUMBS" = "yes" ]; then
+		convert 	-scale $THUMB_SIZE \
+				$file[0] \
+				$collection/$output_file \
+				>/dev/null 2>&1;
+
+		if [ ! $? = 0 ]; then
+			echo -n "    W cannot generate thumbnail for ($file), "
+			echo "using default";
+			if [ "$HAVE_UUDECODE" = "yes" ]; then
+				do_video_thumb $collection \
+					$output_file;
+			fi
+			return;
+		fi
+
+		# bug in mpeg
+		if [ ! -f $collection/$output_file ]; then
+			mv $collection/$output_file.0 $collection/$output_file;
+			rm -f $collection/$output_file.*;
+		fi
+	else
+		if [ "$HAVE_UUDECODE" = "no" ]; then
+			return;
+		else
+			do_video_thumb $collection \
+				$output_file;
+		fi
+	fi
+}
+
+# function to show picture count
+# $1 = counter
+# $2 = maximum pictures
+function do_pic_count
+{
+	if [ "$PIC_COUNT" = "yes" ]; then
+		echo "<center>(picture $counter of $ALLCOUNT)</center>"
+	fi
+
+}
+
+function do_bottom
+{
+	echo "<center>"
+	if [ ! "$LOGO" = "none" ]; then
+		echo "<img src=thumbs.gif><br>"
+	fi
+	echo "<font size=2>Created using "\
+		"<a href=\"$URL\">"\
+		"Thumbs!</a> version $VERSION</font>"\
+		"</center><br>" 
+}
+
+# build page with exif information
+function do_exif_html
+{
+	collection=$1;
+	file=$2;
+	suffix=$3;
+
+	picture=$collection/$file
+	exif_html=$collection/$suffix-info.html
+
+	exif $picture >/dev/null 2>/dev/null
+	if [ $? != 0 ]; then
+		return;
+	fi
+
+	exif_ifs=$IFS;
+	IFS=" "
+	echo "<html><head><title>exif info for $suffix</title>\
+		</head>" >>$exif_html;
+	if [ -n "$CSS_file" ]; then
+		echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+		     "href=\"$CSS_file\">" >>$exif_html;
+	fi
+	echo "<body>" >>$exif_html
+	echo "<center><a href=\"$suffix.html\">return</a></center><br>" >>$exif_html
+	echo "<center><table border=1>" >>$exif_html
+	for z in $EXIF_TAGS; do
+		IFS=$''
+
+		exif_tag=$(exif -t $z $picture 2>/dev/null);
+		if [ ! $? = 0 ]; then
+			# try again using ifd=EXIF
+			exif_tag=$(exif -t $z --ifd=EXIF $picture 2>/dev/null);
+			if [ ! $? = 0 ]; then
+				continue;
+			fi
+		fi
+		exif_tagname=`echo $exif_tag | grep ^Tag | cut -f 2 -d \'`
+
+		exif_tagvalue=`echo $exif_tag | grep "Value:" | head -n 1 |
+				cut -f 2 -d \' | cut -f 2 -d ':'`
+
+		if [ -z "$exif_tagvalue" ]; then
+			# tag not supported
+			continue;
+		fi
+
+		echo "<tr><td>$exif_tagname</td>\
+		      <td>$exif_tagvalue</td></tr>" >>$exif_html
+		IFS=" "
+	done
+	IFS=$exif_ifs
+	echo "</table></center><br>" >>$exif_html
+	echo "<center><a href=\"$suffix.html\">return</a></center><br>" >>$exif_html
+	do_bottom >>$exif_html;
+	echo "</body></html>" >>$exif_html
+}
+
+# build page with big picture
+function do_full_size_html
+{
+	collection=$1;
+	suffix=$2;
+	counter=$3;
+
+	full_size_html=$collection/$suffix-big.html
+	echo "<html><head><title>full size picture for $suffix</title>\
+		</head>" >>$full_size_html;
+	if [ -n "$CSS_FILE" ]; then
+		echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+		     "href=\"$CSS_FILE\">" >>$full_size_html;
+	fi
+	echo "<body>" >>$full_size_html;
+
+	# title
+	echo "<center><font size=6><b>$COLLECTION_TITLE</b></font></center>" \
+		>>$full_size_html;
+	do_comments_html $collection "head" >>$full_size_html;
+
+	do_pic_count $counter $ALLCOUNT >>$full_size_html;
+
+	do_prev_next $collection $suffix $counter "-big" >>$full_size_html;
+	echo "<center><img src=\"$suffix-big.$OUTPUT_FORMAT\"></center>" \
+		>>$full_size_html
+
+	do_comments_html $collection $counter >>$full_size_html;
+
+	do_prev_next $collection $suffix $counter "-big" >>$full_size_html;
+	echo "<br>" >>$full_size_html
+
+	echo "<center>[<a href=$suffix.html>normal size</a>]</center><br>" \
+		>>$full_size_html
+	do_bottom >>$full_size_html
+	echo "</body></html>" >>$full_size_html
+}
+
+# build page with original picture
+function do_orig_html
+{
+	collection=$1;
+	suffix=$2;
+	counter=$3;
+
+	orig_html=$collection/$suffix-orig.html
+	echo "<html><head><title>original picture for $suffix</title>\
+		</head>" >>$orig_html;
+	if [ -n "$CSS_FILE" ]; then
+		echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+		     "href=\"$CSS_FILE\">" >>$orig_html;
+	fi
+	echo "<body>" >>$orig_html;
+	
+	# title
+	echo "<center><font size=6><b>$COLLECTION_TITLE</b></font></center>" \
+		>>$orig_html;
+	do_comments_html $collection "head" >>$orig_html;
+
+	do_pic_count $counter $ALLCOUNT >>$orig_html;
+
+	do_prev_next $collection $suffix $counter "-orig" >>$orig_html;
+	echo "<center><img src=\"$suffix-orig.$OUTPUT_FORMAT\"></center>" >>$orig_html
+
+	do_comments_html $collection $counter >>$orig_html;
+
+	do_prev_next $collection $suffix $counter "-orig" >>$orig_html;
+	echo "<br>" >>$orig_html
+
+	echo "<center>[<a href=$suffix.html>normal size</a>]</center><br>" >>$orig_html
+	do_bottom >>$orig_html
+	echo "</body></html>" >>$orig_html
+}
+
+# check for software dependencies
+function do_check_software
+{
+	# required
+	# if there's no convert
+	convert >/dev/null 2>/dev/null
+	if [ $? != 0 ]; then
+		echo
+		echo "ERROR:"
+		echo -e "\tImagemagick's convert not found! Please download it from"
+		echo -e "\thttp://www.imagemagick.org"
+		exit 1;
+	fi
+
+	# if convert tool not support -scale option go away!
+	if [ -z "`convert --help | grep " $CONVERTOPT"`" ]; then
+		echo
+		echo "ERROR:"
+		echo -e "\tBefore start thumbs process, please upgrade your imagemagick software."
+		echo -e "\tYou can get it at http://www.imagemagick.org/"
+		
+		exit 1;
+	fi
+
+	# optional
+	# uudecode
+	uudecode --help >/dev/null 2>/dev/null;
+	if [ $? != 0 ]; then
+		echo "   * uudecode not found, will not use thumbs logo :("
+	else
+		HAVE_UUDECODE="yes"
+	fi
+
+	# exif
+	exif --help >/dev/null 2>/dev/null
+	if [ $? != 0 -a $IGNORE_EXIF = "no" ]; then
+		echo -e "\t* exif utility not installed. Get it at"
+		echo -e "\thttp://www.sourceforge.net/projects/libexif"
+		HAVE_EXIF="no"
+		IGNORE_EXIF="yes"
+	fi
+
+	# mpgtx
+	mpgtx >/dev/null 2>/dev/null
+	if [ $? != 0 -a $NO_MPEG_INFO = "no" ]; then
+		echo -e "\t* mpgtx utility not installed. Get it at"
+		echo -e "\t  http://www.imagemagick.org/"
+		HAVE_MPGTX="no"
+		NO_MPEG_INFO="yes"
+	fi
+}
+
+# check for supported files
+function do_check
+{
+	if [ "`do_list_files`" = "" ]; then
+		echo -e "\t* no supported files found!"
+		echo;
+		do_help;
+		exit 1;
+	fi
+}
+
+function do_dir
+{
+	COLLECTION=`echo "$COLLECTION" | sed -e "s/\ /_/g"`;
+	if [ -d $COLLECTION ]; then
+		echo "    W $COLLECTION directory already exists, moving it"
+		mv $COLLECTION $COLLECTION-`date +%s`.backup
+	fi
+	mkdir $COLLECTION
+}
+
+# function to list supported files
+function do_list_files
+{
+	# new way of doing things
+	ifs=$IFS;
+	IFS=" ";
+	for test_file in *; do
+		# special file/directory, ignore
+		if [ ! -f "$test_file" ]; then
+			continue;
+		fi
+
+		# .orig file
+		if [ -n "`echo $test_file | grep \".orig$\"`" ]; then
+			continue;
+		fi
+
+		if [ "$IGNORE_VIDEO_FILES" = "yes" ]; then
+			is_video $test_file >/dev/null 2>&1;
+			if [ $? = 1 ]; then
+				# ignoring video files
+				continue;
+			fi
+		fi
+
+		# if imagemagick's identify recognizes it as an image, we can
+		# add it to list of images
+		identify $test_file >/dev/null 2>&1;
+		if [ $? = 0 ]; then
+			echo $test_file;
+		else
+			# it can be a video...
+			is_video $test_file >/dev/null 2>/dev/null;
+			if [ $? = 1 ]; then
+				echo $test_file;
+			fi
+		fi
+	done
+	IFS=$ifs;
+	echo;
+}
+
+function do_order
+{
+	COUNTER=0;
+	if [ "$KEEP_FILES" = "no" ]; then
+		MVCMD=mv
+	else
+		MVCMD=cp
+	fi
+
+	# copy stylesheet file
+	if [ -n "$CSS_FILE" ]; then
+		if [ ! -f "$CSS_FILE" ]; then
+			echo "    W css file not found, ignoring";
+			CSS_FILE="";
+		else
+			cp "$CSS_FILE" $COLLECTION/;
+		fi
+	fi
+
+	# thumbs logo
+	if [ "$LOGO" = "built-in" ]; then
+		# built in logo
+		if [ "$HAVE_UUDECODE" = "yes" ]; then
+			make_thumbs_logo $COLLECTION thumbs.gif;
+		else
+			LOGO="";
+		fi
+	elif [ ! "$LOGO" = "none" ]; then
+		# specified file
+		if [ ! -f "$LOGO" ]; then
+			echo "     W logo not found, using built-in";
+			if [ "$HAVE_UUDECODE" = "yes" ]; then
+				make_thumbs_logo $COLLECTION thumbs.gif;
+			else
+				LOGO="";
+			fi
+		else
+			convert "$LOGO" $COLLECTION/thumbs.gif;
+		fi
+	fi
+
+	for i in `do_list_files`; do
+		COUNTER=$(($COUNTER+1));
+		FILE=`printf "%003i" $COUNTER`;
+
+		# .orig files
+		if [ -f "$i.orig" ]; then
+			is_video "$i";
+			if [ $? = 1 ]; then
+				# it's a video. we won't handle "original"
+				# videos
+				continue;
+			fi
+
+			convert "$i.orig" \
+			 "$COLLECTION/$COLLECTION-$FILE-orig.$OUTPUT_FORMAT";
+
+			# checking for errors
+			if [ ! $? = 0 ]; then
+				rm -f "$COLLECTION/$COLLECTION-$FILE-orig.$OUTPUT_FORMAT";
+				continue;
+			fi
+
+			# removing files if wanted
+			if [ ! "$KEEP_FILES" = "yes" ]; then
+				rm -f "$i.orig";
+			fi
+		fi
+
+		# identify if it's a video
+		is_video "$i";
+		if [ $? = 1 ]; then
+			# it's a video
+			video_name=`get_video_name $i $COLLECTION-$FILE`;
+
+			$MVCMD "$i" "$COLLECTION/$video_name";
+		else
+			# picture
+			convert "$i" \
+				"$COLLECTION/$COLLECTION-$FILE.$OUTPUT_FORMAT";
+
+			# checking for errors. if it couldn't convert, we must
+			# kill it
+			if [ ! $? = 0 ]; then
+				rm -f "$COLLECTION/$COLLECTION-$FILE.$OUTPUT_FORMAT";
+				continue;
+			fi
+		fi
+
+		# removing files if wanted
+		if [ ! "$KEEP_FILES" = "yes" ]; then
+			rm -f "$i";
+		fi
+	done
+	ALLCOUNT=$COUNTER;
+}
+
+function do_thumbs
+{
+	COUNTER=1;
+
+	for i in `find $COLLECTION/ -name \*-???.* | sort`; do
+		FILE=$COLLECTION-`printf "%003i" $COUNTER`-mini.$OUTPUT_FORMAT
+		BIG=$COLLECTION-`printf "%003i" $COUNTER`-big.$OUTPUT_FORMAT
+
+		# check type
+		is_video "$i";
+		if [ $? = 0 ]; then
+			FILE_SIZE=`identify $i | cut -f 3 -d ' ' |cut -f 1 -d 'x'`;
+			# picture
+			convert -scale $THUMB_SIZE "$i" -strip $COLLECTION/$FILE;
+
+			# check if the image is bigger than specified
+			if [ $FILE_SIZE -gt $WIDTH ]; then
+				cp $i $COLLECTION/$BIG
+				convert -scale $WIDTH"x"$HEIGHT $i $i.tmp;
+				mv $i.tmp $i;
+			fi
+			
+		else
+			# movie
+			do_movie_thumb $i $COLLECTION $COUNTER $OUTPUT_FORMAT;
+		fi
+
+		COUNTER=$(($COUNTER+1))
+	done
+}
+
+# creates [prev][index][next] links
+# this function relies on SPLIT_INDEX and SPLIT_INDEX_COUNT to identify if it
+# should return to a different index than the complete
+# $1 = collection
+# $2 = suffix
+# $3 = current counter
+# $4 = type of page
+function do_prev_next
+{
+	collection=$1;
+	suffix=$2;
+	dpn_counter=$3;		# current count
+	page_type=$4;		# -big, -orig, etc
+
+	# building index url
+	if [ "$SPLIT_INDEX" = "yes" ]; then
+		get_index_num $SPLIT_INDEX_COUNT $dpn_counter;
+		n=$?;
+
+		if [ $n -gt 0 ]; then
+			index_url="index-$n.html";
+		else
+			index_url="index.html";
+		fi
+	else
+		index_url="index.html";
+	fi
+		
+	prev=$collection-`printf "%003i" $(($dpn_counter-1))`$page_type.html;
+	next=$collection-`printf "%003i" $(($dpn_counter+1))`$page_type.html;
+	prev_file=$collection/$collection-`printf "%003i" $(($dpn_counter-1))`$page_type.$OUTPUT_FORMAT;
+	next_file=$collection/$collection-`printf "%003i" $(($dpn_counter+1))`$page_type.$OUTPUT_FORMAT;
+
+	if [ -n $page_type ]; then
+		# checking if is there page of the same type to make it next/prev
+		# otherwise, defaults to normal ones
+		if [ ! -f $prev_file ]; then
+			prev=$collection-`printf "%003i" $(($dpn_counter-1))`.html;
+		fi
+		if [ ! -f $next_file ]; then
+			next=$collection-`printf "%003i" $(($dpn_counter+1))`.html;
+		fi
+	fi
+
+	echo -n "<center>";
+	if [ $(($dpn_counter-1)) -lt 1 ]; then
+		echo -n "[ prev ]";
+	else
+		echo -n "[ <a href=\"$prev\">prev</a> ]";
+	fi
+	echo -n "[ <a href=\"$index_url\">index</a> ]";
+	if [ $(($dpn_counter+1)) -gt $ALLCOUNT ]; then
+		echo -n "[ next ]";
+	else
+		echo -n "[ <a href=\"$next\">next</a> ]";
+	fi
+	echo "</center>";
+}
+
+# comments
+function do_comments_html
+{
+	collection=$1;
+	count=$2;
+
+	if [ "$count" = "head" ]; then
+		long_count="head";
+	else
+		long_count=`printf "%003i" $count`;
+	fi
+
+	if [ "$IGNORE_COMMENTS" = "no" ]; then
+		if [ -f comments ]; then
+			comm="`grep ^$long_count: comments | cut -f 2- -d ':'`"
+			if [ -n "$comm" ]; then
+				echo "<center><i>$comm</i></center>";
+			fi
+		fi
+	fi
+}
+
+# printout comment for alt info
+function do_comment_alt
+{
+	count=$1;
+
+	long_count=`printf "%003i" $count`;
+
+	if [ -f comments ]; then
+		comm="`grep ^$long_count: comments | cut -f 2- -d ':'`"
+		if [ -n "$comm" ]; then
+			echo "$comm";
+		fi
+	fi
+}
+
+# printout size info
+function do_size_info
+{
+	count=$1;
+
+	long_count=`printf "%003i" $count`;
+
+	target=$COLLECTION/$COLLECTION-$long_count;
+
+	# first tryout a picture
+	echo "`du $target.* | grep -v "html$" | cut -f 1`kb";
+}
+
+# generates individual html files
+# $1 = counter
+# $2 = collection
+# $3 = output format
+function do_indiv_html
+{
+	counter=$1;
+	collection=$2;
+	output_format=$3;
+
+	FILE=$collection-`printf "%003i" $counter`.$output_format
+	MINI=$collection-`printf "%003i" $counter`-mini.$output_format
+	HTML=$collection-`printf "%003i" $counter`.html
+	BIG=$collection-`printf "%003i" $counter`-big.$output_format
+	ORIG=$collection-`printf "%003i" $counter`-orig.$output_format
+	BIG_HTML=$collection-`printf "%003i" $counter`-big.html
+	ORIG_HTML=$collection-`printf "%003i" $counter`-orig.html
+
+	# creating the own page
+	COUNTER_LONG=`printf "%003i" $counter`
+	AUX=$collection-`printf "%003i" $counter`
+	PREV=$collection-`printf "%003i" $(($counter-1))`.html
+	NEXT=$collection-`printf "%003i" $(($counter+1))`.$output_format
+	NEXT_HTML=$collection-`printf "%003i" $(($counter+1))`.html
+	suffix=$AUX;
+
+	if [ ! -f $collection/$FILE ]; then
+		# it's a video if it has different extension
+		do_video_html $collection $counter;
+		return;
+	fi
+
+	echo "<html><head><title>$COLLECTION_TITLE</title></head>"\
+		>>$collection/$HTML;
+	if [ -n "$CSS_FILE" ]; then
+		echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+		     "href=\"$CSS_FILE\">" >>$collection/$HTML;
+	fi
+
+	# mozilla prefetching
+	if [ $USE_PREFETCH = "yes" ]; then
+		if [ -f $collection/$NEXT ]; then
+			(
+			echo "<meta http-equiv=\"Link\" content=\"<$NEXT>;; rel=prefetch\">";
+			echo "<meta http-equiv=\"Link\" content=\"<$NEXT_HTML>;; rel=prefetch\">"
+			) >>$collection/$HTML;
+		fi
+	fi
+
+	echo "<body>" >>$collection/$HTML;
+
+	# title
+	echo "<center><font size=6><b>$COLLECTION_TITLE</b></font></center>" \
+		>>$collection/$HTML;
+	do_comments_html $collection "head" >>$collection/$HTML;
+
+	# pic count
+	do_pic_count $counter $ALLCOUNT	>>$collection/$HTML;
+
+	do_prev_next $collection $suffix $counter "" >>$collection/$HTML;
+
+	if [ -f $collection/$BIG -a $LINK_BIG = "yes" ]; then
+		OPENBIGLINK="<a href=\"$BIG_HTML\">"
+		CLOSEBIGLINK="</a>"
+	else
+		OPENBIGLINK=""
+		CLOSEBIGLINK=""
+	fi
+	echo "<center>$OPENBIGLINK<img src=\"$FILE\">$CLOSEBIGLINK</center>"\
+		>>$collection/$HTML
+
+	# doing comments
+	do_comments_html $collection $counter >>$collection/$HTML;
+
+	do_prev_next $collection $suffix $counter "" >>$collection/$HTML;
+
+	echo "<br><center>" >>$collection/$HTML
+	
+	if [ "$IGNORE_EXIF" = "no" ]; then
+		do_exif_html $collection $FILE $AUX;
+		if [ -f $collection/$AUX-info.html ]; then
+			echo "[<a href=\"$AUX-info.html\">info</a>]"\
+				>>$collection/$HTML
+		fi
+	fi
+
+	# support for automatic resizing
+	if [ -f $collection/$BIG ]; then
+		do_full_size_html $collection $AUX $counter;
+		echo "[<a href=\"$BIG_HTML\">full size" >>$collection/$HTML;
+		if [ "$SHOW_SIZE" = "yes" ]; then
+			echo " (`du $collection/$BIG | cut -f 1`kb)"\
+				>>$collection/$HTML;
+		fi
+		echo "</a>]" >>$collection/$HTML;
+	fi
+
+	# support for original file
+	if [ -f $collection/$ORIG ]; then
+		do_orig_html $collection $AUX $counter;
+		echo "[<a href=\"$ORIG_HTML\">original picture full size"\
+			>>$collection/$HTML;
+		if [ "$SHOW_SIZE" = "yes" ]; then
+			echo " (`du $collection/$ORIG | cut -f 1`kb)" \
+				>>$collection/$HTML;
+		fi
+		echo "</a>]" >>$collection/$HTML
+	fi
+	echo "</center><br>" >>$collection/$HTML
+
+	do_bottom >>$collection/$HTML;
+
+	echo "</body></html>" >>$collection/$HTML
+}
+
+# function that outputs video section
+# do_video_html $COLLECTION $COUNT
+# $1 = directory with output videos
+# $2 = current count
+function do_video_html
+{
+	collection=$1;
+	vdh_count=$2;
+
+	video=$collection/$collection-`printf %003i $vdh_count`
+	video=`ls --color=never $video.* 2>/dev/null`;
+	video2=`echo $video | cut -f 2- -d '/'`;
+	
+	FILE="`echo $video | cut -f 2 -d '/'`"
+	VIDEO="`echo $FILE | cut -f 1 -d '.'`"
+	EXTEN="`echo $FILE | cut -f 2 -d '.'`"
+	html=$VIDEO.html;
+	mini=$VIDEO-mini.$output_format;
+	snap=$VIDEO.$output_format;
+
+	# now making individual html file
+	echo "<html><head><title>$COLLECTION_TITLE</title></head>" >$collection/$html;
+	if [ -n "$CSS_FILE" ]; then
+		echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+		     "href=\"$CSS_FILE\">" >>$collection/$html;
+	fi
+	echo "<body>" >>$collection/$html;
+
+	# title
+	echo "<center><font size=6><b>$COLLECTION_TITLE</b>" \
+		"</font></center>" >>$collection/$html;
+	do_comments_html $collection "head" >>$collection/$html;
+
+	# pic count
+	do_pic_count $vdh_count $ALLCOUNT >>$collection/$html;
+
+	do_prev_next $collection $suffix $vdh_count "">>$collection/$html;
+
+	echo "<center><a href=$video2>" >>$collection/$html;
+	if [ -f $collection/$mini ]; then
+		convert 	-scale "$WIDTHx$HEIGHT" \
+				$collection/$mini \
+				$collection/$snap \
+				>/dev/null 2>&1;
+		echo "<img src=\"$snap\">" >>$collection/$html;
+	else
+		echo "$VIDEO" >>$collection/$html;
+	fi
+	echo "</a><br>" >>$collection/$html;
+
+	tmp=0;
+	# estimated time
+	if [ "$NO_MPEG_INFO" = "no" -a "$EXTEN" == "mpeg" ]; then
+		echo -n "(`mpgtx -i $video | grep Estimated |
+			cut -b 3- | cut -f 2 -d ':' |
+			cut -f 2 -d ' '`)" >>$collection/$html;
+		tmp=1;
+	fi
+	# show file size
+	if [ "$SHOW_SIZE" = "yes" ]; then
+		echo -n "(`du $video | cut -f 1`kb)" \
+			>>$collection/$html;
+		tmp=1;
+	fi
+	if [ $tmp = 1 ]; then
+		echo "<br>" >>$collection/$html;
+	fi
+	echo "</center>" >>$collection/$html;
+
+	# doing comments
+	do_comments_html $collection $vdh_count \
+		>>$collection/$html;
+
+	do_prev_next $collection $suffix $vdh_count "" \
+		>>$collection/$html;
+
+	do_bottom >>$collection/$html;
+
+	echo "</body></html>" >>$collection/$html;
+}
+
+# function that builds splitted indexes
+# do_split_index $COLLECTION $ALLCOUNT;
+# $1 = collection
+# $2 = number of pictures
+function do_split_index
+{
+	collection=$1;
+	piccount=$2;
+	last_index="";
+	index_cnt=0;
+
+	# finding the number of indexes
+	indexes=$(($ALLCOUNT/$SPLIT_INDEX_COUNT));
+	if [ ! $(($ALLCOUNT%$SPLIT_INDEX_COUNT)) = 0 ]; then
+		indexes=$(($indexes+1));
+	fi
+
+	while [ $index_cnt -lt $indexes ]; do
+		# creating new index
+		if [ -z $last_index ]; then
+			cur_index=index.html;
+		else
+			cur_index=index-$index_cnt.html;
+		fi
+		echo "<html><head><title>$COLLECTION_TITLE</title></head>"\
+			>$collection/$cur_index;
+		if [ -n "$CSS_FILE" ]; then
+			echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+			     "href=\"$CSS_FILE\">" >>$collection/$cur_index;
+		fi
+		echo "<body>" >>$collection/$cur_index;
+
+		# doing head comments
+		echo "<center><font size=6><b>$COLLECTION_TITLE</b></font>"\
+			"</center>">>$collection/$cur_index;
+		do_comments_html $collection "head" >>$collection/$cur_index;	
+
+		echo "<center>(index $(($index_cnt+1)) of $indexes)" \
+			"</center>" >>$collection/$cur_index;
+
+		# prev
+		echo -n "<center>[" >>$collection/$cur_index;
+		if [ -n "$last_index" ]; then
+			echo -n "<a href=$last_index>" >>$collection/$cur_index;
+		fi
+		echo -n "previous" >>$collection/$cur_index;
+		if [ -n "$last_index" ]; then
+			echo -n "</a>" >>$collection/$cur_index;
+		fi
+		echo -n "]" >>$collection/$cur_index;
+
+		# return
+		echo -n "[ <a href=\"$RETURN_URL\">return</a> ]"\
+			>>$collection/$cur_index;
+
+		# all in one
+		echo -n "[<a href=index-all.html>all in one</a>]["\
+			>>$collection/$cur_index;
+
+		# next
+		if [ $index_cnt -lt $(($indexes-1)) ]; then
+			echo -n "<a href=index-$(($index_cnt+1)).html>"\
+				>>$collection/$cur_index;
+		fi
+		echo -n "next" >>$collection/$cur_index;
+		if [ $index_cnt -lt $(($indexes-1)) ]; then
+			echo -n "</a>" >>$collection/$cur_index;
+		fi
+		echo "]</center>" >>$collection/$cur_index;
+
+		# building pics section
+		echo "<hr>" >>$collection/$cur_index;
+		echo "<center>" >>$collection/$cur_index;
+
+		counter=1;
+		while [ $counter -le $SPLIT_INDEX_COUNT ]; do
+			cnt=$(($counter+$SPLIT_INDEX_COUNT*$index_cnt));
+			file=$collection/$collection-`printf "%003i" $cnt`.$output_format;
+			MINI=$collection-`printf "%003i" $cnt`-mini.$output_format;
+			HTML=$collection-`printf "%003i" $cnt`.html;
+
+			# checking if we're not done
+			if [ ! -f $collection/$HTML ]; then
+				break;
+			fi
+
+			#alt="$collection-`printf "%003i" $cnt`";
+			#if [ "$SHOW_SIZE" = "yes" ]; then
+			#	alt="$alt, size: `do_size_info $cnt`";
+			#fi
+			#if [ "$IGNORE_COMMENTS" = "no" ]; then
+			#	alt="$alt, `do_comment_alt $cnt`";
+			#fi
+			alt=""
+
+			# creating table in index
+			echo -n "<a href=\"$HTML\">" >>$collection/$cur_index;
+			echo -n "<img src=\"$MINI\" alt=\"$alt\">" \
+				>>$collection/$cur_index;
+			echo "</a>" >>$collection/$cur_index;
+
+			counter=$(($counter+1))
+		done
+
+		# diary
+		if [ -f $collection/diary.html ]; then
+			echo "<br>" >>$collection/$cur_index;
+			echo -n "<a href=diary.html>" >>$collection/$cur_index;
+			if [ -f $collection/diary.gif ]; then
+				echo -n "<img src=diary.gif>" \
+					>>$collection/$cur_index;
+			else
+				echo -n "diary entry" \
+					>>$collection/$cur_index;
+			fi
+			echo "</a>" >>$collection/$cur_index;
+			
+		fi
+
+		echo "</center>" >>$collection/$cur_index;
+
+		# tail
+		echo "<hr><br>" >>$collection/$cur_index;
+		do_bottom >>$collection/$cur_index;
+		echo "</body></html>" >>$collection/$cur_index;
+
+		# updating counter
+		last_index=$cur_index;
+		index_cnt=$(($index_cnt+1));
+	done
+}
+
+function do_html
+{
+	# if we're in split mode, first will be generated the "all in one"
+	# index then later we'll make the splitted indexes
+	# would be better if we do it here but would be too damn hard to
+	# read the code later
+	INDEX_FILE="index.html"
+	if [ "$SPLIT_INDEX" = "yes" ]; then
+		if [ $ALLCOUNT -gt $SPLIT_INDEX_COUNT ]; then
+			INDEX_FILE="index-all.html"
+			return_url=$RETURN_URL;
+			RETURN_URL="index.html";
+		fi
+	fi
+
+	echo "<html><head><title>$COLLECTION_TITLE</title></head>"\
+		>>$COLLECTION/$INDEX_FILE;
+	if [ -n "$CSS_FILE" ]; then
+		echo "<link rel=\"stylesheet\" type=\"text/css\" "\
+		     "href=\"$CSS_FILE\">" >>$COLLECTION/$INDEX_FILE;
+	fi
+	echo "<body>" >>$COLLECTION/$INDEX_FILE;
+	echo "<center><a href=\"$RETURN_URL\">return</a></center>"\
+		>>$COLLECTION/$INDEX_FILE
+
+	# doing head comments
+	echo "<center><font size=6><b>$COLLECTION_TITLE</b></font>"\
+		"</center>" >>$COLLECTION/$INDEX_FILE
+	do_comments_html $COLLECTION "head" >>$COLLECTION/$INDEX_FILE;
+
+	# creating tables for each pic on index and their own html
+	COUNTER=1
+	echo "<hr>" >>$COLLECTION/$INDEX_FILE
+	echo "<center>" >>$COLLECTION/$INDEX_FILE
+
+	while [ $COUNTER -le $ALLCOUNT ]; do
+		MINI=$COLLECTION-`printf "%003i" $COUNTER`-mini.$OUTPUT_FORMAT
+		HTML=$COLLECTION-`printf "%003i" $COUNTER`.html
+		file=$COLLECTION/$COLLECTION-`printf "%003i" $COUNTER`.$OUTPUT_FORMAT;
+
+		#alt="$collection-`printf "%003i" $COUNTER`";
+		#if [ "$SHOW_SIZE" = "yes" ]; then
+		#	alt="$alt, size: `do_size_info $COUNTER`";
+		#fi
+		#if [ "$IGNORE_COMMENTS" = "no" ]; then
+		#	alt="$alt, `do_comment_alt $COUNTER`";
+		#fi
+		alt="";
+
+		# creating table in index
+		echo -n "<a href=\"$HTML\">" >>$COLLECTION/$INDEX_FILE
+		echo -n "<img src=\"$MINI\" alt=\"$alt\">" \
+			>>$COLLECTION/$INDEX_FILE;
+		echo "</a>" >>$COLLECTION/$INDEX_FILE
+
+		do_indiv_html $COUNTER $COLLECTION $OUTPUT_FORMAT;
+
+		COUNTER=$(($COUNTER+1))
+	done
+
+	# diary
+	if [ -f $COLLECTION/diary.html ]; then
+		echo "<br>" >>$COLLECTION/$INDEX_FILE;
+		echo -n "<a href=diary.html>" >>$COLLECTION/$INDEX_FILE;
+		if [ -f $COLLECTION/diary.gif ]; then
+			echo -n "<img src=diary.gif>" >>$COLLECTION/$INDEX_FILE;
+		else
+			echo -n "diary entry" >>$COLLECTION/$INDEX_FILE;
+		fi
+		echo "</a>" >>$COLLECTION/$INDEX_FILE;
+		
+	fi
+
+	echo "</center>" >>$COLLECTION/$INDEX_FILE
+
+	# tail
+	echo "<hr><br>" >>$COLLECTION/$INDEX_FILE
+	do_bottom >>$COLLECTION/$INDEX_FILE
+	echo "</body></html>" >>$COLLECTION/$INDEX_FILE
+
+	if [ "$SPLIT_INDEX" = "yes" ]; then
+		if [ $ALLCOUNT -gt $SPLIT_INDEX_COUNT ]; then
+			RETURN_URL=$return_url;
+			do_split_index $COLLECTION $ALLCOUNT;
+		fi
+	fi
+}
+#############################################################################
+
+######################### starting ##########################################
+# in this section we choose what we'll do using the options that the user
+# passed to us. the order here is very important, it determines how we answer
+# the user
+##
+LOADED="";
+ifs=$IFS;
+IFS=" ";
+for i in $CONFIG_FILES; do
+	if [ -e $i ]; then
+		LOADED="$LOADED $i"
+		. $i
+	fi
+done;
+IFS=$ifs;
+
+########################### parsing #########################################
+# in this section we parse the command line
+# we only set the correct variables using options, the execution is the next
+# section
+##
+OPTS=`getopt -n $0 -o $THUMB_SIZE_OPTION_LETTER:$ONLY_ORDER_OPTION_LETTER$IGNORE_VIDEO_FILES_OPTION_LETTER$IGNORE_COMMENTS_OPTION_LETTER$HELP_OPTION_LETTER$VERSION_OPTION_LETTER$COLLECTION_NAME_OPTION_LETTER:$IGNORE_EXIF_OPTION_LETTER$NO_MPEG_INFO_OPTION_LETTER$KEEP_FILES_OPTION_LETTER$RETURN_URL_OPTION_LETTER:$SPLIT_INDEX_OPTION_LETTER$QUIET_OPTION_LETTER$COLLECTION_TITLE_OPTION_LETTER: \
+		--long $THUMB_SIZE_LONG_OPTION:,$ONLY_ORDER_LONG_OPTION,$IGNORE_VIDEO_LONG_OPTION,$IGNORE_COMMENTS_LONG_OPTION,$HELP_LONG_OPTION,$VERSION_LONG_OPTION,$COLLECTION_NAME_LONG_OPTION:$IGNORE_EXIF_LONG_OPTION,$NO_MPEG_INFO_LONG_OPTION,$KEEP_FILES_LONG_OPTION,$RETURN_URL_LONG_OPTION:,$OUTPUT_FORMAT_LONG_OPTION:,$PIC_COUNT_LONG_OPTION,$SPLIT_INDEX_LONG_OPTION:,$LINK_BIG_LONG_OPTION,$DUMP_CONFIG_LONG_OPTION,$SHOW_SIZE_LONG_OPTION,$CSS_FILE_LONG_OPTION:,$LOGO_LONG_OPTION:,$MOVIE_THUMBS_LONG_OPTION,$USE_PREFETCH_LONG_OPTION,$COMMENTS_ONTHEFLY_LONG_OPTION,$COMMENTS_EDITOR_LONG_OPTION:,$COMMENTS_PICPREVIEW_LONG_OPTION:,$COMMENTS_VIDPREVIEW_LONG_OPTION:,$IGNORE_DIARY_LONG_OPTION,$INFO_LONG_OPTION,$DEBUG_LONG_OPTION\
+		-- "$@"`
+if [ $? != 0 ]; then
+	do_help;
+	exit 1;
+fi
+
+eval set -- $OPTS
+while true; do
+	case "$1" in
+		-$THUMB_SIZE_OPTION_LETTER|--$THUMB_SIZE_LONG_OPTION)
+			THUMB_SIZE="$2";
+			
+			# as this option has argument we must shift 2, one
+			# here other at the end of while
+			shift;
+		;;
+		-$COLLECTION_TITLE_OPTION_LETTER)
+			COLLECTION_TITLE="$2";
+			shift;
+		;;
+		-$ONLY_ORDER_OPTION_LETTER|--$ONLY_ORDER_LONG_OPTION)
+			ONLY_ORDER=$(do_switch $ONLY_ORDER);
+		;;
+		-$IGNORE_VIDEO_FILES_OPTION_LETTER|--$IGNORE_VIDEO_LONG_OPTION)
+			IGNORE_VIDEO_FILES=$(do_switch $IGNORE_VIDEO_FILES);
+		;;
+		-$IGNORE_COMMENTS_OPTION_LETTER|--$IGNORE_COMMENTS_LONG_OPTION)
+			IGNORE_COMMENTS=$(do_switch $IGNORE_COMMENTS);
+		;;
+		--$IGNORE_DIARY_LONG_OPTION)
+			IGNORE_DIARY=$(do_switch $IGNORE_DIARY);
+		;;
+		-$HELP_OPTION_LETTER|--$HELP_LONG_OPTION)
+			HELP="yes";
+		;;
+		-$VERSION_OPTION_LETTER|--$VERSION_LONG_OPTION)
+			VERSION_SHOW="yes";
+		;;
+		-$COLLECTION_NAME_OPTION_LETTER|--$COLLECTION_NAME_LONG_OPTION)
+			COLLECTION="$2";
+			
+			# as this option has argument we must shift 2, one
+			# here other at the end of while
+			shift;
+		;;
+		-$IGNORE_EXIF_OPTION_LETTER|--$IGNORE_EXIF_LONG_OPTION)
+			IGNORE_EXIF=$(do_switch $IGNORE_EXIF);
+		;;
+		-$NO_MPEG_INFO_OPTION_LETTER|--$NO_MPEG_INFO_LONG_OPTION)
+			NO_MPEG_INFO=$(do_switch $NO_MPEG_INFO);
+		;;
+		-$KEEP_FILES_OPTION_LETTER|--$KEEP_FILES_LONG_OPTION)
+			KEEP_FILES=$(do_switch $KEEP_FILES);
+		;;
+		-$RETURN_URL_OPTION_LETTER|--$RETURN_URL_LONG_OPTION)
+			RETURN_URL="$2";
+			shift;
+		;;
+		-$QUIET_OPTION_LETTER)
+			QUIET=$(do_switch $QUIET);
+		;;
+		--$OUTPUT_FORMAT_LONG_OPTION)
+			OUTPUT_FORMAT="$2";
+			shift;
+		;;
+		--$PIC_COUNT_LONG_OPTION)
+			PIC_COUNT=$(do_switch $PIC_COUNT);
+		;;
+		-$SPLIT_INDEX_OPTION_LETTER)
+			SPLIT_INDEX=$(do_switch $SPLIT_INDEX);
+		;;
+		--$SPLIT_INDEX_LONG_OPTION)
+			SPLIT_INDEX_COUNT=$2;
+			SPLIT_INDEX="yes";
+			shift;
+		;;
+		--$LINK_BIG_LONG_OPTION)
+			LINK_BIG=$(do_switch $LINK_BIG);
+		;;
+		--$DUMP_CONFIG_LONG_OPTION)
+			DUMP_CONFIG="yes";
+		;;
+		--$SHOW_SIZE_LONG_OPTION)
+			SHOW_SIZE=$(do_switch $SHOW_SIZE);
+		;;
+		--$CSS_FILE_LONG_OPTION)
+			CSS_FILE=$2
+			shift;
+		;;
+		--$LOGO_LONG_OPTION)
+			LOGO=$2
+			shift;
+		;;
+		--$MOVIE_THUMBS_LONG_OPTION)
+			MOVIE_THUMBS=$(do_switch $MOVIE_THUMBS);
+		;;
+		--$USE_PREFETCH_LONG_OPTION)
+			USE_PREFETCH="yes";
+		;;
+
+		--$COMMENTS_ONTHEFLY_LONG_OPTION)
+			COMMENTS_ONTHEFLY=$(do_switch $COMMENTS_ONTHEFLY);
+		;;
+		--$COMMENTS_EDITOR_LONG_OPTION)
+			COMMENTS_EDITOR=$2;
+			shift;
+		;;
+		--$COMMENTS_PICPREVIEW_LONG_OPTION)
+			COMMENTS_PICPREVIEW=$2;
+			shift;
+		;;
+		--$COMMENTS_VIDPREVIEW_LONG_OPTION)
+			COMMENTS_VIDPREVIEW=$2;
+			shift;
+		;;
+		--$INFO_LONG_OPTION)
+			INFO="yes";
+		;;
+		--$DEBUG_LONG_OPTION)
+			echo "Enabling debug";
+			set -x;
+		;;
+		--)
+			shift;
+			break;
+		;;
+	esac
+	# move to next argument
+	shift;
+done
+#############################################################################
+
+########################### executing #######################################
+if [ "$HELP" = "yes" ]; then
+	do_help;
+	exit 0;
+fi
+
+if [ "$VERSION_SHOW" = "yes" ]; then
+	do_version;
+	exit 0;
+fi
+
+if [ "$DUMP_CONFIG" = "yes" ]; then
+	dump_config;
+	exit 0;
+fi
+
+if [ "$INFO" = "yes" ]; then
+	do_info;
+	exit 0;
+fi
+
+if [ $QUIET = "yes" ]; then
+	ECHO=true;
+fi
+
+$ECHO "Thumbs! version $VERSION";
+
+if [ -n "$LOADED" ]; then
+	$ECHO "   * using configuration files:$LOADED";
+fi
+
+$ECHO "   * checking for supported files..."
+do_check;
+
+$ECHO "   * checking for required software..."
+do_check_software;
+
+$ECHO "   * creating output directory..."
+# ok, now we are able to create the directory
+do_dir;
+
+# copying and ordering
+$ECHO "   * ordering and converting..."
+do_order;
+if [ "$ONLY_ORDER" = "yes" ]; then
+	exit 0;
+fi
+
+$ECHO "   * generating thumbnails..."
+# doing thumbnail files
+do_thumbs;
+
+# checking for comments on the fly
+if [ "$COMMENTS_ONTHEFLY" = "yes" ]; then
+	$ECHO "   * doing comments on the fly...";
+	do_comments_onthefly;
+fi
+
+# checking for title entry on comments file
+if [ "$IGNORE_COMMENTS" = "no" ]; then
+	check_title;
+fi
+
+# pre-processing diary file
+if [ "$IGNORE_DIARY" = "no" ]; then
+	process_diary;
+fi
+
+$ECHO "   * building html files..."
+# ok, now doing html files
+do_html;
+
+$ECHO "   * fixing permissions..."
+chmod 755 $COLLECTION
+chmod 644 $COLLECTION/*
+#############################################################################
+export IFS=OLDIFS
+

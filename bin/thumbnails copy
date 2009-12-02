@@ -1,0 +1,115 @@
+#!/bin/bash
+#
+# mkthumb.sh - Creates thumbnails and index.html for a directory with images. 
+# Copyright (C) 2002 Oskar Andreasson
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  
+# USA
+
+SIZE=$1
+COLS=$2
+
+header() {
+echo "<HTML>" >> ./index.html
+echo "<HEAD>" >> ./index.html
+echo "Enter title of document"
+read title
+echo " <TITLE>$title</TITLE>" >> ./index.html
+echo "</HEAD>" >> ./index.html
+echo "<BODY BG=\"#ffffff\">" >> ./index.html
+echo "<H2>$title</H2><P>" >> ./index.html
+echo "<TABLE BORDER=\"1\" CELLSPACING=\"1\" CELLPADDING=\"2\">" >> ./index.html
+echo "  <TR>" >> ./index.html
+}
+
+footer() {
+	echo "</TABLE>" >> ./index.html
+  echo "<HR>" >> ./index.html
+  echo "<P>" >> ./index.html
+  echo "Copyright &copy; 2002 by <A HREF="mailto: oan@frozentux.net">Oskar" >> ./index.html
+  echo " Andreasson</A>" >> ./index.html
+  echo "<P>" >> ./index.html
+  echo "Permission is granted to copy, distribute and/or modify this document" >> ./index.html
+  echo "under the terms of the GNU Free Documentation License, Version 1.1; with" >> ./index.html
+  echo "no Invariant Sections, with no" >> ./index.html
+  echo "Front-Cover Texts, and with no Back-Cover Texts. A copy of the license is" >> ./index.html
+  echo "available at <a" >> ./index.html
+  echo "href="http://www.frozentux.net/fdl.txt">http://www.frozentux.net/fdl.txt</a>." >> ./index.html
+  echo "</BODY>" >> ./index.html
+  echo "</HTML>" >> ./index.html
+}
+
+image_description() {
+#FIXME!!!!
+      echo "Title of $image"
+      echo "<TD ALIGN="CENTER">$desc</TD>" >> ./index.html
+
+}
+
+usage() {
+	echo "$0 [size-limit] [columns]"
+  echo ""
+  echo "Size-limit - Limit of size, proportionally."
+  echo "Columns - Columns to use in index.html"
+
+  exit 1
+}
+
+if [ "$SIZE" = "" ]; then
+  usage
+fi
+
+if [ "$COLS" = "" ]; then
+  usage
+fi
+
+if [ ! -d thumbs ]; then
+	echo "Creating dir thumbs"
+	mkdir -p thumbs
+fi
+
+if [ ! -d large ]; then
+	echo "Creating dir large"
+	mkdir -p large
+fi
+
+header
+
+counter=0
+
+
+for file in ./*.[Jj][Pp][Gg] ; do
+    if [ $counter -ge $COLS ] ; then
+      echo "</TR>" >> ./index.html
+      echo "<TR>" >> ./index.html
+      counter=0
+      #image_description
+      echo "</TR>" >> ./index.html
+      echo "<TR>" >> ./index.html
+    fi
+    if [ ! -f thumbs/$file ] ; then
+      convert -size $SIZE $file -resize $SIZE +profile "*" thumbs/$file
+      mv $file large/$file
+      echo "<TD ALIGN="CENTER"><A HREF="large/$file"><IMG SRC="thumbs/$file" BORDER=0></A>" >> ./index.html
+      echo "Image info for $file:"
+      read imageinfo
+      echo "<BR>$imageinfo" >> ./index.html
+      echo "</TD>" >> ./index.html
+    else
+      echo "$file already converted or file with same name already exists"
+    fi
+    counter=$(($counter+1))
+done
+
+footer

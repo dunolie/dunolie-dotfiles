@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,13 September, 2009
+# Description: growl alert in x mins "with message in quotes"
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://www.bitcontrol.org/2007/10/04/itunes-sleep-timer-script/
+#########################################################################
+# Script Comments if needed : ripped from the above linked script
+#
+#########################################################################
+time_to_close=60 #Minutes
+
+if [ ! -z $1 ]; then
+	time_to_close=$1
+fi
+
+elapsed_minutes=0
+
+#if [ ! -z $? ]; then
+#	echo -e 'Usage:\e[1;32m 10 "My reminder"\e[0m ~ will give a growl alert in 10 mins with "My reminder" message'
+#	exit 1;
+#fi
+
+
+echo "growl alert in $time_to_close minutes"
+
+while [ $elapsed_minutes -lt $time_to_close ]; do
+	printf "`expr $time_to_close - $elapsed_minutes` minutes remaining\r"	
+	sleep 60
+	elapsed_minutes=`expr $elapsed_minutes + 1`
+done
+
+growlnotify -s -I "~/bin/growl-icons/Clock" -t "Times Up!! ~ It's `date +%H:%M`" -m "$2"

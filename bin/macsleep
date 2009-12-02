@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# put osx to sleep
+osascript -e 'tell application "System Events" to sleep'

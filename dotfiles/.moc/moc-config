@@ -1,0 +1,210 @@
+# http://polishlinux.org/apps/cli/moc-audio-player-advanced-tricks/
+
+# Read music file tags
+ReadTags = yes
+
+#MusicDir = /music/where-ever
+
+# show the errors in reading the files or streams, 
+ShowStreamErrors = no
+
+# to ignore CRC errors in MP3 files.
+Mp3IgnoreCRCErrors = yes
+
+# Track info
+#% N - Track number
+#% A - Artist
+#% A - Album
+#% T - Title
+#% (X: TRUE: FALSE) - triple the expression - if X occurs view TRUE, if not
+# Show FALSE. More info in the manual zshmisc.
+FormatString = "% (n:% n)% (a:% a -:)% (t:% t:)% (A: \ (% A \):)"
+
+# Output buffer in KB. The minimum value is 128 
+OutputBuffer = 2048
+
+# Input buffer in KB. The minimum value is 32 
+InputBuffer = 512
+
+# How much music is loaded to the MOC-up buffer (in KB)
+# This value can not be greater than the input buffer.
+Prebuffering = 64
+
+# Wskazuje na użycie serwera proxy dla internetowych strumieni. Jeśli zakomentowane
+
+
+# Hide file extensions
+HideFileExtension = yes
+
+# Shows the duration of the song in the menu. Options are: yes, no, IfAvailable - shows if
+# When the file has been previously played.
+Showtime = IfAvailable
+
+# The file with the theme of appearance. You can specify the full path or the file name, which is in
+# / Usr / share / moc / themes / or ~ / .moc / themes /
+Theme = power-orpheus
+
+# Subject to be used when the POWER run from xterm.
+# = XTermTheme transparent-background
+
+# Catalog # MOC, the default is ~ /. Power.
+# MOCDir = ~ /. Power
+
+# Use the function mmap () to read files (currently used for reading mp3). mmap () is much
+# Slower when we use NFS (Network File System).
+UseMmap = yes
+
+# What should be the encoding used to read the tags and file names?
+# If you want to download a list of supported encodings can use the iconv-l.
+
+#ID3v1TagsEncoding = WINDOWS-1250
+
+# Is the librcc is used to assist in the ID3 tags enkodowaniu v. 1/1.1.
+UseRCC # = yes
+
+# Do not forget the contents of the program is off the playlist?
+SavePlaylist = yes
+
+# If you use several clients at once MOC, this means that the current PLAYLIST
+# On both clients.
+SyncPlaylist = yes
+
+# Choose a keymap file (relative to ~ /. Moc / or absolute path)
+Example # keymap description is included with (keymap.example).
+# Keymap = my_keymap
+
+# Use ASCII instead of graphic characters for drawing lines. This helps on
+# Some terminals.
+ASCIILines = no
+
+# FastDirs, these allow you jump directly to a directory, the key bindings are
+# in the keymap file.
+#Fastdir1 = /mp3/rock
+#Fastdir2 = /mp3/electronic
+#Fastdir3 = /mp3/rap
+#Fastdir4 = /mp3/etc
+#Fastdir5 =
+#Fastdir6 =
+#Fastdir7 =
+#Fastdir8 =
+#Fastdir9 =
+#Fastdir10 =
+
+# How fast to seek? Number of seconds per key stroke.
+#SeekTime = 1
+
+# How fast to seek (when using silent seeking)? Number of seconds per key
+# stroke.
+#SilentSeekTime = 5
+
+Method # resamplingu. The default method is linear. A full description is at:
+# # Http://www.mega-nerd.com/libsamplerate/api_misc.html Converters
+#
+# SincBestQuality - Best quality, but awfully slow
+# SincMediumQuality - lower quality, higher speed
+# SincFastest - Fastest, sound quality is still good
+# ZeroOrderHold - Very poor sound quality, but the fastest speed
+# Linear - Good sound quality, and satisfactory in most cases, the quality of sound
+#
+#
+# The word from me (Treadstone): you may not choose a different method than the linear, if not
+# Need a crystal-clear sound that is audible only to the highest quality
+# File with a great nagłaśniającym hardware - on my 2.1 speakers are not heard
+# Difference between the sound so skonfigruowanym MOC and xmms, audacious and Amarok
+# ResampleMethod = Linear
+
+# The sample rate
+If # is 0 or zakomentowany entry will be read from a file
+# 48000 = ForceSampleRate
+
+# This option allows you to set priority to real-time output buffer
+# You must have permission to use this option, or simply be root
+# Setting this option can be dangerous, because the mistake is in the power
+# Can easily hang your computer.
+# = No UseRealtimePriority
+
+# Cache memory for MP3 tags.
+TagsCacheSize = 256
+
+# Do the numbers show in the works.
+PlaylistNumbering # = yes
+
+# If the song changes, you should move the menu, so that currently
+# Playing the file was visible?
+FollowPlayedFile = yes
+
+# What do you want the program, if launched at an interface, where some of the playlist work?
+# Playing? If this option is set to "yes", the interface switches to the playlist.
+# If the "no", it will start with a view of the last directory (you can set in options).
+CanStartInPlaylist = yes
+
+# Run some commands (10 max) selected by pressing buttons (F1 - F10
+# Default).
+# The following arguments can be used:
+#% F - the path to the file
+#% I - the full title of the tag
+#
+# Retrieve information from the tags:
+#% T - title
+#% A - album
+#% R - Artist
+#% N - path
+#% M - the duration of the file (in seconds)
+#
+# These parameters relate to the currently selected file. If you change them
+# So that they are written with capital letters (eg A instead of%% a), will address the current
+# File playback.
+#
+# The programs are run using the execve (), no shell, so we can not for example
+# Redirect output to a file or use the other functions of a shell.
+#
+# Example:
+# ExecCommand1 = 'cp% f / mnt / usb_drive "
+
+# Does the program is to set the title of xterm.
+SetXtermTitle # = yes
+
+# Whether or not to display full file names including path instead of just the file name in playliście.
+PlaylistFullPaths # = yes
+
+# Turn on oversampling (yes / no)?
+ModPlug_Oversampling # = yes
+# Turn on noise reduction (yes / no)?
+ModPlug_NoiseReduction # = yes
+# Turn on the reverb (yes / no)
+# = No ModPlug_Reverb
+# Turn on the reinforcement of bass (yes / no)?
+# = No ModPlug_MegaBass
+# Use the Surround system (yes / no)?
+# = No ModPlug_Surround
+Method # resamplingu. Possible options are: FIR, Spline, NEAREST and LINEAR
+# FIR: The best quality
+Spline #: High quality
+# LINEAR: Good quality, good speed
+# NEAREST: No interpolation - the fastest, poor quality
+# = ModPlug_ResamplingMode FIR
+
+# The following options are not explained on the grounds that I do not want to do this without being literally
+# How does the concept of a function. If you feel up to it, you can provide me a translation
+# That will copy instead of the following English sentences.
+
+# Number of channles (1 or 2)
+# ModPlug_Channels = 2
+# Bits per sample (8,16,32). 32 bits seems ot be buggy ...
+# ModPlug_Bits = 16
+# Sampling rate (11025, 22050, 44100, 48000)
+# ModPlug_Frequency = 44100
+# Reverb level 0 (quiet) -100 (loud)
+# ModPlug_ReverbDepth = 0
+Reverb # delay in ms, usually 40-200ms
+# ModPlug_ReverbDelay = 0
+Bass level # 0 (quiet) -100 (loud)
+# ModPlug_BassAmount = 0
+# Bass cutoff in Hz (10-100)
+# ModPlug_BassRange = 10
+Surround level # 0 (quiet) -100 (heavy)
+# ModPlug_SurroundDepth = 0
+Surround # delay in ms, usually 5-40ms
+# ModPlug_SurroundDelay = 0
+# Number of times to loop. Zero prevents looping. -1 Loops forever.
+# ModPlug_LoopCount = 0

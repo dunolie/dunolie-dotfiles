@@ -1,0 +1,12 @@
+#!/bin/sh
+# http://gorn.ch/archive/2007/01/23/tail-f-to-growl.html
+if [ -z "$1" ]; then
+    echo "Missing filename"
+    exit 1
+fi
+
+tail -n0 -F $1 | while read; do
+    echo $REPLY | growlnotify -a tailfgrowl -t $1;
+done
+
+echo -e "awk '{print $4}' $REPLY" | growlnotify -a tailfgrowl -t $1;

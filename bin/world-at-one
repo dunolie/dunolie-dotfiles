@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,07 August, 2008
+# Description: Records BBC Radio 4 for 30 mins (world at one programme.
+#########################################################################
+# Script Comments if needed : Using it for the World at one radio show 
+# Use Cron to schedule the recording to 1pm (mon-fri)
+# Growl notify uses a .jpg called Radio4.jpg in ~/Radio-Recordings/Radio4/
+# http://tbn0.google.com/images?q=tbn:4M-cRWWBvy2nJM:http://www.markbrake.com/images/CMS/UserFiles/Image/radio4_logo.jpg
+# thanks to http://www.markbrake.com for the icon ;)
+#########################################################################
+
+
+# growl notification for start of recording
+growlnotify -s -n "World At One Recorder" -I "~/Radio-Recordings/BBC-Radio4/Radio4.jpg" -t "Recording BBC Radio 4" -m "$USER, The time is now $(date +%H:%M).
+
+BBC Radio 4, The World at One programme is being recorded for the next half hour.  
+     
+The *.mp3 file is being saved in: ~/Radio-Recordings/BBC-Radio4/World-at-One/";
+# recording for 30 mins
+radio.py BBC Radio4 --record ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3 --sleep 30;
+
+
+# set the id tags on the mp3
+id3v2 --delete-v1 ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 --id3v2-only ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 -t "The World at One_`date +%d-%m-%Y`" ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 -a "Martha Kearney (Mon-Thurs) - Shaun Ley (Fri)" ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;  
+id3v2 -A "BBC Radio 4 - The World at One"  ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 --comment "News Programme on BBC Radio4, 1pm Mon-Fri- Recorded with radio.py" ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 -g 101 ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 -y "`date +%Y`" ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+
+id3v2 --WOAF "http://www.bbc.co.uk/radio4/news/wato/" ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+id3v2 --APIC "/Users/$USERS/Radio-Recordings/BBC-Radio4/World-at-One//Radio4.jpg" ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3;
+
+# change the name of the finished recording so it is dated correctly and wont be writen over by the next recording
+mv ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3 ~/Radio-Recordings/BBC-Radio4/World-at-One/world_at_one_`date +%d-%m-%Y`.mp3
+
+rm ~/Sync/World-at-One-Latest/*.mp3
+LATEST=$(ls -t  ~/Radio-Recordings/BBC-Radio4/World-at-One/*.mp3 | head  -n 1)
+DONE=world_at_one_`date +%d-%m-%Y`.mp3
+cp $LATEST ~/Sync/World-at-One-Latest
+
+# growl notification for end of recording
+growlnotify -s -n "World at One Recorder" -I "~/Radio-Recordings/BBC-Radio4/Radio4.jpg" -t "Recording BBC Radio 4" -m "$USER, The time is now $(date +%H:%M).
+
+BBC Radio 4, The World at One programme is finished recording.       
+
+$DONE in:
+~/Radio-Recordings/BBC-Radio4/World-at-One/
+~/Sync/World-at-One-Latest"

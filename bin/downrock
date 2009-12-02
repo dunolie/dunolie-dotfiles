@@ -1,0 +1,240 @@
+#!/bin/bash
+function A ()
+{
+echo "      ____";
+echo "     /    \ ";
+echo "    /  /\  \ ";
+echo "   /  /__\  \ ";
+echo "  /__/    \__\  " ;
+}
+function B ()
+{
+echo "   ________ ";
+echo "  |  ____  |";
+echo "  | |____| |";
+echo "  |  ____  |";
+echo "  | |____| |";
+echo "  |________|";
+}
+function C ()
+{
+echo "   _______ ";
+echo "  |  _____|";
+echo "  |  |     ";
+echo "  |  |____ ";
+echo "  |_______|";
+}
+function D ()
+{
+echo "   ______ ";
+echo "  | ____ \ ";
+echo "  | |   \ \ ";
+echo "  | |___/ / ";
+echo "  |______/ ";  
+}
+function E ()
+{
+echo "   _______";
+echo "  |  _____|";
+echo "  |  |____ ";
+echo "  |   ____|";
+echo "  |  |____";
+echo "  |_______|";  
+}
+function F ()
+{
+echo "   ________";
+echo "  |  ______|";
+echo "  |  |____ ";
+echo "  |   ____|";
+echo "  |__| ";
+}
+function G ()
+{
+echo "   ________ ";
+echo "  |  ______|";
+echo "  |  | ____";
+echo "  |  ||__  |";
+echo "  |  |___| |";
+echo "  |________|";
+}
+function H ()
+{
+echo "   ___   ___";
+echo "  |   | |   |";
+echo "  |   |_|   |";
+echo "  |    _    |";
+echo "  |___| |___|";  
+}
+function I ()
+{
+echo "   ________";
+echo "  |___  ___|";
+echo "     |  |";
+echo "   __|  |__";
+echo "  |________|";
+}
+function J ()
+{
+echo "   ________";
+echo "  |___  ___|";
+echo "     |  |";
+echo "   _ /  /";
+echo "  |____/";
+}     
+function K ()
+{
+echo "   ___";
+echo "  |   | ___";
+echo "  |   |/  /";
+echo "  |      /";
+echo "  |___|__\ ";
+}
+function L ()
+{
+echo "   ___";
+echo "  |   |";
+echo "  |   |";
+echo "  |   |___";
+echo "  |_______|";
+}
+function M ()
+{
+echo "    __  __";
+echo "   /  \/  \ ";
+echo "  / /\  /\ \  ";
+echo " /_/  \/  \_\ ";    
+}
+function N ()
+{
+echo "   ____    __";
+echo "  |    \  |  |";
+echo "  |  |\ \ |  |";
+echo "  |  | \ \|  |";
+echo "  |__|  \____|";
+}
+function O ()
+{ 
+echo "   _______";
+echo "  /   _   \ ";
+echo "  |  | |  |";
+echo "  |  |_|  |";
+echo "  \_______/";
+}
+function P ()
+{
+echo "   ________";
+echo "  |  ____  |";
+echo "  | |____| |";
+echo "  |  ______|";
+echo "  |__|";
+}
+function Q ()
+{
+echo "   _______";
+echo "  /   _   \ ";
+echo "  |  | |__|";
+echo "  |  |_|\ \ ";
+echo "  \______\_\ ";
+}
+function R ()
+{
+echo "   _____";
+echo "  |  _  |";
+echo "  | |_| |";
+echo "  |  \  \ ";
+echo "  |__|\__\ ";
+}
+function S ()
+{
+echo "     _______ ";
+echo "    |    ___| ";
+echo "     \  \ ";
+echo "   ___\  \  ";
+echo "  |_______| ";
+}
+function T ()
+{
+echo "   ________";
+echo "  |___  ___|";
+echo "     |  |";
+echo "     |  |";
+echo "     |__|";
+}
+function U ()
+{
+echo "   __   __";
+echo "  |  | |  |";
+echo "  |  | |  |";
+echo "  |  |_|  |";
+echo "  |_______|";
+}
+function V ()
+{
+echo "   __      __";
+echo "  \  \    /  / ";
+echo "   \  \  /  / ";
+echo "    \  \/  / ";
+echo "     \____/ ";
+}
+function W ()
+{
+echo "   __        __";
+echo "  \  \  /\  /  / ";
+echo "   \  \/  \/  / ";
+echo "    \___/\___/ ";
+}
+function X ()
+{
+echo "   __    __";
+echo "  \  \  /  / ";
+echo "   \  \/  / ";
+echo "   /  /\  \ ";
+echo "  /__/  \__\ ";
+}
+function Y ()
+{
+echo "   __   __";
+echo "  \  \ /  / ";
+echo "   \___  / ";
+echo "     /  / ";
+echo "    /__/ ";
+}
+function Z ()
+{
+echo "   ______";
+echo "  /___   / ";
+echo "     /  / ";
+echo "    /  /___ ";
+echo "   /______/ ";
+}
+function ! () 
+{
+echo ""
+echo -e   "     \033[1;37m.\033[1;30m~\033[1;37m.\033[0;0m     "
+echo -en  "     \033[1;30m/\033[1;33mV\033[1;30m\\\\\033[0;0m     "
+echo ""
+echo -en  "    \033[1;30m//\033[1;37m&\033[1;30m\\\\\\\\\033[0;0m    "
+echo ""
+echo -e   "   \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m   "
+echo -e   "    \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m    "
+}
+function s () 
+{
+echo " ";
+}
+-help ()
+{
+echo " type the letters one after the other with spaces in between - eg   h e l l o . ";
+}
+-h ()
+{
+-help
+}
+total=$#
+for (( i=0; $i < $total; i++ ))
+do
+     fun=`echo "$1" | tr [:lower:] [:upper:]`
+     $fun
+     shift 1
+done 

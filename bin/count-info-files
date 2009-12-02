@@ -1,0 +1,67 @@
+#!/bin/sh
+
+## Version 0.1
+
+##
+## Written by Abraham vd Merwe
+##
+
+# Compares two strings, returns 0 if not equal, 1 otherwise
+strcmp ()
+{
+  local RESULT=0
+  if [ $# -eq 2 ] && [ $(expr "$1" : "$2") -eq $(expr length "$1") ]
+  then
+      RESULT=1
+  fi
+  echo $RESULT
+}
+
+if [ $# -ne 0 ]
+then
+    if [ $(strcmp "$1" "-R") -eq 1 ]
+    then
+        shift
+        FILES=$(ls -R "$@")
+    elif [ $(strcmp "$1" "-h") -eq 1 ] || [ $(strcmp "$1" "--help") -eq 1 ]
+    then
+        echo "USAGE: count [-R] [files]"
+        echo "       count -h"
+        exit 1
+    else
+        FILES=$(ls "$@")
+    fi
+else
+    FILES=$(ls)
+fi
+
+FC=0
+DC=0
+OTH=0
+
+for F in $FILES
+do
+  if [ -f $F ]
+  then
+      FC=$(expr $FC + 1)
+  elif [ -d $F ]
+  then
+      DC=$(expr $DC + 1)
+  else
+      OTH=$(expr $OTH + 1)
+  fi
+done
+
+if [ $FC -ne 0 ]; then echo -en $FC" ^[[01;36mfiles^[[0m, "; fi
+if [ $DC -ne 0 ]; then echo -en $DC" ^[[01;34mdirectories^[[0m, "; fi
+if [ $OTH -ne 0 ]; then echo -en $OTH" ^[[37munknown entries^[[0m, "; fi
+
+COUNT=$(expr $FC + $DC + $OTH)
+
+if [ $COUNT -ne 0 ]
+then
+    echo $COUNT" ^[[01;32mtotal^[[0m"
+else
+    echo "no entries found"
+fi
+

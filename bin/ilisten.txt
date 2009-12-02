@@ -1,0 +1,22 @@
+#!/bin/bash
+bbc[0]=""
+bbc[1]="http://www.bbc.co.uk/radio1/realaudio/media/r1live.ram"
+bbc[2]="http://www.bbc.co.uk/radio2/realmedia/fmg2.ram"
+bbc[3]="http://www.bbc.co.uk/radio3/ram/r3g2.ram"
+bbc[4]="http://www.bbc.co.uk/radio4/realplayer/media/fmg2.ram"
+bbc[5]="http://www.bbc.co.uk/fivelive/live/surestream_int.ram"
+bbc[6]="http://www.bbc.co.uk/6music/ram/6music.asx"
+bbc[7]="http://www.bbc.co.uk/bbc7/realplayer/bbc7.asx"
+bbc[8]="http://www.bbc.co.uk/england/realmedia/live/localradio/leeds.ram"
+bbc[9]="http://www.bbc.co.uk/1xtra/realmedia/1xtra.asx"
+if [ $# -eq 0 ]
+ then
+echo "usage bbc 1"
+	for ((i=0; i<${#bbc[@]}; i++))
+	do
+	  echo $i . ${bbc[$i]}
+	  
+	done
+	exit  1
+fi
+mplayer -quiet -playlist ${bbc[${1}]} 

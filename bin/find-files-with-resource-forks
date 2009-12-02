@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sat 23 Aug 20:24:01 2008
+# Description: find files with resource forks on OS X
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://www.entropy.ch/blog/Mac+OS+X/2005/03/30/Quickie_shell_command_to_find_files_with_resource_forks.html
+#########################################################################
+# Script Comments if needed : finds all files on OS X with resource forks
+#
+#########################################################################
+# Net Growl Support : uncomment lines and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()
+#
+#########################################################################
+echo -e "searching for resource forks"
+echo -e "this can take a while"
+find . -type f -exec test -s {}/..namedfork/rsrc \; -print
+

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,11 September, 2009
+# Description: Remote log monitoring with Growl
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://swannman.wordpress.com/2006/07/01/remote-log-monitoring-with-growl/
+#########################################################################
+# Script Comments if needed :
+# examples ~
+# tail -n 0 -F /var/log/system.log | growltail &
+# tail -n 0 -F /var/log/secure.log | growltail &
+#########################################################################
+ClientIP="192.168.2.*" # change this to the client IP you want to send the notice to
+ServerName="$(hostname)-growltail"
+
+while read; do
+echo $REPLY | growlnotify -n ServerName --udp --host ClientIP
+done
+

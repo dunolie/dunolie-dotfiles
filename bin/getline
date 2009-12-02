@@ -1,0 +1,29 @@
+#!/usr/bin/env bash -f
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,17 August, 2008
+# Description: getline
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://snippets.dzone.com/posts/show/5829
+#########################################################################
+# Script Comments if needed :
+# Get input from terminal with prompt, history, line editor
+# Using this script you will be able to read user input using readline goodies but without need to manually program readline library. Just save it under e.g. /usr/local/bin/getline, and then call like:
+# getline {prompt} {historydir}.
+#
+#for example:
+#getline "input> " "/tmp"
+#
+#Y ou can for example call this script from php using popen(). 
+# This way php doesn't have to include readline module, and you can do shell stuff not inside php,
+# but using shell code, which is more natural and comfortable way to do it.
+#########################################################################
+history -r "$2/.getline_history"
+LINE=""
+read -re -p "$1" LINE
+history -s "$LINE"
+history -w "$2/.getline_history"
+echo $LINE
+
+

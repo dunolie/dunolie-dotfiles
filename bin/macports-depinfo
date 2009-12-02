@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,04 February, 2009
+# Description: mac port dependants
+# Snipped from website : http://www.nabble.com/Newbie---Keeping-a-macport-installation-clean-td21196567.html
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines if need and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()	
+#
+#########################################################################
+
+# mpdepinfo - print 2 lists of dependents in the following forms
+# 1) <port> depends on <port>
+# 2) <port> has no dependents!
+
+umask 0077
+
+dir="/tmp/`basename $0`-$$"
+fil="$dir/cmdfil"
+trap 'rtn=$?; rm -rf $dir; exit $rtn' EXIT
+trap 'exit $?' HUP INT QUIT TERM
+
+mkdir "$dir" || exit 2
+
+(
+        IFS='
+'
+        for p in `port installed | sed '1d ; s/^  // ; s/ (active)$//'` ; do
+                echo dependents "$p"
+        done
+) >"$fil"
+

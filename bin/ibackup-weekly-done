@@ -1,0 +1,33 @@
+
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Mon 22 Dec 01:41:05 2008
+# Description: growl my ibackup weekly sync and backup
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()
+#
+######################################################################### 
+
+growlnotify -a "iBackup" -s -t "iBackup Script Done" -m "Backed up & Synced
+/Users/robbie
+/Pictures
+/opt
+
+to:
+/Volumes/BackUp-500GB/iBackups/Main\ Backup\ -\ Weekly\ -
+
+$(ls /Volumes/BackUp-500GB/iBackups/Main\ Backup\ -\ Weekly\ -)"

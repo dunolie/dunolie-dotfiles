@@ -1,0 +1,562 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2006 Paul Z. Kolano <pkolano@gmail.com>.
+# All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the same terms as Perl itself.
+#
+
+use strict;
+use vars qw($VERSION);
+
+$VERSION = '1.0';
+
+use constant LAYOUT => 1;
+use constant REGION => 2;
+use constant WINDOW => 3;
+
+my $current_session = $ENV{HOME} . "/.screenwm." . $ENV{STY};
+my $current_layout = "$current_session/current";
+my $current_region = "$current_layout/current";
+my $current_history = "$current_region/history";
+my $current_window = "$current_region/current";
+
+my $source_file = "$current_session/.source";
+
+sub set_level {
+    my $type = shift;
+    my $level = shift;
+    my $base = $current_session;
+    for (my $i = 1; $i < $type; $i++) {
+        $base .= "/current";
+    }
+    unlink "$base/current";
+    symlink($level, "$base/current");
+    if ($type == WINDOW) {
+        my $meta = readlink("$base/$level");
+        $meta =~ s/\d*//;
+        unlink "$base/$level";
+        symlink(time . $meta, "$base/$level");
+    } else {
+        unlink "$base/current/atime";
+        symlink(time, "$base/current/atime");
+    }
+}
+
+sub new_level {
+    my $type = shift;
+    my $glob = $current_session;
+    for (my $i = 0; $i < $type; $i++) {
+        $glob .= "/[0-9]*";
+    }
+    my @levels = glob($glob);
+    map {s/.*\///} @levels;
+    @levels = sort {$a <=> $b} @levels;
+    my $level = $levels[scalar(@levels) - 1];
+    $level++;
+    return $level;
+}
+
+sub goto_level {
+    my $type = shift;
+    my $direction = shift;
+    my $base = $current_session;
+    for (my $i = 1; $i < $type; $i++) {
+        $base .= "/current";
+    }
+    my $level = readlink("$base/current");
+    my @levels = glob("$base/[0-9]*");
+    map {s/$base\///} @levels;
+    if ($type == REGION) {
+        my $atime0 = -1;
+        my $bbox0 = bbox(readlink("$base/current/history"));
+        foreach (@levels) {
+            my $bbox1 = bbox(readlink("$base/$_/history"));
+            my $atime1 = readlink("$base/$_/atime");
+            if (edge_overlap($direction, $bbox0, $bbox1) > 0 &&
+                    $atime1 > $atime0) {
+                $level = $_;
+                $atime0 = $atime1;
+            }
+        }
+    } else {
+        my @levels = sort {$a <=> $b} @levels;
+        my $i;
+        for ($i = 0; $i < scalar(@levels); $i++) {
+            last if ($levels[$i] eq $level);
+        }
+        $i = ($direction =~ /next/) ? $i + 1 : $i - 1 + scalar(@levels);
+        $level = $levels[$i % scalar(@levels)];
+    }
+    return $level;
+}
+
+sub bbox {
+    my $history = shift;
+    my @splits = split(/\./, $history);
+    shift @splits;
+
+    my $bbox = {x0 => 0, x1 => 1, y0 => 0, y1 => 1};
+    foreach (@splits) {
+        $bbox->{y0} = ($bbox->{y0} + $bbox->{y1}) / 2 if (/h0/);
+        $bbox->{y1} = ($bbox->{y0} + $bbox->{y1}) / 2 if (/h1/);
+        $bbox->{x1} = ($bbox->{x0} + $bbox->{x1}) / 2 if (/v0/);
+        $bbox->{x0} = ($bbox->{x0} + $bbox->{x1}) / 2 if (/v1/);
+    }
+    return $bbox;
+}
+
+sub edge_overlap {
+    my $direction = @_[0];
+    my %bbox0 = %{@_[1]};
+    my %bbox1 = %{@_[2]};
+
+    if ($direction eq 'left') {
+        if ($bbox1{x1} == $bbox0{x0} &&
+                $bbox1{y1} > $bbox0{y0} && $bbox1{y0} < $bbox0{y1}) {
+            return min($bbox1{y1}, $bbox0{y1}) - max($bbox1{y0}, $bbox0{y0});
+        }
+    } elsif ($direction eq 'right') {
+        if ($bbox1{x0} == $bbox0{x1} &&
+                $bbox1{y1} > $bbox0{y0} && $bbox1{y0} < $bbox0{y1}) {
+            return min($bbox1{y1}, $bbox0{y1}) - max($bbox1{y0}, $bbox0{y0});
+        }
+    } elsif ($direction eq 'up') {
+        if ($bbox1{y0} == $bbox0{y1} &&
+                $bbox1{x1} > $bbox0{x0} && $bbox1{x0} < $bbox0{x1}) {
+            return min($bbox1{x1}, $bbox0{x1}) - max($bbox1{x0}, $bbox0{x0});
+        }
+    } elsif ($direction eq 'down') {
+        if ($bbox1{y1} == $bbox0{y0} &&
+                $bbox1{x1} > $bbox0{x0} && $bbox1{x0} < $bbox0{x1}) {
+            return min($bbox1{x1}, $bbox0{x1}) - max($bbox1{x0}, $bbox0{x0});
+        }
+    }
+    return 0;
+}
+
+sub max {
+    return (@_[0] > @_[1]) ? @_[0] : @_[1];
+}
+
+sub min {
+    return (@_[0] < @_[1]) ? @_[0] : @_[1];
+}
+
+sub split_region {
+    my $type = shift;
+    my $history = readlink($current_history);
+    unlink $current_history;
+
+    # create new region
+    my $region = new_level(REGION);
+    my $region_path = "$current_layout/$region";
+    mkdir $region_path;
+    my $window = new_level(WINDOW);
+    symlink(0, "$region_path/$window");
+    symlink($window, "$region_path/current");
+    symlink(0, "$region_path/atime");
+
+    if ($type eq 'split') {
+        symlink("$history.h0", $current_history);
+        symlink("$history.h1", "$region_path/history");
+    } else {
+        symlink("$history.v0", $current_history);
+        symlink("$history.v1", "$region_path/history");
+    }
+    return $window;
+}
+
+sub focus_region {
+    my $region = shift;
+    my @regions = glob "$current_layout/[0-9]*";
+    map {s/.*\///} @regions;
+    my $cmd = " \"focus top\"";
+    foreach (@regions) {
+        $cmd .= " \"focus down\"" if (before_region($_, $region));
+    }
+    return $cmd;
+}
+
+sub before_region {
+    my $region0 = shift;
+    my $region1 = shift;
+    my @splits0 = split(/\./, readlink("$current_layout/$region0/history"));
+    my @splits1 = split(/\./, readlink("$current_layout/$region1/history"));
+    shift @splits0;
+    shift @splits1;
+    foreach my $split1 (@splits1) {
+        my $split0 = shift @splits0;
+        return 1 if ($split0 =~ /[hv]0/ && $split1 =~ /[hv]1/);
+        return 0 if ($split0 =~ /[hv]1/ && $split1 =~ /[hv]0/);
+    }
+    return 0;
+}
+
+sub build_regions {
+    my $history = @_[0];
+    my @histories = @{@_[1]};
+    my $cmd = "";
+    if (scalar(@histories) == 1) {
+        my $region = $histories[0];
+        $region =~ s/\/[^\/]*$//;
+        $cmd .= " \"select _" . readlink("$region/current") . "\"";
+    } elsif ($histories[0] =~ /\/$history\.h[^\/]*/) {
+        my @grep = grep(/\/$history\.h0[^\/]*/, @histories);
+        $cmd .= " split" . build_regions("$history.h0", \@grep);
+        @grep = grep(/\/$history\.h1[^\/]*/, @histories);
+        $cmd .= " \"focus down\"" . build_regions("$history.h1", \@grep);
+    } elsif ($histories[0] =~ /\/$history\.v[^\/]*/) {
+        my @grep = grep(/\/$history\.v0[^\/]*/, @histories);
+        $cmd .= " vert_split" . build_regions("$history.v0", \@grep);
+        @grep = grep(/\/$history\.v1[^\/]*/, @histories);
+        $cmd .= " \"focus down\"" . build_regions("$history.v1", \@grep);
+    }
+    return $cmd;
+}
+
+sub meta_command {
+    my $args = shift;
+    my @cmd = ("screen" , "-X", "eval");
+    my $rcmd = "stuff ^a':exec screenwm";
+    foreach (@{$args}) {
+        $rcmd .= " $_";
+    }
+    $rcmd .= "'\015";
+    push(@cmd, $rcmd);
+    system($cmd[0], @cmd);
+}
+
+if (scalar(@ARGV) == 0) {
+    exit;
+} elsif ($ARGV[0] =~ /--meta/) {
+    my $meta = shift @ARGV;
+    $meta =~ s/[^=]*=?//;
+    if (readlink("$current_region/" . readlink($current_window)) =~ /meta/ &&
+            (readlink("$current_region/history") eq '1' || $meta eq '')) {
+        if ($ARGV[0] eq 'detach') {
+            my $window = readlink($current_window);
+            unlink "$current_region/$window";
+            symlink($window, "$current_region/$window");
+        }
+        meta_command(\@ARGV);
+        exit;
+    }
+}
+if ($ARGV[0] eq 'init') {
+    ##############
+    #### INIT ####
+    ##############
+    mkdir $current_session;
+    my ($layout, $region, $window) = (0, 0, 0);
+    mkdir "$current_session/$layout";
+    set_level(LAYOUT, $layout);
+    mkdir "$current_layout/$region";
+    set_level(REGION, $region);
+    symlink(1, $current_history);
+    set_level(WINDOW, $window);
+    qx(screen -X eval "title _$window" "setenv STY $ENV{STY}" "source .screenwmrc");
+} elsif ($ARGV[0] eq 'detach') {
+    ################
+    #### DETACH ####
+    ################
+    qx{screen -X detach};
+} elsif ($ARGV[0] =~ /down|up|left|right/) {
+    ############################
+    #### DOWN/UP/LEFT/RIGHT ####
+    ############################
+    my $region = goto_level(REGION, $ARGV[0]);
+    set_level(REGION, $region);
+    my $cmd = focus_region($region);
+    qx{screen -X eval $cmd};
+} elsif ($ARGV[0] eq 'info') {
+    ##############
+    #### INFO ####
+    ##############
+    qx{screen -X info};
+} elsif ($ARGV[0] eq 'kill') {
+    ##############
+    #### KILL ####
+    ##############
+    my @windows = glob("$current_region/[0-9]*");
+    if (scalar(@windows) > 1) {
+        my $window = readlink($current_window);
+        unlink "$current_region/$window";
+        @windows = grep(!/\/$window$/, @windows);
+        $window = shift @windows;
+        foreach (@windows) {
+            $window = $_ if (readlink($window) < readlink($_));
+        }
+        $window =~ s/.*\///;
+        set_level(WINDOW, $window);
+        # first kill is for filter
+        system("screen" , "-X", "eval",
+            "register 0 ^a':eval kill kill \"select _$window\"\015\'",
+            "process 0"
+        );
+    }
+} elsif ($ARGV[0] =~ /^(next|prev)/) {
+    ###################
+    #### NEXT/PREV ####
+    ###################
+    my $window = goto_level(WINDOW, $ARGV[0]);
+    set_level(WINDOW, $window);
+    qx{screen -X select _$window};
+} elsif ($ARGV[0] eq 'only') {
+    ##############
+    #### ONLY ####
+    ##############
+    qx{screen -X only};
+} elsif ($ARGV[0] eq 'other') {
+    ###############
+    #### OTHER ####
+    ###############
+    my @windows = glob("$current_region/[0-9]*");
+    if (scalar(@windows) > 1) {
+        my $window = readlink($current_window);
+        @windows = grep(!/\/$window$/, @windows);
+        $window = shift @windows;
+        foreach (@windows) {
+            $window = $_ if (readlink($window) < readlink($_));
+        }
+        $window =~ s/.*\///;
+        set_level(WINDOW, $window);
+        qx{screen -X select _$window};
+    }
+} elsif ($ARGV[0] eq 'quit') {
+    ##############
+    #### QUIT ####
+    ##############
+    my @files = glob("$current_session/[0-9]*/[0-9]*/*");
+    push(@files, glob("$current_session/[0-9]*/[a-z]*"));
+    push(@files, glob("$current_session/[a-z]*"));
+    push(@files, glob("$current_session/.[a-z]*"));
+    unlink @files;
+
+    my @dirs = glob("$current_session/*/*");
+    push(@dirs, glob("$current_session/*"));
+    push(@dirs, $current_session);
+    rmdir($_) foreach (@dirs);
+    qx{screen -X quit};
+    exit;
+} elsif ($ARGV[0] eq 'redisplay') {
+    ###################
+    #### REDISPLAY ####
+    ###################
+    qx{screen -X redisplay};
+} elsif ($ARGV[0] eq 'remove') {
+    ################
+    #### REMOVE ####
+    ################
+    my @regions = glob("$current_layout/[0-9]*");
+    if (scalar(@regions) > 1) {
+        my @windows = glob("$current_region/[0-9]*");
+        map {s/.*\///} @windows;
+        open(SOURCE, ">$source_file");
+        # first kill is for filter
+        print SOURCE "kill\n";
+        foreach (@windows) {
+            print SOURCE "select _$_\nkill\n";
+        }
+
+        my $region = readlink($current_region);
+        my $history = readlink("$current_region/history");
+        $history =~ s/\.\w+$//;
+        @regions = grep(!/\/$region$/, @regions);
+
+        my @files = glob("$current_region/*");
+        unlink @files;
+        rmdir "$current_layout/$region";
+
+        foreach $region (@regions) {
+            if (readlink("$region/history") =~ /^$history(.*)/) {
+                my $split = $1;
+                $split =~ s/^\.\w+//;
+                unlink "$region/history";
+                symlink("$history$split", "$region/history");
+            }
+        }
+
+        $region = $regions[0];
+        foreach (@regions) {
+            $region = $_ if (readlink("$region/atime") < readlink("$_/atime"));
+        }
+        $region =~ s/.*\///;
+        set_level(REGION, $region);
+
+        my @histories = @regions;
+        map {$_ .= "/" . readlink("$_/history")} @histories;
+        print SOURCE "only\neval" . build_regions(1, \@histories);
+        print SOURCE focus_region(readlink($current_region));
+        close SOURCE;
+        qx{screen -X eval "register 0 ^a':source $source_file'\015" "process 0"};
+    }
+} elsif ($ARGV[0] eq 'screen') {
+    ################
+    #### SCREEN ####
+    ################
+    my $window = new_level(WINDOW);
+    symlink(time, "$current_region/$window");
+    set_level(WINDOW, $window);
+    qx{screen -X eval screen "title _$window"};
+} elsif ($ARGV[0] eq 'select' && scalar(@ARGV) == 2) {
+    ################
+    #### SELECT ####
+    ################
+    my @windows = glob("$current_region/[0-9]*");
+    map {s/.*\///} @windows;
+    my @windows = sort {$a <=> $b} @windows;
+    if (0 <= $ARGV[1] && $ARGV[1] < scalar(@windows)) {
+        set_level(WINDOW, $windows[$ARGV[1]]);
+        qx{screen -X select _$windows[$ARGV[1]]};
+    }
+} elsif ($ARGV[0] =~ /split/) {
+    ###############
+    #### SPLIT ####
+    ###############
+    my $window = split_region($ARGV[0]);
+    qx{screen -X eval $ARGV[0] "focus down" screen "title _$window" "focus up"};
+} elsif ($ARGV[0] eq 'layout_kill') {
+    #####################
+    #### LAYOUT_KILL ####
+    #####################
+    my @layouts = glob("$current_session/[0-9]*");
+    if (scalar(@layouts) > 1) {
+        my @windows = glob("$current_layout/[0-9]*/[0-9]*");
+        map {s/.*\///} @windows;
+        open(SOURCE, ">$source_file");
+        # first kill is for filter
+        print SOURCE "kill\n";
+        foreach (@windows) {
+            print SOURCE "select _$_\nkill\n";
+        }
+
+        my $layout = readlink($current_layout);
+        my @files = glob("$current_layout/*/*");
+        push(@files, glob("$current_layout/[a-z]*"));
+        unlink @files;
+
+        my @dirs = glob("$current_layout/*");
+        push(@dirs, "$current_session/$layout");
+        rmdir($_) foreach (@dirs);
+
+        @layouts = grep(!/\/$layout$/, @layouts);
+        $layout = shift @layouts;
+        foreach (@layouts) {
+            $layout = $_ if (readlink("$layout/atime") < readlink("$_/atime"));
+        }
+        $layout =~ s/.*\///;
+        set_level(LAYOUT, $layout);
+
+        my @histories = glob("$current_layout/[0-9]*");
+        map {$_ .= "/" . readlink("$_/history")} @histories;
+        print SOURCE "only\neval" . build_regions(1, \@histories);
+        print SOURCE focus_region(readlink($current_region));
+        close SOURCE;
+        qx{screen -X eval "register 0 ^a':source $source_file'\015" "process 0"};
+    }
+} elsif ($ARGV[0] =~ /_(next|prev)/) {
+    ##########################
+    #### LAYOUT_NEXT/PREV ####
+    ##########################
+    my $layout = goto_level(LAYOUT, $ARGV[0]);
+    set_level(LAYOUT, $layout);
+    my @histories = glob("$current_layout/[0-9]*");
+    map {$_ .= "/" . readlink("$_/history")} @histories;
+    my $cmd = build_regions(1, \@histories);
+    $cmd .= focus_region(readlink($current_region));
+    qx{screen -X eval only $cmd};
+    if (readlink("$current_region/" . readlink($current_window)) =~ /meta/) {
+        # layout must be recreated in meta windows after a move from
+        # another layout (this seems to be a bug in screen)
+        meta_command(["layout_redisplay"]);
+    }
+} elsif ($ARGV[0] eq 'layout_other') {
+    ######################
+    #### LAYOUT_OTHER ####
+    ######################
+    my @layouts = glob("$current_session/[0-9]*");
+    if (scalar(@layouts) > 1) {
+        my $layout = readlink($current_layout);
+        @layouts = grep(!/\/$layout$/, @layouts);
+        $layout = shift @layouts;
+        foreach (@layouts) {
+            $layout = $_ if (readlink($layout) < readlink($_));
+        }
+        $layout =~ s/.*\///;
+
+        set_level(LAYOUT, $layout);
+        my @histories = glob("$current_layout/[0-9]*");
+        map {$_ .= "/" . readlink("$_/history")} @histories;
+        my $cmd = build_regions(1, \@histories);
+        $cmd .= focus_region(readlink($current_region));
+        qx{screen -X eval only $cmd};
+        if (readlink("$current_region/" .
+                readlink($current_window)) =~ /meta/) {
+            # layout must be recreated in meta windows after a move from
+            # another layout (this seems to be a bug in screen)
+            meta_command(["layout_redisplay"]);
+        }
+    }
+} elsif ($ARGV[0] eq 'layout_redisplay') {
+    ##########################
+    #### LAYOUT_REDISPLAY ####
+    ##########################
+    my $layout = readlink($current_layout);
+    my @histories = glob("$current_layout/[0-9]*");
+    map {$_ .= "/" . readlink("$_/history")} @histories;
+    my $cmd = build_regions(1, \@histories);
+    $cmd .= focus_region(readlink($current_region));
+    qx{screen -X eval only $cmd};
+} elsif ($ARGV[0] eq 'layout_screen') {
+    #######################
+    #### LAYOUT_SCREEN ####
+    #######################
+    my ($layout, $region, $window) =
+        (new_level(LAYOUT), new_level(REGION), new_level(WINDOW));
+    mkdir "$current_session/$layout";
+    set_level(LAYOUT, $layout);
+    mkdir "$current_layout/$region";
+    set_level(REGION, $region);
+    symlink(1, $current_history);
+    set_level(WINDOW, $window);
+    qx{screen -X eval only screen "title _$window"};
+} elsif ($ARGV[0] eq 'layout_select' && scalar(@ARGV) == 2) {
+    #######################
+    #### LAYOUT_SELECT ####
+    #######################
+    my @layouts = glob("$current_session/[0-9]*");
+    map {s/.*\///} @layouts;
+    my @layouts = sort {$a <=> $b} @layouts;
+    if (0 <= $ARGV[1] && $ARGV[1] < scalar(@layouts)) {
+        my $layout = $layouts[$ARGV[1]];
+        set_level(LAYOUT, $layout);
+        my @histories = glob("$current_layout/[0-9]*");
+        map {$_ .= "/" . readlink("$_/history")} @histories;
+        my $cmd = build_regions(1, \@histories);
+        $cmd .= focus_region(readlink($current_region));
+        qx{screen -X eval only $cmd};
+    }
+    if (readlink("$current_region/" . readlink($current_window)) =~ /meta/) {
+        # layout must be recreated in meta windows after a move from
+        # another layout (this seems to be a bug in screen)
+        meta_command(["layout_redisplay"]);
+    }
+} elsif ($ARGV[0] eq 'window_meta') {
+    #####################
+    #### WINDOW_META ####
+    #####################
+    my $window = readlink($current_window);
+    unlink "$current_region/$window";
+    symlink(time . " meta", "$current_region/$window");
+} elsif ($ARGV[0] eq 'window_nometa') {
+    #######################
+    #### WINDOW_NOMETA ####
+    #######################
+    my $window = readlink($current_window);
+    unlink "$current_region/$window";
+    symlink(time, "$current_region/$window");
+}
+

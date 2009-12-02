@@ -1,0 +1,631 @@
+#!/bin/bash
+# http://www.linuxforums.org/forum/linux-programming-scripting/107950-mencoder-script-bash-might-useful-someone.html
+#Copyright (c) 2007  Martin J. Wanicki email: (withheld)
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+#
+#---------------------------------------------------------------------------
+# 2Xvid - bash script to transcode A/V files to xvid format
+#
+# Video compression is calculated (by mencoder) to make the combined audio
+# and video fit the target file size as determined by the source A/V files size
+# or provided on the command line.
+#
+#---------------------------------------------------------------------------
+appname=2Xvid
+appvers=1.0rc1
+versionstring="${appname} ${appvers} (${0})"
+#---------------------------------------------------------------------------
+# Edit the following 4 variables to suit your needs
+#---------------------------------------------------------------------------
+DEF_MABR=128	#Default AudioBitRate (abr:br=this)
+tsize=350000	#Target Filesize - 350000 is ideal TV Show episode size
+startep=1	#For Multidisk Multi episode disks - file episode numbering uses this
+dvddev=/dev/dvd	#Default DVD Device
+#---------------------------------------------------------------------------
+nullfile="/dev/null"				# self explanitory
+cwd=$(pwd)					# Current Working Directory
+#---------------------------------------------------------------------------
+#
+#
+#
+# Usage String
+#---------------------------------------------------------------------------
+Usage="${versionstring}\n
+       Usage: ${0} [options]\nBasic options: \n
+       --help      \t\tThis Message\n
+       --filemode\t\tProcess files found in the current directory instead of a dvd (default=unset)\n
+       --infile\t\tProcess a File instead of dvd's (default=unset)\n
+       --dvdlist\t\tList the contents of the dvd (default=no)\n
+       --dvddev\t\tThe dvd device to process (default=${dvddev})\n
+       --dvdtitle=<1,2,3,..>\tComma separated list of dvd titles to process (Default=all)\n
+       --startep=<id>\t\tThe number of the first episode on this disk (default=${startep})\n
+       --mabr=<num>\t\tThe default Maximum Audio Bit Rate (integer) (default=${DEF_MABR}\n
+       --tsize=<size>\t\tThe Target File Size for the transcoded file (integer - bytes) (default=${tsize})\n
+       --keepsize\t\tMake the new file the same size as the source file (default=off)\n
+       --autoexec\t\tAutomatically start processing the files (default=off)\n"
+
+#---------------------------------------------------------------------------
+# exit Handler
+#---------------------------------------------------------------------------
+Done(){
+	echo "${versionstring} : ${1} - Done!" 
+	exit 0
+}
+#---------------------------------------------------------------------------
+# Error Handler
+#---------------------------------------------------------------------------
+die(){
+	echo "${versionstring} : ${1} - so quitting" >/dev/stderr
+	exit 1
+}
+#---------------------------------------------------------------------------
+# Sanity check for the software we need
+#---------------------------------------------------------------------------
+sanitycheck(){
+	[ -n "$(which lsdvd)" ] || die 'lsdvd not installed'
+	[ -n "$(which mplayer)" ] || die 'mplayer not installed'
+	[ -n "$(which mencoder)" ] || die 'mencoder not installed'
+	[ -n "$(which midentify)" ] || die 'midentify not installed'
+}
+#---------------------------------------------------------------------------
+#
+#Check the command line contains only legal options
+#---------------------------------------------------------------------------
+checkopt(){
+	legalopt=0
+	for co in  mabr tsize help autoexec dvdtitle startep dvdlist dvddev filemode keepsize infile
+	do
+		if [ ${1} = ${co} ]
+		then
+			legalopt=1
+			break
+		fi
+	done
+}
+#---------------------------------------------------------------------------
+#
+#Parse the command line arguments                  
+#--------------------------------------------------------------------------
+parse_cmdline(){	# This function to get the arguments off the command line is NOT perfect but it works for me!
+	cmdline="$@"	# Make a copy so we stil have it to display after its been shifted to nothing
+	until [ -z "$1" ]
+	do
+		tmp='0'
+		if [ ${1:0:1} = '-' ]
+		then
+			if [ ${1:0:2} = '--' ]
+			then
+				tmp=${1:2} 
+			else
+				tmp=${1:1}
+			fi
+		fi
+
+		if [ $tmp != '0' ]
+		then
+			parameter=${tmp%%=*}     # Extract name.
+			checkopt $parameter
+			if [ $legalopt = '0' ]
+			then 
+				helpreason="Unknown Option : $1"
+				break
+			fi
+			value=${tmp##*=}         # Extract value.
+			#echo $parameter=$value
+			eval $parameter=$value
+			if [ $parameter = 'help' ]
+			then
+				helpreason='Help Requested'
+			fi
+		else
+			helpreason="Unknown Option : $1"
+			break
+		fi
+		shift
+	done
+	if [ ! -z "$helpreason" ]
+	then
+		echo $helpreason 
+		echo -e ${Usage} 
+		exit 0
+	fi
+	if [ -z "$cmdline" ]
+	then
+		echo "$0: No Command line - using defaults: --mabr=${DEF_MABR} --tsize=${deftsize} noautoexec"
+	else
+		echo "$0: using  $cmdline"
+	fi
+}
+#---------------------------------------------------------------------------
+#
+#Run cropdetect to establish the correct crop rectangle
+#---------------------------------------------------------------------------
+cropdetect(){
+	echo -n "Running Crop Detection - "
+	detectsecs=10
+	mplayer ${1} -vf cropdetect -nosound -vo null -frames 10 -sstep 1 -nocache  &> /tmp/cropdetect.out
+	wait
+	crop=$(cat /tmp/cropdetect.out | tr '\r' '\n' | grep 'vf crop\=' | tail -1 | awk -F\= '{print $2}' | awk -F\) '{print $1}')
+	echo "Established crop factor = ${crop}"
+	rm /tmp/cropdetect.out
+}
+#---------------------------------------------------------------------------
+# calculate a target audio bitrate bsed on current audio - (keepsize)
+#---------------------------------------------------------------------------
+calcaudio(){
+        #t'aint perfect or pretty but it works for me
+        r=`mplayer -vo null -ao null -frames 0 -identify "${1}"  2>/dev/null \
+                | grep -v "=0" | grep "^ID_AUDIO_BITRATE" | uniq | cut -d"=" -f2`
+
+        br=$((${r}/1000))
+        #$br=${br:0:3}
+
+        #choke the audio bit rate down to our maximum if it is higher
+        if [ "${br}" -le "${mabr}" ];
+        then
+                mabr=${br}
+        fi
+}
+
+#---------------------------------------------------------------------------
+# calculate a target filesize if none was specified
+#---------------------------------------------------------------------------
+calctsize(){ 
+        if [ ! -z "${keepsize}" ]	# If we are to keep the original file size as the target size
+        then                    # Calculate one using the source A/V file's size
+                tfs=$(du -b "${1}" | sed 's/\([0-9]*\)\(.*\)/\1/')
+                tsize=$(( ${tfs} / 1024 ))                
+        fi
+}
+#---------------------------------------------------------------------------
+#
+# Helper function to create a file
+# Create a new script for the current A/V file
+#---------------------------------------------------------------------------
+createscript(){						
+	echo '#!/bin/bash'		>  	"${1}"
+}
+#---------------------------------------------------------------------------
+#
+#Helper function to append stuff to a file
+#---------------------------------------------------------------------------
+appendscript(){						# Helper func to generate script
+	echo -e "${1}" >> "${2}"
+}
+#---------------------------------------------------------------------------
+#
+#Write out the header/boilerplate for the conversion script
+#---------------------------------------------------------------------------
+scriptheader(){						# Create a new script for the current A/V file
+	appendscript "#"				"${1}"
+	appendscript "#Simple Error handler"		"${1}"
+	appendscript "#"				"${1}"
+	appendscript "die(){"				"${1}"
+        appendscript '	echo "${versionstring} : ${1} - so quitting" >/dev/stderr' "${1}"
+        appendscript "	exit 1"				"${1}"
+	appendscript "}"				"${1}"
+	appendscript "#-------------------------------" "${1}"
+	appendscript "# Info"				"${1}"
+	appendscript "#"				"${1}"
+	appendscript "# Movie Length (minutes)=${Minutes}"	"${1}"
+	appendscript "# Calculated Audio Bitrate=${vbrcalc}"	"${1}"
+	appendscript "# Calculated Audio size=${AudioSize}"	"${1}"
+	appendscript "# Available space for Video=${Remainder}"	"${1}"
+	appendscript "#"				"${1}"
+	appendscript "#-------------------------------" "${1}"
+	appendscript "#"				"${1}"
+	appendscript "#Set Up Variables"		"${1}"
+	appendscript "#"				"${1}"
+	appendscript 'nano=$(date +%N)'		"${1}"
+	appendscript "cropval=${crop}"		"${1}"
+	appendscript "targetsize=${tsize}"	"${1}"
+	appendscript "vbr=${vbr} #tsize - audio"	"${1}"
+	appendscript "abr=${mabr}"		"${1}"
+	appendscript "sourcefile=${sourcefile}"	"${1}"
+	appendscript "outfile=${outfile}"	"${1}"
+	appendscript 'backupfile='${file}'_${nano}.avi'	"${1}"
+	appendscript "# sourceargs may duplicate sourcefile if not processing a dvd"	"${1}"
+	if [ -z "${filemode}" ]
+	then
+		appendscript "sourceargs=\"dvd://${dvdtitle}  -dvd-device ${dvddev}\""	"${1}"
+	else
+		appendscript "sourceargs='${sourcefile}'"	"${1}"
+	fi
+	appendscript "divxlog=${divxlog}"	"${1}"
+	appendscript "logfile=${logfile}"	"${1}"
+	appendscript "#"				"${1}"
+	appendscript "#	Clean up old log files"	"${1}"
+	appendscript "#"				"${1}"
+	appendscript 'if [ -f "${divxlog}"  ]'	"${1}" 	# if an old log file exists
+	appendscript "then"			"${1}"
+	appendscript '	rm  "${divxlog}"'	"${1}"	# get rid of it
+	appendscript "fi"			"${1}"
+	appendscript "#"				"${1}"
+	appendscript "# Back up an existing avi" "${1}"
+	appendscript "#"				"${1}"
+	appendscript 'if [ -f "${outfile}" ]' 	"${1}"
+	appendscript "then" 			"${1}"
+	appendscript '	mv "${outfile}" "${backupfile}"'			"${1}"
+	appendscript '	echo "Backed up existing avi to ${backupfile}"'		"${1}"
+	appendscript "fi" 							"${1}"
+	appendscript "#"				"${1}"
+	appendscript "#	Do Encoding"		"${1}"
+	appendscript "#"				"${1}"
+}
+#---------------------------------------------------------------------------
+#
+#Write out the footer/boilerplate for the conversion script
+#---------------------------------------------------------------------------
+scriptfooter(){						# Finalize the script for the current A/V file
+	appendscript "#"				"${1}"
+	appendscript "#	Clean Up"		"${1}"
+	appendscript "#"				"${1}"
+	appendscript 'if [ -f "${logfile}" ]'	"${1}"	
+	appendscript "then"			"${1}"
+	appendscript '	rm "${divxlog}"'	"${1}"
+	appendscript "fi"			"${1}"
+	appendscript "#"				"${1}"
+	appendscript 'midentify "${outfile}"' 	"${1}"
+	appendscript 'if [ "$?" -ne 0 ]'	"${1}"	
+	appendscript "then"			"${1}"
+	appendscript '	die   "Something went wrong - check the logs"'	"${1}"
+	appendscript "else"			"${1}"
+	appendscript '	echo "${outfile}" encoded successfully' 	"${1}"
+	appendscript "fi"			"${1}"
+	chmod u+x "${1}"
+	echo Created "${1}" Conversion Script
+}
+#---------------------------------------------------------------------------
+#
+#Calculate the size of the encoded audio 
+#Subtract this from the target file size so that mencoder 
+#will compress video to the remainer 
+#ie: encode video to the target filesize minus the size of the audio
+#---------------------------------------------------------------------------
+calcbitrates(){
+	if [ -z "${filemode}" ]
+	then
+		# The following line figures out how long the video is in minutes
+		# it is ugly and probably brittle but it works at the moment
+		# Maybe should use midentify here
+		#---------------------------------------------------------------------------
+		Minutes=`cat ${INFOFILE} | grep -i "Title: ${dvdtitle}" | \
+			awk -F\, '{print $2}' | awk -F\: '{print $2*60+$3}'`
+		#---------------------------------------------------------------------------
+		Seconds=$(( $Minutes * 60 ))
+	else
+		# set tsize to the size of the current file - if --keepsize is set
+		calctsize ${1}
+		#Always calculate audio - to make sure we never up-size the audio - that would make no sense
+		calcaudio ${1}
+		# Use midentify instead of info from lsdvd
+		#---------------------------------------------------------------------------
+		Seconds=$(midentify  "${1}" | grep "ID_LENGTH" | awk -F\= '{print $2}' | awk -F\. '{print $1}')
+		Minutes=$(( ${Seconds} / 6000 ))
+		#---------------------------------------------------------------------------
+	fi
+	AudioRateKB=$(( $mabr / 8 ))
+	AudioSize=$(( $AudioRateKB * $Seconds ))
+	Remainder=$(( $tsize  - $AudioSize ))
+	# the following would be the absolute(ish) vbr - but we only want a total size
+	vbrcalc=$(( ($Remainder * 8 ) / $Seconds))
+	vbr=$Remainder
+}
+#---------------------------------------------------------------------------
+#
+#Prepare for and set up all the variables and values we need to do the actual 
+#encoding
+#---------------------------------------------------------------------------
+prepare(){
+	if [ -z "${filemode}" ]
+	then
+		#--------------------------------------------------------------------------------------------
+		# Format the dvd title id to a two digit number
+		#--------------------------------------------------------------------------------------------
+		dvdtitle=$(echo ${1} | awk  '{printf "%02g", $0}')
+		#--------------------------------------------------------------------------------------------
+		# Calculate an episode id
+		#--------------------------------------------------------------------------------------------
+		epid=$(echo $(( ${1} + ${startep} - 1 )) | awk  '{printf "%02g", $0}')
+		#--------------------------------------------------------------------------------------------
+		echo "Processing ${DVDNAME} Title ${1} (Episode ${epid})"
+		#--------------------------------------------------------------------------------------------
+		file="${cwd}/${DVDNAME}_Ep_${epid}"		# Current File being processed
+		sourcefile="${file}.VOB"			# Construct a name for the temporary VOB file
+	else
+		#--------------------------------------------------------------------------------------------
+		# File mode 
+		#--------------------------------------------------------------------------------------------
+		unset dvdtitle
+        	infile="${cwd}/${1}"				# Current File being processed
+		#--------------------------------------------------------------------------------------------
+		echo "Processing ${1} "
+		#--------------------------------------------------------------------------------------------
+        	ext=$(echo "${1}" | sed -e 's/^.*\.//')          # File Extension
+        	file="${cwd}"/$(basename "${1}" .${ext})         # Current File being processed
+		sourcefile="${1}"				# Construct a name for the source file
+	fi
+	logfile="${file}_divx2pass.log"			# Construct a name for the log file
+	outfile="${file}_2Xvid.avi"			# Construct a name for the target A/V file
+	script="${file}.sh"				# Construct a name for the script that will 
+	divxlog="${cwd}/divx2pass.log"			# Construct a name for the 1st pass log file
+	#--------------------------------------------------------------------------------------------
+	calcbitrates ${sourcefile}			# Calculate abr & vbr to fit target size
+	#--------------------------------------------------------------------------------------------
+	# Default Video and Audio args to mencoder - english audio with frame rate of 23.976
+	#--------------------------------------------------------------------------------------------
+	stdvidopts="-alang en -ofps 24000/1001 -ovc xvid "
+	#--------------------------------------------------------------------------------------------
+	# Note this excerpt from mplayer docs re: frame rate
+	#  - "30000/1001 fps" insead of "30fps"
+	#  - "24000/1001 fps" instead of "24fps"
+	#
+	#  - "60000/1001" instead of 59.94
+	#  - "30000/1001" instead of 29.97
+	#  - "24000/1001" instead of 23.976
+	#
+	#--------------------------------------------------------------------------------------------
+	# use lame to encode mp3 audio
+	#--------------------------------------------------------------------------------------------
+	stdaudopts="-oac mp3lame "			
+	#--------------------------------------------------------------------------------------------
+	# widescren tv shows seem acceptable at 624x352 but not all episodes
+	# you might like to rip are wide screen - so we stick to the acceptable height
+	# and let the width sort itself out - testing
+	# the following test ended up with much smaller files that I wanted - need to do some reading
+	#vidopts="${stdvidopts} -vf crop="'${cropval}'",scale=-2:352:noup=1 "
+	#--------------------------------------------------------------------------------------------
+	vidopts="${stdvidopts} -vf crop="'${cropval}'",scale=624:-2:noup=1 "
+	#--------------------------------------------------------------------------------------------
+	# Tweak the following line  as you like 
+	#--------------------------------------------------------------------------------------------
+	encopt="hq_ac:chroma_opt:chroma_me:trellis:vhq=2:bvhq=1"
+	#--------------------------------------------------------------------------------------------
+	# note the negative sign before the bitrate this tells mencoder that we are trying to
+	# limit the new file by this size
+	#--------------------------------------------------------------------------------------------
+	encopts='bitrate=-${vbr}:'${encopt}
+	#--------------------------------------------------------------------------------------------
+	# encopts1 is for the first pass and encopts2 is for the second 
+	# doesnt seem to hurt having turbo on both
+	#--------------------------------------------------------------------------------------------
+	encopts1="-xvidencopts pass=1:turbo"
+	encopts2="-xvidencopts pass=2:turbo:"${encopts}
+	#--------------------------------------------------------------------------------------------
+	# audopts1 is for the first pass and audopts2 is for the second 
+	#--------------------------------------------------------------------------------------------
+	audopts1="${stdaudopts} "
+	audopts2="${stdaudopts} -lameopts abr:br="'${abr}'
+	#--------------------------------------------------------------------------------------------
+	#options for the cropdetect run
+	#--------------------------------------------------------------------------------------------
+	cropdopts="${stdvidopts} -xvidencopts bitrate=-${vbr}:${encopt}"
+
+	if [ -z "${filemode}" ]
+	then
+		cropdetect "dvd://${dvdtitle} -dvd-device ${dvddev}"
+	else
+		cropdetect "${infile}"
+	fi
+}
+
+convert(){
+	#--------------------------------------------------------------------------------------------
+	# Calculate and Set up all the arguments and variables needed
+	#--------------------------------------------------------------------------------------------
+	prepare "${1}" 
+	#--------------------------------------------------------------------------------------------
+	createscript  "${script}"
+	scriptheader  "${script}"
+	if [ -z "${filemode}" ]
+	then
+		appendscript   "#" 							"${script}"
+		appendscript   "# Rip the track from the dvd"				"${script}"
+		appendscript   "#" 							"${script}"
+		appendscript   'if [ ! -f "${sourcefile}" ]' 				"${script}"
+		appendscript   "then" 							"${script}"
+#		appendscript   '	nice -n 20 mencoder ${sourceargs} \ '		"${script}"
+#		appendscript   '		-alang en -oac copy -ovc copy \'	"${script}"
+#		appendscript   '		-of mpeg -o ${sourcefile} '		"${script}"
+		appendscript   '	nice -n 20 mplayer ${sourceargs} \'		"${script}"
+		appendscript   '	-alang en -dumpstream \'			"${script}"
+		appendscript   '	-dumpfile  ${sourcefile}'			"${script}"
+		appendscript   "fi" 							"${script}"
+		appendscript   "#" 							"${script}"
+		appendscript   "# Process the ripped track"				"${script}"
+	else
+		appendscript   "# Process the source file"				"${script}"
+	fi
+	appendscript   "#" 							"${script}"
+	appendscript   'if [ -f "${sourcefile}" ]' 				"${script}"
+	appendscript   "then" 							"${script}"
+	appendscript   "	#"							"${script}"
+	appendscript   "	#If the first pass has not already been done - do it"	"${script}"
+	appendscript   "	#"							"${script}"
+	appendscript   '	if [ ! -f "${logfile}" ]' 				"${script}"
+	appendscript   "	then" 							"${script}"
+	appendscript   "	 	#"						"${script}"
+	appendscript   "	 	# Pass 1"					"${script}"
+	appendscript   "	 	#"						"${script}"
+	appendscript   '		nice -n 20 mencoder ${sourcefile} \' 		"${script}"
+	appendscript   "			${vidopts}  	  \\"  			"${script}"
+	appendscript   "			${encopts1}  	  \\" 	 		"${script}"
+	appendscript   "			-oac copy         \\"  			"${script}"
+	appendscript   "			-o ${nullfile} \n" 			"${script}"
+	appendscript   '		if [ "$?" -ne 0 ]'				"${script}"	
+	appendscript   "		then"						"${script}"
+	appendscript   "			die 'Pass 1 failed'"			"${script}"
+	appendscript   "		else"						"${script}"
+	appendscript   "			echo 'Pass 1 Complete'"			"${script}"
+	appendscript   "			#Save divx2pass.log for future runs"	"${script}"
+	appendscript   '			mv "${divxlog}" "${logfile}"' 		"${script}"
+	appendscript   "		fi"						"${script}"
+	appendscript   "	fi\n" 							"${script}"
+	appendscript   '	if [ -f "${logfile}" ]' 				"${script}"
+	appendscript   "	then" 							"${script}"
+	appendscript   "		#"						"${script}"
+	appendscript   "		# Pass 2"					"${script}"
+	appendscript   "		#"						"${script}"
+	appendscript   "		#Make sure we have the right divx2pass.log"	"${script}"
+	appendscript   '		cp "${logfile}" "${divxlog}" \n' 		"${script}"
+	appendscript   '		nice -n 20 mencoder  ${sourcefile}   \'		"${script}"
+	appendscript   "			${vidopts} 		  \\" 		"${script}"
+	appendscript   "			${encopts2} 		  \\" 		"${script}"
+	appendscript   "			${audopts2} 		  \\"  		"${script}"
+	appendscript   '			-o ${outfile}  \n'  			"${script}"
+	appendscript   '		if [ "$?" -ne 0 ]'				"${script}"	
+	appendscript   "		then"						"${script}"
+	appendscript   "			die 'Pass 2 failed'"			"${script}"
+	appendscript   "		else"						"${script}"
+	if [ -z "${filemode}" ]
+	then
+		appendscript   '			rm "${sourcefile}"' 		"${script}"
+	fi
+	appendscript   "			echo 'Pass 2 Complete'"			"${script}"
+	appendscript   "		fi"						"${script}"
+	appendscript   "	else" 							"${script}"
+	appendscript   '		die "File Not found : ${logfile} \'		"${script}"
+	appendscript   '		     Unable to process second pass!"'		"${script}"
+	appendscript   "	fi" 							"${script}"
+	appendscript   "else" 								"${script}"
+	appendscript   '	die  "Error - Couldnt find ${sourcefile}"'		"${script}"
+	appendscript   "fi" 								"${script}"
+	scriptfooter  "${script}"	
+}
+#---------------------------------------------------------------------------
+# Process a DVD
+#---------------------------------------------------------------------------
+dvdmode(){
+	#---------------------------------------------------------------------------
+	# Get information about the DVD
+	#---------------------------------------------------------------------------
+	INFOFILE="/tmp/2Xvid_lsdvd.out"
+	lsdvd ${dvddev}  > ${INFOFILE}
+	DVDNAME=`cat ${INFOFILE} | grep -i "disc title" | awk -F": " '{print $2}'`
+	#---------------------------------------------------------------------------
+	# Check if we are supposed to just spew out the dvd contents
+	#---------------------------------------------------------------------------
+	if [ ! -z "${dvdlist}" ]
+	then
+		cat  ${INFOFILE}
+		Done ${dvdlist}
+	fi
+	#---------------------------------------------------------------------------
+	# If one or more title number were passed on the command line
+	# Process each in turn
+	#---------------------------------------------------------------------------
+	if [ ! -z "${dvdtitle}" ]
+	then
+		echo 'Processing title(s) : '${dvdtitle}
+		titlelist=`echo ${dvdtitle} | sed -e "s/\,/\ /g"`   #convert commas to spaces - ie: make a list
+		for m in ${titlelist} 
+		do
+			convert "${m}"
+		done
+	else
+	#---------------------------------------------------------------------------
+	# OR process all titles on the dvd
+	#---------------------------------------------------------------------------
+		for m in `cat ${INFOFILE} | grep -i "Title" | grep -iv disc | \
+				awk -F\, '{print $1}' | awk -F": " '{print $2}'`
+		do
+			convert "${m}"
+		done
+	fi
+}
+#---------------------------------------------------------------------------
+# Process a File or Files
+#---------------------------------------------------------------------------
+filemode(){
+	if [ ! -z "${infile}" ]
+	then
+		# Create a conversion script for the file provided on the command line A/V file
+		convert "${infile}"
+	else
+		# Create a conversion script for each suitible candidate A/V file
+		# You may edit the 'for' line to include files you'd like to convert
+		# Could be improved to handle mixed-case extensions
+		for m in wmv vob mov rm mpeg mpg mp4    # The files I was interested in when I wrote this, YMMV
+		do
+			for i in *.${m}
+			do
+				if [ -f "${i}" ]
+				then
+					convert "${i}"
+				fi
+			done
+		done
+	fi
+}
+#---------------------------------------------------------------------------
+# Do The Work - From here on down 
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# Make sure we have all the sofware we need
+#---------------------------------------------------------------------------
+sanitycheck
+#---------------------------------------------------------------------------
+# Parse the command line
+#---------------------------------------------------------------------------
+parse_cmdline $*
+#---------------------------------------------------------------------------
+# Do some basic setup
+#---------------------------------------------------------------------------
+# Use the default Maximum Audio Bit Rate if none passed on commandline
+#---------------------------------------------------------------------------
+if [ -z $mabr ];
+then
+	mabr=$DEF_MABR
+fi
+#---------------------------------------------------------------------------
+# Decide if we are processing files or a DVD
+#---------------------------------------------------------------------------
+if [ -z "${filemode}" ] && [ -z "${infile}" ]
+then
+	# Process the DVD
+	dvdmode
+else
+	# Process File(s)
+	filemode=filemode
+	filemode
+fi
+#---------------------------------------------------------------------------
+# If the autoexec flag was not passed in on the command line
+# we are all done at this point
+#---------------------------------------------------------------------------
+if [ -z $autoexec ]
+then
+	Done "Not Auto Exec-ing"
+fi
+#---------------------------------------------------------------------------
+# If the autoexec flag was passed in on the command line
+# Automatically begin processing each generated script
+#---------------------------------------------------------------------------
+echo "Auto Exec-ing ..."
+#---------------------------------------------------------------------------
+# Process each executable script
+# Could (should) be improved to ensure only the scripts we want are run
+#---------------------------------------------------------------------------
+for f in *.sh
+do
+	"${cwd}/${f}"
+done
+#---------------------------------------------------------------------------
+echo "${versionstring} done."

@@ -1,0 +1,54 @@
+#! /bin/sh
+#
+# nopaste.sh, 
+# 
+# Andrea Fiore, and(at)inventati.org
+
+# Creative Commons, by Attribution, Share Alike
+# http://creativecommons.org/licenses/by-sa/2.0/
+#
+# shell interface to http://rafb.net/paste/
+# this suppose you have python and curl installed 
+#
+
+function help () {
+   echo "Usage: nopaste.sh [-n nickname] [-d description] file "
+}
+
+nick="${USER}@${HOSTNAME}"
+desc=""
+
+while getopts "n:d:" opt;
+do
+ case $opt in 
+ n ) nick=$OPTARG;;
+ d ) desc=$OPTARG;;
+ : ) echo "Missing argument for option \"$OPTARG\".";;
+\? ) help ;; 
+  esac
+done
+
+shift $(($OPTIND-1))
+if [ -z "$1" ]; then echo "Missing filename argument!"
+   else 
+       txt=`urlencode $1`
+       pastedtxt=`curl -d "lang=Plain%20Text&nick=$nick&desc=$desc&text=$txt&tabs=no" -L http://rafb.net/paste/paste.php 2> /dev/null|egrep -o  -e '\/results\/.*\.html'`
+       echo "http://rafb.net/paste$pastedtxt"
+       
+       fi
+
+//end nopaste.sh
+
+//simple python urlencode..
+
+#! /usr/bin/env python
+# -*- coding: iso-8859-15 -*-
+import sys, urllib
+try:
+    f=open(sys.argv[1],'r')
+    txt=urllib.urlencode({'t':f.read()})
+    f.close()
+    print txt[2:]
+except:
+    print "no such file..."
+

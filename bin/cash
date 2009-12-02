@@ -1,0 +1,427 @@
+#!/bin/bash
+
+# Raven's Currency Converter
+# Convert between over 150 currencies over the Internet using Yahoo! Finance
+#
+# Copyright (c) 2004 Raven Morris
+#
+# License
+# -------
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You can view the complete GNU General Public License at the following URL:
+# http://www.gnu.org/copyleft/gpl.html
+#
+# Or mirrored on my own web server:
+# http://atu.cjb.net/software/Raven/Scripts/GPL.txt
+#
+# Usage Examples
+# --------------
+#
+# Convert $6.50 Canadian dollars into Philippines pesos:
+# Currency_Converter 6.50 cad php
+#
+# Convert $150 United States dollars into Australian dollars:
+# Currency_Converter 150 usd aud
+#
+# Installation
+# ------------
+#
+# Make the script executable:
+#
+#    chmod a+x Currency_Converter
+#
+# Optionally move the script to one of the directories in your path:
+#
+#    echo $PATH|tr : \\n
+#    mv Currency_Converter /some/directory
+#
+# Optionally set up your IRC client to run this script from an alias:
+#
+#    Install in irssi with the script it in your path:
+#       /alias conv exec -o - Currency_Converter
+#       /save
+#
+#    Install in irssi with the script it in your home directory:
+#       /alias conv exec -o - ~/Currency_Converter
+#       /save
+#
+#    Install in X-Chat with the script it in your path:
+#       Settings menu > Advanced > User commands...
+#       Click on the "Add New" button
+#       In the Name column type in: CONV
+#       In the Command column type in: exec -o Currency_Converter &2
+#       Click on the "Save" button
+#
+#    Install in X-Chat with the script it in your home directory:
+#       Settings menu > Advanced > User commands...
+#       Click on the "Add New" button
+#       In the Name column type in: CONV
+#       In the Command column type in: exec -o ~/Currency_Converter &2
+#       Click on the "Save" button
+#
+#    Install in another IRC client:
+#       Please check the documentation for your IRC client about how to add
+#       aliases and perform command execution.  Use the above examples for
+#       reference.
+#
+# Changelog
+# ---------
+#
+# Created On: December 28th, 2004
+# Updated On: December 31st, 2004
+#
+# Version 1.0:
+#  * Initial release
+#
+# Version 1.1:
+#  * Yahoo! Finance is apparently completely insane -- the numbers in the CSV
+#    data do not match the numbers found on their main HTML page, so I changed
+#    the script to parse the much larger page with the more accurate numbers
+#  * Added the conversion ratio in parenthesis at the end of the line
+#
+# Version 1.2:
+#  * Fixed a bug when the conversion rate was very high and the Yahoo! Finance
+#    web site displayed the numbers separated with commas, such as: 1,608,205.
+#  * Made the error messages more consistant with the main output
+#  * Changed various other output text
+#  * Added a shrunken URL from http://go.auk.ca/ for the script source code
+#  * Removed trailing zeroes from the conversion rate number
+#  * Limited the rate number to at most four digits after the decimal place
+#  * Added a Get_Conversion_Rate() function and a few other minor updates
+#
+# Version 1.3:
+#  * Made the currency name checking loop a bit more efficient
+#  * Added a single function for all error output
+#  * Added error checking for when the download of currency data fails
+#  * Added new functions and changed previous code to simplify the web access
+#  * Lots of change to the text at the top of this file
+#  * Posted GNU GPL information at the top of the script
+#  * Made some screenshots and posted to FreshMeat
+
+
+# -----------
+#  Variables 
+# -----------
+
+
+Version="1.3"
+Title="Currency Converter $Version [auk.ca/1z]"
+
+
+# -----------
+#  Functions 
+# -----------
+
+
+function Load_Currency_Names {
+
+   # I added "s" to all these to make them plural, but
+   # I am not sure if the names are all correct or not
+   # Please let me know if I got any of them wrong
+
+   Cur_Code[1001]="AFA"; Cur_Name[1001]="Afghanistan Afghanis"
+   Cur_Code[1002]="ALL"; Cur_Name[1002]="Albanian Leks"
+   Cur_Code[1003]="DZD"; Cur_Name[1003]="Algerian Dinars"
+   Cur_Code[1004]="ARS"; Cur_Name[1004]="Argentine Pesos"
+   Cur_Code[1005]="AWG"; Cur_Name[1005]="Aruba Florins"
+   Cur_Code[1006]="AUD"; Cur_Name[1006]="Australian Dollars"
+   Cur_Code[1007]="BSD"; Cur_Name[1007]="Bahamian Dollars"
+   Cur_Code[1008]="BHD"; Cur_Name[1008]="Bahraini Dinars"
+   Cur_Code[1009]="BDT"; Cur_Name[1009]="Bangladesh Takas"
+   Cur_Code[1010]="BBD"; Cur_Name[1010]="Barbados Dollars"
+   Cur_Code[1011]="BYR"; Cur_Name[1011]="Belarus Rubles"
+   Cur_Code[1012]="BZD"; Cur_Name[1012]="Belize Dollars"
+   Cur_Code[1013]="BMD"; Cur_Name[1013]="Bermuda Dollars"
+   Cur_Code[1014]="BTN"; Cur_Name[1014]="Bhutan Ngultrums"
+   Cur_Code[1015]="BOB"; Cur_Name[1015]="Bolivian Bolivianos"
+   Cur_Code[1016]="BWP"; Cur_Name[1016]="Botswana Pulas"
+   Cur_Code[1017]="BRL"; Cur_Name[1017]="Brazilian Reals"
+   Cur_Code[1018]="GBP"; Cur_Name[1018]="British Pounds"
+   Cur_Code[1019]="BND"; Cur_Name[1019]="Brunei Dollars"
+   Cur_Code[1020]="BGN"; Cur_Name[1020]="Bulgarian Levs"
+   Cur_Code[1021]="BIF"; Cur_Name[1021]="Burundi Francs"
+   Cur_Code[1022]="KHR"; Cur_Name[1022]="Cambodia Riels"
+   Cur_Code[1023]="CAD"; Cur_Name[1023]="Canadian Dollars"
+   Cur_Code[1024]="CVE"; Cur_Name[1024]="Cape Verde Escudos"
+   Cur_Code[1025]="KYD"; Cur_Name[1025]="Cayman Islands Dollars"
+   Cur_Code[1026]="XOF"; Cur_Name[1026]="CFA Francs (BCEAO)"
+   Cur_Code[1027]="XAF"; Cur_Name[1027]="CFA Francs (BEAC)"
+   Cur_Code[1028]="CLP"; Cur_Name[1028]="Chilean Pesos"
+   Cur_Code[1029]="CNY"; Cur_Name[1029]="Chinese Yuans"
+   Cur_Code[1030]="COP"; Cur_Name[1030]="Colombian Pesos"
+   Cur_Code[1031]="KMF"; Cur_Name[1031]="Comoros Francs"
+   Cur_Code[1032]="CRC"; Cur_Name[1032]="Costa Rica Colons"
+   Cur_Code[1033]="HRK"; Cur_Name[1033]="Croatian Kunas"
+   Cur_Code[1034]="CUP"; Cur_Name[1034]="Cuban Pesos"
+   Cur_Code[1035]="CYP"; Cur_Name[1035]="Cyprus Pounds"
+   Cur_Code[1036]="CZK"; Cur_Name[1036]="Czech Korunas"
+   Cur_Code[1037]="DKK"; Cur_Name[1037]="Danish Krones"
+   Cur_Code[1038]="DJF"; Cur_Name[1038]="Dijibouti Francs"
+   Cur_Code[1039]="DOP"; Cur_Name[1039]="Dominican Pesos"
+   Cur_Code[1040]="XCD"; Cur_Name[1040]="East Caribbean Dollars"
+   Cur_Code[1041]="ECS"; Cur_Name[1041]="Ecuador Sucres"
+   Cur_Code[1042]="EGP"; Cur_Name[1042]="Egyptian Pounds"
+   Cur_Code[1043]="SVC"; Cur_Name[1043]="El Salvador Colons"
+   Cur_Code[1044]="ERN"; Cur_Name[1044]="Eritrea Nakfas"
+   Cur_Code[1045]="EEK"; Cur_Name[1045]="Estonian Kroons"
+   Cur_Code[1046]="ETB"; Cur_Name[1046]="Ethiopian Birrs"
+   Cur_Code[1047]="EUR"; Cur_Name[1047]="Euros"
+   Cur_Code[1048]="FKP"; Cur_Name[1048]="Falkland Islands Pounds"
+   Cur_Code[1049]="FJD"; Cur_Name[1049]="Fiji Dollars"
+   Cur_Code[1050]="GMD"; Cur_Name[1050]="Gambian Dalasis"
+   Cur_Code[1051]="GHC"; Cur_Name[1051]="Ghanian Cedis"
+   Cur_Code[1052]="GIP"; Cur_Name[1052]="Gibraltar Pounds"
+   Cur_Code[1053]="XAU"; Cur_Name[1053]="Gold Ouncess"
+   Cur_Code[1054]="GTQ"; Cur_Name[1054]="Guatemala Quetzals"
+   Cur_Code[1055]="GNF"; Cur_Name[1055]="Guinea Francs"
+   Cur_Code[1056]="GYD"; Cur_Name[1056]="Guyana Dollars"
+   Cur_Code[1057]="HTG"; Cur_Name[1057]="Haiti Gourdes"
+   Cur_Code[1058]="HNL"; Cur_Name[1058]="Honduras Lempiras"
+   Cur_Code[1059]="HKD"; Cur_Name[1059]="Hong Kong Dollars"
+   Cur_Code[1060]="HUF"; Cur_Name[1060]="Hungarian Forints"
+   Cur_Code[1061]="ISK"; Cur_Name[1061]="Iceland Kronas"
+   Cur_Code[1062]="INR"; Cur_Name[1062]="Indian Rupees"
+   Cur_Code[1063]="IDR"; Cur_Name[1063]="Indonesian Rupiahs"
+   Cur_Code[1064]="IRR"; Cur_Name[1064]="Iran Rials"
+   Cur_Code[1065]="IQD"; Cur_Name[1065]="Iraqi Dinars"
+   Cur_Code[1066]="ILS"; Cur_Name[1066]="Israeli Shekels"
+   Cur_Code[1067]="JMD"; Cur_Name[1067]="Jamaican Dollars"
+   Cur_Code[1068]="JPY"; Cur_Name[1068]="Japanese Yen"
+   Cur_Code[1069]="JOD"; Cur_Name[1069]="Jordanian Dinars"
+   Cur_Code[1070]="KZT"; Cur_Name[1070]="Kazakhstan Tenges"
+   Cur_Code[1071]="KES"; Cur_Name[1071]="Kenyan Shillings"
+   Cur_Code[1072]="KRW"; Cur_Name[1072]="Korean Wons"
+   Cur_Code[1073]="KWD"; Cur_Name[1073]="Kuwaiti Dinars"
+   Cur_Code[1074]="LAK"; Cur_Name[1074]="Lao Kips"
+   Cur_Code[1075]="LVL"; Cur_Name[1075]="Latvian Lats"
+   Cur_Code[1076]="LBP"; Cur_Name[1076]="Lebanese Pounds"
+   Cur_Code[1077]="LSL"; Cur_Name[1077]="Lesotho Lotis"
+   Cur_Code[1078]="LRD"; Cur_Name[1078]="Liberian Dollars"
+   Cur_Code[1079]="LYD"; Cur_Name[1079]="Libyan Dinars"
+   Cur_Code[1080]="LTL"; Cur_Name[1080]="Lithuanian Litas"
+   Cur_Code[1081]="MOP"; Cur_Name[1081]="Macau Patacas"
+   Cur_Code[1082]="MKD"; Cur_Name[1082]="Macedonian Denars"
+   Cur_Code[1083]="MGF"; Cur_Name[1083]="Malagasy Francs"
+   Cur_Code[1084]="MWK"; Cur_Name[1084]="Malawi Kwachas"
+   Cur_Code[1085]="MYR"; Cur_Name[1085]="Malaysian Ringgits"
+   Cur_Code[1086]="MVR"; Cur_Name[1086]="Maldives Rufiyaas"
+   Cur_Code[1087]="MTL"; Cur_Name[1087]="Maltese Liras"
+   Cur_Code[1088]="MRO"; Cur_Name[1088]="Mauritania Ougulyas"
+   Cur_Code[1089]="MUR"; Cur_Name[1089]="Mauritius Rupees"
+   Cur_Code[1090]="MXN"; Cur_Name[1090]="Mexican Pesos"
+   Cur_Code[1091]="MDL"; Cur_Name[1091]="Moldovan Leus"
+   Cur_Code[1092]="MNT"; Cur_Name[1092]="Mongolian Tugriks"
+   Cur_Code[1093]="MAD"; Cur_Name[1093]="Moroccan Dirhams"
+   Cur_Code[1094]="MZM"; Cur_Name[1094]="Mozambique Meticals"
+   Cur_Code[1095]="MMK"; Cur_Name[1095]="Myanmar Kyats"
+   Cur_Code[1096]="NAD"; Cur_Name[1096]="Namibian Dollars"
+   Cur_Code[1097]="NPR"; Cur_Name[1097]="Nepalese Rupees"
+   Cur_Code[1098]="ANG"; Cur_Name[1098]="Neth Antilles Guilders"
+   Cur_Code[1099]="NZD"; Cur_Name[1099]="New Zealand Dollars"
+   Cur_Code[1100]="NIO"; Cur_Name[1100]="Nicaragua Cordobas"
+   Cur_Code[1101]="NGN"; Cur_Name[1101]="Nigerian Nairas"
+   Cur_Code[1102]="KPW"; Cur_Name[1102]="North Korean Wons"
+   Cur_Code[1103]="NOK"; Cur_Name[1103]="Norwegian Krones"
+   Cur_Code[1104]="OMR"; Cur_Name[1104]="Omani Rials"
+   Cur_Code[1105]="XPF"; Cur_Name[1105]="Pacific Francs"
+   Cur_Code[1106]="PKR"; Cur_Name[1106]="Pakistani Rupees"
+   Cur_Code[1107]="XPD"; Cur_Name[1107]="Palladium Ounces"
+   Cur_Code[1108]="PAB"; Cur_Name[1108]="Panama Balboas"
+   Cur_Code[1109]="PGK"; Cur_Name[1109]="Papua New Guinea Kinas"
+   Cur_Code[1110]="PYG"; Cur_Name[1110]="Paraguayan Guaranis"
+   Cur_Code[1111]="PEN"; Cur_Name[1111]="Peruvian Nuevo Sols"
+   Cur_Code[1112]="PHP"; Cur_Name[1112]="Philippine Pesos"
+   Cur_Code[1113]="XPT"; Cur_Name[1113]="Platinum Ounces"
+   Cur_Code[1114]="PLN"; Cur_Name[1114]="Polish Zlotys"
+   Cur_Code[1115]="QAR"; Cur_Name[1115]="Qatar Rials"
+   Cur_Code[1116]="ROL"; Cur_Name[1116]="Romanian Leus"
+   Cur_Code[1117]="RUB"; Cur_Name[1117]="Russian Roubles"
+   Cur_Code[1118]="RWF"; Cur_Name[1118]="Rwanda Francs"
+   Cur_Code[1119]="WST"; Cur_Name[1119]="Samoa Talas"
+   Cur_Code[1120]="STD"; Cur_Name[1120]="Sao Tome Dobras"
+   Cur_Code[1121]="SAR"; Cur_Name[1121]="Saudi Arabian Riyals"
+   Cur_Code[1122]="SCR"; Cur_Name[1122]="Seychelles Rupees"
+   Cur_Code[1123]="SLL"; Cur_Name[1123]="Sierra Leone Leones"
+   Cur_Code[1124]="XAG"; Cur_Name[1124]="Silver Ouncess"
+   Cur_Code[1125]="SGD"; Cur_Name[1125]="Singapore Dollars"
+   Cur_Code[1126]="SKK"; Cur_Name[1126]="Slovak Korunas"
+   Cur_Code[1127]="SIT"; Cur_Name[1127]="Slovenian Tolars"
+   Cur_Code[1128]="SBD"; Cur_Name[1128]="Solomon Islands Dollars"
+   Cur_Code[1129]="SOS"; Cur_Name[1129]="Somali Shillings"
+   Cur_Code[1130]="ZAR"; Cur_Name[1130]="South African Rands"
+   Cur_Code[1131]="LKR"; Cur_Name[1131]="Sri Lanka Rupees"
+   Cur_Code[1132]="SHP"; Cur_Name[1132]="Saint Helena Pounds"
+   Cur_Code[1133]="SDD"; Cur_Name[1133]="Sudanese Dinars"
+   Cur_Code[1134]="SRG"; Cur_Name[1134]="Surinam Guilders"
+   Cur_Code[1135]="SZL"; Cur_Name[1135]="Swaziland Lilagenis"
+   Cur_Code[1136]="SEK"; Cur_Name[1136]="Swedish Kronas"
+   Cur_Code[1137]="CHF"; Cur_Name[1137]="Swiss Francs"
+   Cur_Code[1138]="SYP"; Cur_Name[1138]="Syrian Pounds"
+   Cur_Code[1139]="TWD"; Cur_Name[1139]="Taiwan Dollars"
+   Cur_Code[1140]="TZS"; Cur_Name[1140]="Tanzanian Shillings"
+   Cur_Code[1141]="THB"; Cur_Name[1141]="Thai Bahts"
+   Cur_Code[1142]="TOP"; Cur_Name[1142]="Tonga Pa'angas"
+   Cur_Code[1143]="TTD"; Cur_Name[1143]="Trinidad & Tobago Dollars"
+   Cur_Code[1144]="TND"; Cur_Name[1144]="Tunisian Dinars"
+   Cur_Code[1145]="TRL"; Cur_Name[1145]="Turkish Liras"
+   Cur_Code[1146]="USD"; Cur_Name[1146]="United States Dollars"
+   Cur_Code[1147]="AED"; Cur_Name[1147]="United Arab Emirates Dirhams"
+   Cur_Code[1148]="UGX"; Cur_Name[1148]="Ugandan Shillings"
+   Cur_Code[1149]="UAH"; Cur_Name[1149]="Ukraine Hryvnias"
+   Cur_Code[1150]="UYU"; Cur_Name[1150]="Uruguayan New Pesos"
+   Cur_Code[1151]="VUV"; Cur_Name[1151]="Vanuatu Vatu"
+   Cur_Code[1152]="VEB"; Cur_Name[1152]="Venezuelan Bolivars"
+   Cur_Code[1153]="VND"; Cur_Name[1153]="Vietnam Dong"
+   Cur_Code[1154]="YER"; Cur_Name[1154]="Yemen Riyals"
+   Cur_Code[1155]="YUM"; Cur_Name[1155]="Yugoslav Dinars"
+   Cur_Code[1156]="ZMK"; Cur_Name[1156]="Zambian Kwachas"
+   Cur_Code[1157]="ZWD"; Cur_Name[1157]="Zimbabwe Dollars"
+
+   Total_Currencies="157"
+
+} # End Load_Currency_Names
+
+
+function Problem {
+
+   echo "$Title PROBLEM $2"
+   exit "$1"
+
+} # End Problem
+
+
+function Check_Parameters {
+
+   if [ "$#" != "3" ]; then
+
+      Problem "1" "You must specify 3 parameters: <amount> <from currency> <to currency>"
+
+   fi
+
+   # Prepare the three command line parameters by removing unwanted
+   # characters and converting the currency codes to all uppercase
+   Amount="$(printf "%s" "$1"|sed -e 's=[^0-9.]==g')"
+     From="$(printf "%s" "$2"|sed -e 's=[^a-zA-Z]==g'|tr 'a-z' 'A-Z')"
+       To="$(printf "%s" "$3"|sed -e 's=[^a-zA-Z]==g'|tr 'a-z' 'A-Z')"
+
+   if [ -z "$Amount" ]; then
+
+      Problem "2" "Your amount value \"$1\" is not valid"
+
+   fi
+
+   if [ -z "$From" ]; then
+
+      Problem "3" "Your currency code \"$2\" is not valid"
+
+   fi
+
+   if [ -z "$To" ]; then
+
+      Problem "4" "Your currency code \"$3\" is not valid"
+
+   fi
+
+} # End Check_Parameters
+
+
+function Check_Currency {
+
+   Search_Code="$1"
+   Search_Match=""
+   Counter="1000"
+   Stop_Counter="$((1000+${Total_Currencies}))"
+
+   # Search all array elements to see if this is a valid currency code
+   while [ "$Counter" -lt "$Stop_Counter" ]; do
+
+      Counter="$((${Counter}+1))"
+
+      if [ "${Cur_Code[$Counter]}" == "$Search_Code" ]; then
+
+         # Record the full English name of the currency
+         Search_Match="${Cur_Name[$Counter]}"
+         break
+
+      fi
+
+   done
+
+   if [ -z "$Search_Match" ]; then
+
+      # No search match was found
+      Problem "5" "Your currency code \"$Search_Code\" is unknown"
+
+   fi
+
+} # End Check_Currency
+
+
+function Parse_Web_Site {
+
+   # Output the web page
+   printf "%s" "$1"| \
+
+   # Find the line with the conversion
+   grep ">${From}${To}=X<"| \
+
+   # Find the conversion ratio,
+   sed -e "s+.*<a href=\"/q?s=${From}${To}=X\">${From}${To}=X</a></td><td[^>]*><b>[^<]*</b></td><td[^>]*>[^<]*</td><td[^>]*>\([^<]*\)</td>.*+\1+; s=[^0-9.]==g"
+
+} # End Parse_Web_Site
+
+
+function Get_Conversion_Rate {
+
+   # Download the Yahoo! Finance web site
+   URL="http://finance.yahoo.com/currency/convert?amt=${Amount}&from=${From}&to=${To}&submit=Convert"
+   Yahoo_Web_Page="$(wget -qO - "$URL")"
+
+   # Check if wget returned no output, signifying an error
+   if [ -z "$Yahoo_Web_Page" ]; then
+
+      Problem "6" 'Unable to download the currency information from Yahoo! Finance'
+
+   fi
+
+   Conversion_Rate="$(Parse_Web_Site "$Yahoo_Web_Page")"
+
+   # Check if the resulting "conversion rate" has
+   # any non-numeric characters in it or is empty
+   if [ "$Conversion_Rate" != "$(echo "$Conversion_Rate"|sed -e 's=[^0-9.]==g')" ] || [ -z "$Conversion_Rate" ]; then
+
+      Problem "7" 'Yahoo! Finance has changed their web page, could not parse the currency rate'
+
+   fi
+
+   # Remove extra zeroes after the decimal place and limit the
+   # number to at most four digits after the decimal place
+   Display_Rate="$(printf "%s" "$Conversion_Rate"|sed -e '/\./s=0*$==; s=\.$==; s=\(.*\.....\).*=\1=')"
+
+} # End Get_Conversion_Rate
+
+
+# -----------
+#  Main Code 
+# -----------
+
+
+Load_Currency_Names
+Check_Parameters "$@"
+Check_Currency "$From"; From_Name="$Search_Match"
+Check_Currency "$To";     To_Name="$Search_Match"
+Get_Conversion_Rate
+
+# Display the output message
+awk "BEGIN {printf \"%s %.2f %s = %.2f %s (Rate: %s)\n\", \"$Title\", ($Amount), \"$From_Name\", ($Conversion_Rate*$Amount), \"$To_Name\", \"$Display_Rate\"}"
+

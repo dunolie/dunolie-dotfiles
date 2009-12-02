@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ -e ~/Library/iTunes/Scripts/iThief.scpt ]
+then
+    /usr/bin/osascript  ~/Library/iTunes/Scripts/iThief.scpt $*
+else
+    echo "I couldn't find \"~/Library/iTunes/Scripts/iThief.scpt\"."
+    echo "Either you place \"iThief.scpt\" there or modify this script at \"$(which $0)\" and put the correct path to \"iThief.scpt\"."
+fi

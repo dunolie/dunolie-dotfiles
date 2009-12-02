@@ -1,0 +1,62 @@
+TermInit:
+=========
+  TermInit is a simple utility to help you initalize your Terminal to the state
+  you want it for various projects.
+
+
+Credits:
+========
+  Inspired by/stolen from Solomon White's post "Scripting the Leopard Terminal":
+  http://onrails.org/articles/2007/11/28/scripting-the-leopard-terminal
+  Hacked together by Jeff Emminger jemminger (at) elctech dot com
+
+
+Requires:
+=========
+  Ruby Appscript: sudo gem install rb-appscript
+
+
+Usage:
+======
+  terminit.rb project_name
+  
+  where project_name is the name of a terminit project yaml file 
+  in the projects_dir as defined in terminit.yml (.yml extension not
+  necessary when calling the terminit project)
+
+  A terminit project is a yaml file describing how many Terminal 
+  tabs to open, and what to execute in each tab.
+  
+  I found it handy to install the terminit files in any old dir, then
+  symlink like so: 
+    sudo ln -s /path/to/my/terminit.rb /usr/local/bin/terminit && sudo chmod +x /usr/local/bin/terminit
+  Then you can just type "terminit foo_project" from anywhere.
+
+
+Options:
+========
+  A file named terminit.yml may be created in terminit.rb's directory.
+  This file currently only provides one option:
+
+    projects_dir: /path/to/terminit_projects/
+  
+  The projects_dir defaults to the same dir as terminit.rb, so if you
+  don't specify a different projects_dir then your project yaml files
+  must be in the same dir as terminit.rb
+
+
+Example:
+========
+  myproject.yml:
+  - tab1: cd /foo/bar
+  - tab2: 
+    - mysql -u root
+    - use foo_db
+    - select * from bar;
+  - tab3: echo "hello world"
+
+  This would be called by:
+    terminit.rb myproject
+
+  Use yaml arrays for each tab (as in the example) if tab order is important.
+  Tabs can contain a single command, or yaml arrays to execute multiple commands.

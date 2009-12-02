@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# By Robbie -- dunolie@gmail.com 
+# Created on: Tuesday,25 March, 2008
+# Description: Battery check @ http://snipplr.com/view/5049/get-infos-on-battery-on-osx/
+
+system_profiler SPPowerDataType | awk '/Full/ || /Remaining/ || /Cycle/ { printf }' | sed -e 's/[^:]*/Battery/' -e 's/ *R.*):./\//' -e 's/ *Cycle/ (mAh)     Cycle/'

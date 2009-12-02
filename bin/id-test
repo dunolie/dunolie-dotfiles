@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,07 August, 2008
+# Description: Records BBC Radio 4 for 30 mins (world at one programme.
+#########################################################################
+# Script Comments if needed : Using it for the World at one radio show 
+# Use Cron to schedule the recording to 1pm (mon-fri)
+# Growl notify uses a .jpg called Radio4.jpg in ~/Radio-Recordings/Radio4/
+# http://tbn0.google.com/images?q=tbn:4M-cRWWBvy2nJM:http://www.markbrake.com/images/CMS/UserFiles/Image/radio4_logo.jpg
+# thanks to http://www.markbrake.com for the icon ;)
+#########################################################################
+
+
+id3v2 --id3v2-only $1 
+id3v2 -t "The World at One_`date +%d-%m-%Y`" $1 
+id3v2 -a "Martha Kearney (Mon-Thurs) - Shaun Ley (Fri)" $1  
+id3v2 -A "BBC Radio 4 - The World at One"  $1
+id3v2 --comment "News Programme on BBC Radio4, 1pm Mon-Fri- Recorded with radio.py" $1 
+id3v2 -g 101 $1  
+id3v2 -y "`date +%Y`" $1  
+
+id3v2 --WOAF "http://www.bbc.co.uk/radio4/news/wato/" $1  
+id3v2 --APIC "~/Desktop/BBC-Radio4\ copy/Radio4.tif" $1  

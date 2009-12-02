@@ -1,0 +1,1 @@
+/Users/robbie/.irssi/scripts/anotherway.pl

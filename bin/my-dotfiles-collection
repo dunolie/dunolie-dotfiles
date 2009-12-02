@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com
+# Created on: Friday,12 December, 2008
+# Description: copies my dotfiles to a seperate dir for easy backups to ipods and flash drives
+# Snipped from website :
+# Snipped from IRC channel :
+# Snipped from :
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines if need and copy to base of script
+# This is used to call netgrowl.py for network notifications
+# More info here : http://blog.mckuhn.de/
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()
+#
+#########################################################################
+cp ~/.Xdefaults ~/.my-dotfiles-collection/
+cp ~/.aliases_bash ~/.my-dotfiles-collection/
+cp ~/.aliases_bash_osx ~/.my-dotfiles-collection/
+cp ~/.aliases_bash_robbie ~/.my-dotfiles-collection/
+cp -R ~/.bash_completion.d ~/.my-dotfiles-collection/
+cp ~/.bash_functions ~/.my-dotfiles-collection/
+cp ~/.bash_logout ~/.my-dotfiles-collection/
+cp ~/.bash_profile ~/.my-dotfiles-collection/
+cp ~/.bashrc ~/.my-dotfiles-collection/
+cp ~/.dir_colors ~/.my-dotfiles-collection/
+cp ~/.dirs ~/.my-dotfiles-collection/
+cp ~/.fff ~/.my-dotfiles-collection/
+cp ~/.inputrc ~/.my-dotfiles-collection/
+cp ~/.profile ~/.my-dotfiles-collection/
+cp -R ~/.screen ~/.my-dotfiles-collection/
+cp -R ~/.vim ~/.my-dotfiles-collection/
+cp -R ~/.moc/config ~/.my-dotfiles-collection/moc-config
+cp ~/.gvimrc ~/.my-dotfiles-collection/
+cp ~/.vimrc ~/.my-dotfiles-collection/
+cp ~/.viminfo ~/.my-dotfiles-collection/
+cp ~/.xinitrc ~/.my-dotfiles-collection/
+cp -R ~/.irssi ~/.my-dotfiles-collection/
+
+# also a few of the /etc files if needed
+cp /etc/login ~/.my-dotfiles-collection/etc
+cp /etc/motd ~/.my-dotfiles-collection/etc
+#cp /etc/bashrc ~/.my-dotfiles-collection/etc
+#cp /etc/profile ~/.my-dotfiles-collection/etc
+
+cd ~/.my-dotfiles-collection/
+# make html files with syntax for easy reading
+2html .Xdefaults
+2html .aliases_bash
+2html .aliases_bash_osx
+2html .aliases_bash_robbie
+2html .bash_functions
+2html .fff
+2html .bash_logout
+2html .bash_profile
+2html .bashrc
+2html .dir_colors
+2html .dirs
+2html .inputrc
+2html .profile
+2html moc-config
+2html .gvimrci
+2html vimrc
+2html .viminfo
+2html .xinitrc
+
+mv .Xdefaults.html html-files/Xdefaults.html
+mv .aliases_bash.html html-files/aliases_bash.html
+mv .aliases_bash_osx.html html-files/aliases_bash_osx.html
+mv .aliases_bash_robbie.html html-files/aliases_bash_robbie.html
+mv .bash_functions.html html-files/bash_functions.html
+mv .fff.html html-files/fff.html
+mv .bash_logout.html html-files/bash_logout.html
+mv .bash_profile.html html-files/bash_profile.html
+mv .bashrc.html html-files/bashrc.html
+mv .dir_colors.html html-files/dir_colors.html
+mv .dirs.html html-files/dirs.html
+mv .inputrc.html html-files/inputrc.html
+mv .profile.html html-files/profile.html
+mv moc-config.html html-files/
+mv .gvimrc.html html-files/gvimrc.html
+mv vimrc.html html-files/vimrc.html
+mv .viminfo.html html-files/viminfo.html
+mv .xinitrc.html html-files/xinitrc.html
+
+#set sanitized permissions on local machine and user for os x
+if [ "$sw_vers -productVersion" != "10.*" ]; then
+  chmod -R u=rwX,go=rX "~/.my-dotfiles-collection"
+  chown -R ${USER}:everyone "~/.my-dotfiles-collection"
+else
+chmod -R u=rwX,go=rX "~/.my-dotfiles-collection"
+chown -R ${USER}:users "~/.my-dotfiles-collection"
+fi
+#set sanitized permissions on local machine for html files
+chmod -R 644 ~/.my-dotfiles-collection/html-files/*.html
+
+
+rm ~/Sync/Bash/my-dotfiles/my-dotfiles-collection*
+tar czf ~/Sync/Bash/my-dotfiles/my-dotfiles-collection`date +%d_%m_%y`.tar.gz ~/.my-dotfiles-collection/
+
+growlnotify -s -I "~/Sync/Bash/bin/growl-icons/Me" -t "~/.my-dotfiles-collection" -m "copied your dotfiles to:
+
+~/Sync/Bash/my-dotfiles
+
+For auto syncing with keydrives, iPods, etc"
+
+
+

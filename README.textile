@@ -1,0 +1,34 @@
+h1. dunolie-dotfiles - Robbie "dunolie"
+
+My collection of dotfiles. It's a work in progress, my shell is bash and my main OS is OS X.
+I keep my bash files, scripts, docs, todo's and info in ~/Sync/Bash/ for easy syncing to my thumb drive and other locations. the dotfiles are in kept in  ~/
+
+h2. File locations on my system
+
+-- --
+When you start an interactive shell (log in, open terminal or iTerm in OS X,
+or create a new tab in iTerm) the following files are read and run, in this order:
+     /etc/profile
+     /etc/bashrc
+     .bash_profile
+     .bashrc (only because this file is run (sourced) in .bash_profile)
+
+When you start a shell that is not a login shell, is started
+(when you run "bash" from inside a shell, or when you start a shell in
+xwindows [xterm/gnome-terminal/etc] ) the following files are read and executed,
+in this order:
+     /etc/bashrc
+     .bashrc
+-- --
+I keep my bash files, scripts, docs, todo's and info in ~/Sync/Bash/ for easy syncing to my thumb drive and other locations. the dotfiles are in kept in  ~/ (/Users/$USER/).
+
+
+Do what you will with it, I've snipped lots of things from all over the web, some is credited some is not (I was lazier when I started)
+
+If you find something you have done, I send my thanks :).
+
+h4. To be continued....
+
+
+
+

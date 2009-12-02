@@ -1,0 +1,230 @@
+#!/bin/bash
+
+# Paths to commands executed by this script.
+my_dirname="/usr/bin/dirname"
+my_bash="/bin/bash"
+my_cat="/bin/cat"
+my_echo="/bin/echo"
+my_expr="/bin/expr"
+my_openssl="/usr/bin/openssl"
+my_rditto=`$my_dirname "$0"`/rditto
+my_ssh="/usr/bin/ssh"
+my_stty="/bin/stty"
+
+function echo_err {
+#	Echoes a string to stderr
+# 	Input: $1 = string
+
+	$my_echo "$1">&2
+}
+
+function show_usage {
+# 	Input: $1 = exit code used to terminate script
+
+	echo_err ""
+	echo_err "zipaes v1.1: Copyright [C] 2005 by Edward K. Chew, All rights reserved."
+	echo_err ""
+	echo_err "zipaes can create and expand zip archives encrypted using a 128-bit AES cipher."
+	echo_err "It basically adds an openssl encryption filter to rditto, so you should look at"
+	echo_err "the rditto documentation for detailed usage."
+	echo_err ""
+	echo_err "openssl needs a password to encrypt/decrypt data, and you can provide it one"
+	echo_err "through the -p option.  The argument of -p should take the form described under"
+	echo_err "\"PASS PHRASE ARGUMENTS\" on the openssl man page.  You can use most of the input"
+	echo_err "sources except for stdin, which is reserved for the incoming raw data.  If you"
+	echo_err "omit the -p option, openssl itself will prompt you for the password."
+	echo_err ""
+	echo_err "The normal syntax for password environment variables is \"-p env:VAR_NAME\", but"
+	echo_err "zipaes will also recognize \"-p env\" alone as a special case.  It will prompt"
+	echo_err "you for the password and store it in an environment variable to be passed on to"
+	echo_err "openssl.  This has certain advantages over having openssl prompt you.  If you"
+	echo_err "are handling multiple files, it will use the same password for all of them."
+	echo_err "It will also not interfere as much with the verbose mode comments."
+	echo_err ""
+	echo_err "USAGE:"
+	echo_err ""
+	echo_err "    $0 [OPTIONS] SRC_PATH ... DST_ARCHIVE.zipaes"
+	echo_err "    $0 -b [OPTIONS] SRC_PATH ... DST_DIR"
+	echo_err "    $0 -x [OPTIONS] SRC_ARCHIVE.zipaes ... DST_DIR"
+	echo_err "    $0 -z [OPTIONS] SRC_ARCHIVE.zip DST_ARCHIVE.zipaes"
+	echo_err "    $0 -z -x [OPTIONS] SRC_ARCHIVE.zipaes DST_ARCHIVE.zip"
+	echo_err ""
+	echo_err "    -p TYPE:VALUE"
+	echo_err "         Optional openssl pass phrase, as described above." 
+	echo_err ""
+	echo_err "    -b:  Equivalent to rditto -b \".zipaes\" (batch compress)."
+	echo_err "    -x:  Equivalent to rditto -x (expand archive)."
+	echo_err "         The absence of either -b or -x implies rditto -c (group compress)."
+	echo_err "    -e:"
+	echo_err "    -E:"
+	echo_err "    -r REMOVE_LEVEL:"
+	echo_err "    -v:"
+	echo_err "    -V:"
+	echo_err "    -o \"SSH_OPTIONS\":"
+	echo_err "    -O \"SSH_OPTIONS\":"
+	echo_err "         Equivalent to rditto options."
+	echo_err "    -z:  Use -z to add encryption to an existing zip archive."
+	echo_err "         Use -z -x to remove encryption from an existing zipaes archive."
+	echo_err ""
+#             0123456789012345678901234567890123456789012345678901234567890123456789012345678
+	exit $1
+}
+
+function run_in_bash {
+#	Input:
+#		$1 = command
+#		$verbose
+
+	[ -n "$verbose" ] && echo_err "zipaes executes: $1"
+	$my_bash -c "$1"
+	exit_code="$?"
+	if [ "$exit_code" -ne "0" ]; then
+		echo_err "$0 terminated with exit code: $exit_code"
+		exit 1
+	fi
+}
+
+function prompt_for_password {
+#	Input:
+#		$1 = prompt string
+#	Output:
+#		$password = user-supplied password
+	$my_echo -n "$1">&2
+	$my_stty -echo
+	read password
+	$my_stty echo
+	echo_err ""
+}
+
+function request_passphrase {
+#	Output:
+#		$passphrase = env:zipaes_password,
+#			where env:zipaes_password has been exported
+
+	prompt_for_password "Enter password: "
+	zipaes_password="$password"
+	if [ "$rditto_mode" != "-x " ]; then
+		prompt_for_password "Re-enter password: "
+		until [ "$password" = "$zipaes_password" ]; do
+			prompt_for_password "Incorrect.  Enter password: "
+			zipaes_password="$password"
+			prompt_for_password "Verify password: "
+		done
+	fi
+	export zipaes_password
+	passphrase="env:zipaes_password"
+}
+
+function parse_path {
+#	Input: $1 = full scp-style path
+#	Output:
+#		$remote_host = user@remote.host or empty string if local host
+#		$local_path = /local/path on remote or local host
+
+	if [ "${#1}" -lt "3" ]; then
+		got_remote_host="0"
+	else
+		got_remote_host=`$my_expr "$1" : '.*:'`
+	fi
+	if [ "$got_remote_host" -eq "0" ]; then
+		remote_host=""
+		local_path="$1"
+	else
+		remote_host="${1%:*}"
+		local_path="${1#*:}"
+	fi
+}
+
+function parse_src_and_dst {
+#	This function just calls parse_path twice for the source and destination.
+#	Input:
+#		$1 = source path
+#		$2 = destination path
+#	Output:
+#		$src_host = user@source.host or empty string if local host
+#		$src_path = /source/path on remote or local host
+#		$dst_host = user@destination.host or empty string if local host
+#		$dst_path = /destination/path on remote or local host
+
+	src_path="$1"
+	dst_path="$2"
+	parse_path "$src_path"
+	src_host="$remote_host"
+	src_path="$local_path"
+	parse_path "$dst_path"
+	dst_host="$remote_host"
+	dst_path="$local_path"
+}
+
+function process_archive_mode {
+#	Input:
+#		$1 = source path
+#		$2 = destination path
+#		$filter = base openssl command
+#		command line parameters may be used
+
+	# Use ssh source options for destination if the latter are unavailable.
+	ssh_dst_opts="${ssh_dst_opts:-$ssh_src_opts}"
+	
+	parse_src_and_dst "$1" "$2"
+	if [ -n "$src_host" ]; then
+		full_cmd="$my_ssh $ssh_src_opts \"$src_host\" '$my_cat \"$src_path\"'"
+		full_cmd="$full_cmd | $filter"
+	else
+		full_cmd="$filter -in \"$src_path\""
+	fi
+	if [ -n "$dst_host" ]; then
+		full_cmd="$full_cmd | $my_ssh $ssh_dst_opts \"dst_host\" '$my_cat > \"dst_path\"'"
+	else
+		full_cmd="$full_cmd -out \"$dst_path\""
+	fi
+	run_in_bash "$full_cmd"
+}
+
+rditto_mode="-c "
+rditto_opts="-k "
+while getopts "beEr:vVxo:O:p:z" options; do
+	case "$options" in
+	b)	rditto_mode="-b \".zipaes\" ";;
+	e)	rditto_opts="$rditto_opts-e ";;
+	E)	rditto_opts="$rditto_opts-E ";;
+	r)	rditto_opts="$rditto_opts-r \"$OPTARG\" ";;
+	v)	verbose="-v ";;
+	V)	verbose="-V ";;
+	x)	rditto_mode="-x ";;
+	o)	ssh_src_opts="$OPTARG";;
+	O)	ssh_dst_opts="$OPTARG";;
+	p)	passphrase="$OPTARG";;
+	z)	archive_mode="-z ";;
+	\?)	show_usage 2;;
+	esac
+done
+rditto_opts="$rditto_mode$rditto_opts$verbose"
+[ "$ssh_src_opts" != "" ] && rditto_opts="$rditto_opts-o \"$ssh_src_opts\" "
+[ "$ssh_dst_opts" != "" ] && rditto_opts="$rditto_opts-O \"$ssh_dst_opts\" "
+shift $(($OPTIND-1))
+if [ -n "$archive_mode" ]; then
+	[ "$#" -ne "2" ] && show_usage 2
+else
+	[ "$#" -lt "2" ] && show_usage 2
+fi
+
+filter="$my_openssl aes-128-cbc -salt"
+[ "$rditto_mode" = "-x " ] && filter="$filter -d"
+if [ -n "$passphrase" ]; then
+	[ "$passphrase" = "env" ] && request_passphrase
+	filter="$filter -pass $passphrase"
+fi
+
+if [ -n "$archive_mode" ]; then
+	process_archive_mode "$1" "$2"
+else
+	rditto_opts="$rditto_opts-f \"$filter\" "
+	rditto_cmd="$my_rditto $rditto_opts"
+	for in_path; do
+		rditto_cmd="$rditto_cmd \"$in_path\""
+	done
+	run_in_bash "$rditto_cmd"
+fi
+
+exit 0

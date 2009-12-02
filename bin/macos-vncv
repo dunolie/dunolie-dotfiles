@@ -1,0 +1,105 @@
+#! /bin/sh
+
+#http://blogs.sun.com/mock/entry/and_now_chicken_of_the
+# Script to put a GUI front end around Chicken of the VNC over SSH for MacOS X
+#
+# Author: Joseph Mocker, Sun Microsystems.
+
+#
+# This script works only with Chicken of the VNC but needs the 
+# "vncpasswd" command from TightVNC.
+#
+
+COTVNC_HOME="/Applications/Chicken of the VNC.app"
+COTVNC_CMD="$COTVNC_HOME/Contents/MacOS/Chicken of the VNC"
+
+PATH=$HOME/bin:$PATH
+export PATH
+
+# Define a general Prompt routine
+
+prompt () {
+  TITLE="$PROMPT_TITLE"
+
+  DIALOG="display dialog \"$@\" default answer \"\" with title \"$TITLE\""
+  DIALOG="$DIALOG with icon caution"
+  
+  result=`osascript -e 'tell application "Finder"' -e "activate"  \
+   -e "$DIALOG" -e 'end tell'`
+  
+  if [ "$result" = "" ]; then
+    return 1
+  else
+    echo "$result" | sed -e 's/^text returned://' -e 's/, button returned:.*$//'
+    return 0
+  fi
+}
+
+# Prompt for VNC Server 
+
+PROMPT_TITLE="VNC Connection"
+export PROMPT
+server=`prompt "Connect to server (host:port)"`
+
+if [ "x$server" = "x" ]; then
+   exit 0
+fi
+
+# Prompt for VNC Password
+
+MACOS_ASKPASS_TITLE="VNC Password"
+export MACOS_ASKPASS_TITLE
+passwd=`macos-askpass "Password for server ${server}:"`
+
+host=`echo $server | cut -d: -f1`
+port=`echo $server | cut -d: -f2`
+port=`expr $port + 5900`
+
+touch /tmp/tmpvnc.$$
+chmod 600 /tmp/tmpvnc.$$
+echo $passwd | vncpasswd -f > /tmp/tmpvnc.$$
+
+# Start up a "private" SSH agent
+
+eval `ssh-agent -s`
+
+# Register SSH Identities with the agent
+
+DISPLAY=:0
+export DISPLAY
+SSH_ASKPASS=macos-askpass
+export SSH_ASKPASS
+unset MACOS_ASKPASS_TITLE
+
+ssh-add < /dev/null
+
+# Now lets find an open port for tunnelling
+
+tunnel=41235
+while [ "`telnet localhost $tunnel < /dev/null 2>&1 |grep refused`" == "" ]; do
+  tunnel=`expr $tunnel + 1`
+done
+
+# Start up an SSH with a Local tunnel.
+
+ssh -L $tunnel:$host:$port $host "sleep 60" &
+
+# Wait for the tunnel to activate
+
+while [ "`telnet localhost $tunnel < /dev/null 2>&1 |grep refused`" != "" ]; do
+  sleep 1
+done
+
+"$COTVNC_CMD" localhost:$tunnel --PasswordFile /tmp/tmpvnc.$$ &
+
+# Give it a little bit to make the connection
+
+sleep 10
+
+# Kill the "private" SSH Agent
+
+eval `ssh-agent -k`
+
+# Cleanup
+
+rm /tmp/tmpvnc.$$

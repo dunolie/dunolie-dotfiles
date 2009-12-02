@@ -1,0 +1,14 @@
+#!/bin/bash
+# http://braille.uwo.ca/pipermail/speakup/2007-April/042604.html
+# conditions: a bash script to display current weather conditions.
+# Author: Alvin Gene Collins
+# Last modified: Wed Apr 18 09:03:34 CDT 2007.
+# usage: conditions Ames Iowa
+# or some other location or zip code.
+#
+if [ $# -eq 0 ];then export LOCATION="oban uk";else export LOCATION="$*";fi
+lynx "http://braille.wunderground.com/cgi-bin/findweather/getForecast?query=`echo $LOCATION`" -dump >/tmp/weather-oban-sunset`date +%H,%M`.tmp
+grep -i "sunset" /tmp/weather-oban-sunset`date +%H,%M`.tmp
+unset A
+unset X
+unset LOCATION

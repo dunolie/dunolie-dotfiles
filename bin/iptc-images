@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Saturday,12 September, 2009
+# Description: iptc-images
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+for x in "$@"
+do
+exiftool '-filename&lt;CreateDate' -d %Y%m%d_%H%M%S%%+c.%%e $x
+done

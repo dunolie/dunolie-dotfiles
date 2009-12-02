@@ -1,0 +1,27 @@
+# My sart up script for Terminal.app - called in the Terminal.app Preferences
+# multiple tabs at startup with no messing around 
+
+# Tab 1 = irssi via screen
+# Tab 2 = ssh to serv.local
+# Tab 3 = cd to the desktop
+# Tab 4 = Loads a script tip from Shell-fu.org - stays in home dir
+# Tab 5 = Opens my todo file in vim for checking and editing
+
+# you can make as many tabs as you wish...
+# tab names are actually arbitrary at this point too.
+
+#I found it handy to install the terminit files in any old dir, then
+# symlink like so: 
+#   sudo ln -s /path/to/my/terminit.rb /usr/local/bin/terminit && sudo chmod +x /usr/local/bin/terminit
+# Then you can just type "terminit foo_project" from anywhere.
+
+
+#http://www.elctech.com/blog/script-terminal-with-terminit
+
+---
+- tab1: irc
+- tab2: serv
+- tab3: cd ~Desktop
+  - gtime
+- tab4: shell-fu
+- tab5: v ~/ToDo/todo.txt

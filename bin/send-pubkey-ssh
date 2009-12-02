@@ -1,0 +1,11 @@
+#!/bin/bash
+# script from http://www.zagura.ro/
+if [ "$#" != "1" ]; then
+    echo "Usage $0 user@host"
+    exit 0
+fi
+
+echo "Copying public key file to remote host"
+scp ~/.ssh/id_dsa.pub ${1}:
+echo "Appending public key file to remote authorized keys file"
+ssh ${1} "cat ~/id_dsa.pub >> ~/.ssh/authorized_keys2; chmod 600 ~/.ssh/authorized_keys2; rm ~/id_dsa.pub"

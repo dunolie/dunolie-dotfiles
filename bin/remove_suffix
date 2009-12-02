@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# remove_suffix
+# Removes the suffix (from the last dot until the end of the string)
+# from each of the strings passed, one per line, via STDIN
+# Cameron Hayne (macdev@hayne.net)  March 2005
+
+# Example of use:
+# echo "foo.bar.txt" | remove_suffix
+# will output "foo.bar" (without the quotes)
+
+sed 's/\.[^.]*$//'
+
+# Note that if you have a variable "file" containing a string like the above,
+# then you can use the Bash pattern-matching feature to get the portion
+# before the suffix:  ${file%\.[^.]*}

@@ -1,0 +1,32 @@
+
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thu 25 Dec 00:33:32 2008
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()
+#
+######################################################################### 
+
+echo -e "\e[1;36mFiles please:"
+echo -e "\e[0;31m *.txt *.jpg"
+echo -e "\e[1;36mex: 01.jpg -> 08_12_25-01.jpg\e[0m"
+
+read files
+ls $files | while read f ; do
+	mv -v "$f" "`date +%d_%m_%Y`-$f"
+done

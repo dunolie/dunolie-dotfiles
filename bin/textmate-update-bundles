@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,10 September, 2009
+# Description: Update textmate bundles via svn
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+cd /Library/Application\ Support/TextMate 
+export LC_CTYPE=en_US.UTF-8
+sudo svn update
+osascript -e 'tell app "TextMate" to reload bundles'
+growlnotify -a "Textmate" -t "Textmate bundles reloaded" -m ":)"
+
+

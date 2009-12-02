@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie ( dunolie@gmail.com )
+#        Created: 11/10/09 @ 02:11:54
+#      File name: local ip
+#  Last modified:
+# -------------------------------------------------------------------------------
+#       Comments: get local ip
+#    Description:
+# -------------------------------------------------------------------------------
+ifconfig -a | grep inet | grep "netmask" | grep -v "127.0.0.1" | awk '{print $2}'
+

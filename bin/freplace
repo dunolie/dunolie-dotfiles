@@ -1,0 +1,74 @@
+#!/bin/bash
+# freplace.sh v1.1 <17.12.2006>
+# http://unflyingobject.com/blog/dl/
+# (cc) 2006 Filipp Lepalaan <filipp@mac.com>
+
+usage="`basename $0` [-sb] [-o owner:group] -d indir target replacement"
+
+# Set up defaults
+do_chown='no'
+do_backup='no'
+do_symlink='no'
+do_replace='yes'
+
+if [ $# -lt 2 ]
+	then echo "Usage: $usage"
+	exit 1
+fi
+
+# Parse the args
+while getopts "rsbo:d:" param
+do
+	case $param in
+		s ) do_symlink='yes';;
+		b ) do_backup='yes';;
+		o ) do_chown='yes';o_user=${OPTARG%:*};o_group=${OPTARG#*:};;
+		d ) srch_dir=$OPTARG;;
+	esac
+done
+
+# Need the last two args
+shift $(($# - 2))
+target=$1
+replacement=$2
+
+# Sanity check
+if ! [ -a "$replacement" ]
+	then echo "Error: \"$replacement\" not found"
+	exit 1
+fi
+
+# Just a little timesaver. Too bad Bash won't do this.
+function realpath {
+	echo `/usr/bin/php -r "echo realpath ('$1');"`
+	exit 0
+}
+
+IFS=$'\n';	# So that names with spaces would't bother us
+
+for i in `find $srch_dir -name $target`
+do
+	replacement=`realpath $replacement`	# Create absolute path
+	
+	echo "*** Replacing \"`realpath $i`\" with \"$replacement\""
+	
+	if [ $do_backup = "yes" ]
+		then mv $i "$i.old"
+	fi
+	
+	if [ $do_symlink = "yes" ]
+		then rm -rf $i
+		ln -fs $replacement $i
+		do_replace='no'					# If we link, we don't copy
+	fi
+	
+	if [ $do_replace = 'yes' ]
+		then cp -rf $replacement $i
+	fi
+	
+	if [ $do_chown = 'yes' ]
+		then chown $o_user:$o_group $i
+	fi
+done
+
+exit 0

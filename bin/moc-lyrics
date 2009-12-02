@@ -1,0 +1,81 @@
+#!/usr/bin/perl -s
+#This is a script for the MOC player that will fetch the lyrics of the currently
+#playing song from metrolyrics.com. The lyrics change automatically when the song
+#changes. <smufkin@googlemail.com>
+# http://www.undergroundsystems.org/forums/showthread.php?t=6068
+require LWP::UserAgent;
+use HTTP::Request::Common;
+use HTML::Entities;
+
+my $ua = LWP::UserAgent->new;
+$ua->timeout(10);
+$ua->env_proxy;
+$ua->agent("Mozilla/8.0");
+
+
+if ($v){
+        print "Lyrics Fetcher 0.1\n";
+        exit 0;
+}
+
+if ($d){ $debug = "true";}
+
+sub getCurrentSongArtist {
+
+        if ($artist){
+                $currentSongArtist = $artist;
+        } else {
+                $currentSongArtist =`mocp -i | grep 'Artist:' | sed -e 's/^.*: //' | tr "\n" " "`; 
+        }
+
+        return $currentSongArtist;
+}
+
+sub getCurrentSongTitle {
+        return `mocp -i | grep 'SongTitle:' | sed -e 's/^.*: //' | tr "\n" " "`;
+}
+
+sub getCurrentSongLyrics {
+
+        $currentSongInfoSearch = $_[0];
+        $currentSongInfoSearch =~ s/ /\+/g;
+        #trying metro lyrics first
+        my $lyricsFoundList = $ua->request(POST 'http://www.metrolyrics.com/search.php', [search => $currentSongInfoSearch, category => "artisttitle", action=> "Search"]);
+        if ($d){ print "Searching MetroLyrics.com for '$currentSongInfoSearch'\n";}
+        $currentSongLyricsSearch = $lyricsFoundList->decoded_content;
+        $currentSongLyricsSearch =~ s/\n/ /g;
+
+        if ($currentSongLyricsSearch =~m/<td class="First"><a href="http:\/\/www.metrolyrics.com\/(.*?)">/){
+                $currentSongLyricsURL = $1;
+        }
+
+
+        my $lyricsFetchRequestFoundList = $ua->request(GET "http://www.metrolyrics.com/$currentSongLyricsURL");
+        if ($d) {print "Fetching lyrics from webpage at http://www.metrolyrics.com/$currentsongLyricsURL\n";}
+        $lyricsFetchRequestHTML = $lyricsFetchRequestFoundList->decoded_content;
+        $lyricsFetchRequestHTML =~s/\n/ /g;
+
+
+        if ($lyricsFetchRequestHTML =~/<span id="lyrics">(.*?)<h5>/m){
+                $currentSongLyrics = $1;
+        }
+
+        $currentSongLyrics = decode_entities($currentSongLyrics);
+        $currentSongLyrics =~ s/<br \/>/ /g;
+        return " $_[0] \n ------- \n $currentSongLyrics";
+}
+
+$active = true;
+while ($active){
+        $currentSong = &getCurrentSongArtist . &getCurrentSongTitle;
+
+        if ($currentSong ne $currentSongCheck){
+                if (!$d && !$s){        system("clear");}
+                print &getCurrentSongLyrics($currentSong);
+        }
+
+        $currentSongCheck = &getCurrentSongArtist . &getCurrentSongTitle;
+
+if ($s){exit 0;}
+        sleep(3);
+}

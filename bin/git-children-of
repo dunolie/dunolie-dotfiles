@@ -1,0 +1,10 @@
+#!/bin/bash
+
+commit=$1
+branch=$2
+
+[ -z "$branch" ] && branch=HEAD
+
+git rev-list --children $branch --not $commit^@ \
+   | awk "/^$commit/ { print \$2 }"
+

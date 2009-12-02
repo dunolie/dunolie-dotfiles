@@ -1,0 +1,561 @@
+#!/bin/bash
+
+# cat /usr/local/bin/ws
+
+OPATH=${PATH}
+export PATH=/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin
+
+OIFS=${IFS}
+export IFS=$' \t\n'
+
+declare search="" sed=/usr/bin/sed open=/usr/bin/open grep=/usr/bin/grep
+
+#exec 2>/dev/console   # write stderr to console.log in /Library/Logs/Console/
+
+
+# URL encoding
+# convert special (UTF-8 encoded) input characters into hexadecimal URL-encoding form 
+# For further conversions see:
+# http://www.w3schools.com/tags/ref_urlencode.asp (HTML URL-encoding Reference)
+# http://www.blooberry.com/indexdot/html/topics/urlencoding.htm
+# http://en.wikipedia.org/wiki/Percent-encoding
+
+function url_encoding() {
+
+printf "%s" "$(</dev/stdin)" | /usr/bin/sed -E -e 's/%/%25/g' -e 's/ /%20/g' -e 's/"/%22/g' -e 's/#/%23/g' \
+-e 's/&/%26/g' -e 's/</%3C/g' -e 's/>/%3E/g' -e 's/{/%7B/g' -e 's/}/%7D/g' -e 's/\|/%7C/g' \
+-e 's/\\/%5C/g' -e 's/\^/%5E/g' -e 's/\~/%7E/g' -e 's/\[/%5B/g' -e 's/\]/%5D/g' -e 's/\`/%60/g' \
+-e s/$'\342\202\254'/%80/g -e s/$'\303\274'/%FC/g -e s/$'\302\243'/%A3/g -e s/$'\303\266'/%F6/g \
+-e s/$'\303\251'/%E9/g -e s/$'\303\244'/%E4/g -e s/$'\303\204'/%C4/g -e s/$'\303\226'/%D6/g \
+-e s/$'\303\234'/%DC/g -e s/$'\303\237'/%DF/g -e s/$'\303\240'/%E0/g -e s/$'\303\241'/%E1/g \
+-e s/$'\303\242'/%E2/g -e s/$'\303\247'/%E7/g -e s/$'\303\250'/%E8/g -e s/$'\303\252'/%EA/g \
+-e s/$'\303\253'/%EB/g -e s/$'\303\254'/%EC/g -e s/$'\303\255'/%ED/g -e s/$'\303\256'/%EE/g \
+-e s/$'\303\257'/%EF/g -e s/$'\303\200'/%C0/g -e s/$'\303\201'/%C1/g -e s/$'\303\202'/%C2/g \
+-e s/$'\303\207'/%C7/g -e s/$'\303\210'/%C8/g -e s/$'\303\211'/%C9/g -e s/$'\303\212'/%CA/g \
+-e s/$'\303\213'/%CB/g -e s/$'\303\214'/%CC/g -e s/$'\303\215'/%CD/g -e s/$'\303\216'/%CE/g \
+-e s/$'\303\217'/%CF/g -e s/$'\303\277'/%BF/g -e s/$'\303\203'/%C3/g -e s/$'\303\205'/%C5/g \
+-e s/$'\303\206'/%C6/g -e s/$'\303\220'/%D0/g -e s/$'\303\221'/%D1/g -e s/$'\303\245'/%E5/g \
+-e s/$'\303\246'/%E6/g -e s/$'\303\261'/%F1/g -e s/$'\303\262'/%F2/g -e s/$'\303\263'/%F3/g \
+-e s/$'\303\264'/%F4/g -e s/$'\303\265'/%F5/g -e s/$'\303\267'/%F7/g -e s/$'\303\270'/%F8/g \
+-e s/$'\303\271'/%F9/g -e s/$'\303\272'/%FA/g -e s/$'\303\273'/%FB/g -e s/$'\303\275'/%FD/g \
+-e s/$'\303\276'/%FE/g -e s/$'\303\277'/%FF/g -e s/$'\303\235'/%DD/g -e s/$'\303\236'/%DE/g \
+-e s/$'\305\241'/%9A/g -e s/$'\305\223'/%9C/g -e s/$'\305\276'/%9E/g -e s/$'\305\270'/%9F/g \
+-e s/$'\302\265'/%B5/g -e s/$'\305\275'/%8E/g -e s/$'\305\240'/%8C/g -e s/$'\302\241'/%A1/g \
+-e s/$'\302\242'/%A2/g -e s/$'\302\245'/%A5/g -e s/$'\303\243'/%E3/g -e s/$'\303\260'/%F0/g \
+-e s/$'\303\222'/%D2/g -e s/$'\303\223'/%D3/g -e s/$'\303\224'/%D4/g -e s/$'\303\225'/%D5/g \
+-e s/$'\303\230'/%D8/g -e s/$'\303\223'/%D9/g -e s/$'\303\232'/%DA/g -e s/$'\303\233'/%DB/g
+
+return 0
+}
+
+
+
+# check if libidn is available (optional here; see the same libidn check below)
+# http://www.gnu.org/software/libidn/
+# http://en.wikipedia.org/wiki/Punycode
+# http://en.wikipedia.org/wiki/Internationalized_domain_name
+
+: <<-'COMMENT'
+COMMENT
+
+if [[ ! -f "/opt/local/bin/idn" ]]; then 
+   printf "%s\n" "You do not have libidn installed at: /opt/local/bin/idn"
+   printf "%s\x21\n" "Please install it via MacPorts"
+   printf "%s\n" "See: http://www.macports.org/install.php"
+   exit 1
+fi
+
+
+
+#################################################    BEGINNING OF CMDPARSER
+
+
+
+usage="usage: $(/usr/bin/basename "$0") [-h] [-y] [-gm] [-wp] [-p \"a phrase\"] [-w website ] [-t term] [term1 term2 ...]"
+
+# define the names of flags as a regular expression
+# flags are command line options that require arguments
+
+# p: phrase
+# t: terms
+# w: website
+
+flags="(p|t|w)"
+
+
+# define the names of switches as a regular expression
+# switches are command line options that do not take arguments
+# make sure multi-char switches precede single-char switches in the regular expression
+# note that the regular expression contains neither the special read-from-stdin switch "-" nor the special end-of-options switch "--"
+
+# gm: Google Maps
+# h: help
+# wp: Wikipedia
+# y: Yahoo
+
+switches="(gm|wp|h|y)"
+
+declare p s t                            # flags
+declare -i gm=0 h=0 wp=0 y=0             # switches
+
+
+declare argstr argvar argvar_escaped char flagvar optstr piped pipedstr       # script variables
+declare -i optid pipedvar pipedvar2
+
+# piped="piped" will be used for variable creation 
+# example: piped="piped"; piped2="piped"; pipedstr="piped arg"; eval $piped='"$(printf "%s\n" "${pipedstr}")"'; printf "%s\n" "$piped"
+
+piped="piped"
+
+# default value is set to "no pipe"
+pipedvar=0
+pipedvar2=0
+pipedstr=""
+
+
+# if /dev/stdin has a size greater than zero ...
+if [[ -s /dev/stdin ]]; then pipedstr="$(</dev/stdin)"; else pipedstr=""; fi 
+
+if [[ $# -eq 0 ]] && [[ -z "$pipedstr" ]]; then
+  printf "\n%s\n\n%s\n\n" 'No arguments specified!' "$usage" 1>&2
+  exit 1
+fi 
+
+if [[ $# -eq 0 ]] && [[ -n "$pipedstr" ]]; then
+  eval $piped='"${pipedstr}"'  
+  pipedvar=1
+  pipedvar2=1
+fi 
+
+
+# if there are command line arguments ...
+if [[ $pipedvar -eq 0 ]]; then
+
+   optstr=" "  
+   optid=0
+
+   while [[ -n "$optstr" ]]; do     
+
+      # try to extract valid flags or switches from positional parameter $1
+      # $1 gets shift-ed afterwards
+
+      optstr="$(printf "%s" "$1" | /usr/bin/egrep -e "^--?${flags}$")"
+
+      if [[ -n "$optstr" ]]; then optid=1; fi
+      if [[ -z "$optstr" ]]; then optid=2; optstr="$(printf "%s" "$1" | /usr/bin/egrep -e "^--?${switches}$")"; fi
+      if [[ -z "$optstr" ]]; then optid=3; optstr="$(printf "%s" "$1" | /usr/bin/egrep -e "^--?${switches}+$")"; fi
+      if [[ -z "$optstr" ]]; then optid=4; optstr="$(printf "%s" "$1" | /usr/bin/egrep -e "^--?(${flags}=.*|${flags}[^[:space:]]+)$")"; fi
+
+      if [[ -z "$optstr" ]]; then  
+         if [[ "$1" = "-" ]] && [[ "$@" = "-" ]]; then  
+            optid=5
+            optstr="-" 
+         elif [[ -n "$(printf "%s" "${@/%/ }" | /usr/bin/egrep -e "[[:space:]]--?(${flags}|${switches})")" ]]; then 
+            # create argstr by appending a space to each command line argument
+            argstr="$(printf "%s" "${@/%/ }")"
+            printf "\n%s\x21\n\n%s\n\n%s\n\n" "Undefined non-option string: ${1} is followed by a legal flag or switch" "${argstr}" "$usage" 1>&2
+            exit 1
+         fi
+      fi
+
+      if [[ "$1" = "--" ]]; then shift; break; fi     # -- marks end of options
+
+      if [[ -z "$optstr" ]]; then break; fi     # no further flags or switches to process
+
+
+      # flag followed by space (example: -f file)
+      if [[ $optid -eq 1 ]]; then 
+
+         if [[ -z "$2" ]]; then
+            printf "%s\n%s\n" "no argument given to flag: ${1}" "$usage" 1>&2
+            exit 1
+         fi 
+
+         flagvar="${1##*-}"     # remove leading dashes
+         argvar="$2"
+         eval $flagvar='"${argvar}"'
+         shift 2     # shift positional parameters $1 & $2 (that is, a flag plus its argument)
+         continue
+
+      # single switch (example: -a)
+      elif [[ $optid -eq 2 ]]; then
+         flagvar="${1##*-}"
+         eval $flagvar='"1"'
+         shift
+         continue
+  
+      # combined switch (example: -abcc)
+      elif [[ $optid -eq 3 ]]; then
+         flagvar="${1##*-}"
+         while [[ -n "$flagvar" ]]; do
+            char="$(printf "%s" "$flagvar" | /usr/bin/sed -E "s/^${switches}.*$/\1/")"
+            eval $char='"1"'
+            flagvar="$(printf "%s" "$flagvar" | /usr/bin/sed -E "s/^${switches}//")"
+         done
+         shift
+         continue
+
+      # flag without following space (example: -ffile)
+      elif [[ $optid -eq 4 ]]; then 
+
+: <<-'COMMENT'
+
+         argvar="$(printf "%s" "$1" | /usr/bin/sed -E "s/^\-\-?${flags}\=?//")"
+
+         argvar2="${argvar//\\\\/\\\\}"       # escape \ (for Bash version 2.05b.0(1)-release)
+         #argvar2="${argvar//\\/\\\\}"          # escape \
+
+         flagvar="${1%${argvar2}}"          # remove escaped $argvar string
+         flagvar="${flagvar%=}"             # remove trailing =
+         flagvar="${flagvar##*-}"           # remove leading - or --
+         eval $flagvar='"${argvar}"'
+         shift
+         continue
+
+COMMENT
+
+        # alternative: no string escaping required 
+         #argvar="$(printf "%s" "$1" | /usr/bin/sed -E "s/^\-\-?${flags}\=?//")"
+         #flagvar="$(printf "%s" "$1" | /usr/bin/sed -E -n -e "s/^\-\-?${flags}\=?.*$/\\1/p")"
+
+         argvar="$(printf "%s" "${1##*-}" | /usr/bin/sed -E "s/^${flags}\=?//")"
+         flagvar="$(printf "%s" "${1##*-}" | /usr/bin/sed -E -n -e "s/^${flags}\=?.*$/\\1/p")"
+
+         eval $flagvar='"${argvar}"'
+         shift
+         continue
+
+
+      # the special read-from-stdin switch "-"
+      elif [[ $optid -eq 5 ]]; then 
+         pipedvar=1
+         eval $piped='"${pipedstr}"'
+         shift
+         break
+
+      fi
+
+      # remove positional parameter $1 from "$@"
+      shift
+
+   done
+
+fi   # if [[ $pipedvar -eq 0 ]]; then ...
+
+
+
+#################################################    END OF CMDPARSER
+
+ 
+
+if [[ $h -eq 1 ]]; then      #  help message
+   printf "\n%s\n" "${usage}"
+
+/bin/cat <<-'EOF'
+
+Examples:
+ws -h
+ws daily quote
+ws café Berlin
+ws -y -p "daily news" sports football
+ws -gm California Cupertino Infinite Loop 1
+ws -p "wildlife vacation" India travel visit tiger leopard
+ws -t 'Australia holiday vacation ocean desert'
+ws -w http://en.wikipedia.org -p "keep it simple"
+ws -wp -p "keep it simple"
+ws -w en.wikipedia.org -t Africa wildlife
+printf "Canada wildlife" | ws -y -w en.wikipedia.org -
+
+EOF
+
+   exit 0 
+fi
+
+
+# store the contents of ${@} in ${search}
+if [[ -n "${@}" ]]; then search="${@}"; fi
+
+# if there is piped data, ${search} is set to ${pipedstr}
+if [[ $pipedvar -eq 1 ]]; then search="${piped}"; fi 
+
+# if there is piped data without any further flags or switches specified, we just do a Google
+if [[ $pipedvar2 -eq 1 ]]; then
+   F="$(printf "%s" "${search}" | url_encoding)"
+   $open "http://www.google.com/search?q=${F}"
+   exit 0
+fi
+
+
+# to open the given URL directly we will store the original URL given by the -w switch in ${ow} for processing with libidn below
+declare ow     
+
+# remove http:// and encode URL
+if [[ -n "${w}" ]]; then 
+   w="$(printf "%s" "${w}" | $sed -E 's/^([[:space:]]*http:\/\/[[:space:]]*)(.*)$/\2/' )"
+   ow="${w}"
+   w="$(printf "%s" "${w}" | url_encoding)"
+fi 
+
+
+# If only the -p and/or -t flag is specified or no flags & switches are specified at all, we just do a Google.
+# If the remaining string stored in ${search} (which has been ${@} above) is not empty and the -p and/or -t flags are specified, 
+# the remaining string will be added to the search term(s) or phrase as additional search term(s).
+
+if [[ -z "${w}" ]] && [[ $y -eq 0 ]] && [[ $gm -eq 0 ]] && [[ $wp -eq 0 ]]; then 
+
+   if [[ -n "${t}" ]] && [[ -n "${p}" ]]; then
+
+      # strings in ${search} will be added as search terms
+      # example: ws -p "a phrase" -t "a term" term1 term2 ...
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi    
+      F1="$(printf "%s" "${t}" | url_encoding)"                  
+      F2="$(printf "%s" "${p}" | url_encoding)"
+      str='%22'
+      F2="${str}${F2}${str}"
+      F="${F2}%20${F1}"
+      $open "http://www.google.com/search?q=${F}"
+      exit 0
+
+   elif [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then      # strings in ${search} will be added as search terms 
+         t="${search}"                        
+         F1="$(printf "%s" "${t}" | url_encoding)"
+         F2="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F2="${str}${F2}${str}"
+         F="${F2}%20${F1}"
+         $open "http://www.google.com/search?q=${F}"
+         exit 0
+
+      else
+         F="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F="${str}${F}${str}"
+         $open "http://www.google.com/search?q=${F}"
+         exit 0
+      fi
+
+   elif [[ -n "${t}" ]]; then
+
+      # strings in ${search} will be added as search terms 
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi    
+      F="$(printf "%s" "${t}" | url_encoding)"
+      $open "http://www.google.com/search?q=${F}"
+      exit 0
+
+   else  
+      
+      # just open the given URL
+      if [[ -z "${search}" ]]; then $open "http://www.google.com"; exit 0; fi     
+      F="$(printf "%s" "${search}" | url_encoding)"
+      $open "http://www.google.com/search?q=${F}"
+      exit 0
+
+   fi
+
+fi
+
+
+# search a website specified by the -w switch (example: ws -w www.macosxhints.com)
+if [[ -n "${w}" ]] && [[ $y -eq 0 ]]; then 
+
+   if [[ -n "${t}" ]] && [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi
+      F1="$(printf "%s" "${t}" | url_encoding)"
+      F2="$(printf "%s" "${p}" | url_encoding)"
+      str='%22'
+      F2="${str}${F2}${str}"
+      F="${F2}%20${F1}"
+      $open "http://www.google.com/search?q=site%3A${w}%20${F}"
+      exit 0
+
+   elif [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then    # strings in ${search} will be added as search terms
+         t="${search}"                      
+         F1="$(printf "%s" "${t}" | url_encoding)"
+         F2="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F2="${str}${F2}${str}"
+         F="${F2}%20${F1}"
+         $open "http://www.google.com/search?q=site%3A${w}%20${F}"
+         exit 0
+
+      else
+         F="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F="${str}${F}${str}"
+         $open "http://www.google.com/search?q=site%3A${w}%20${F}"
+         exit 0
+      fi
+
+   elif [[ -n "${t}" ]]; then
+
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi   
+      F="$(printf "%s" "${t}" | url_encoding)"
+      $open "http://www.google.com/search?q=site%3A${w}%20${F}"
+      exit 0
+
+   else
+
+      # if there are no search terms given at all, just open the original URL stored in ${ow}
+      if [[ -z "${search}" ]]; then   
+
+         # check if libidn is available
+         if [[ ! -e "/opt/local/bin/idn" ]]; then 
+            printf "%s\n" "You do not have libidn installed at: /opt/local/bin/idn"
+            printf "%s\x21\n" "Please install it via MacPorts"
+            printf "%s\n" "See: http://www.macports.org/install.php"
+            exit 1
+         fi
+
+         w="$(printf "%s" "${ow}" | CHARSET=UTF-8 /opt/local/bin/idn --quiet)"
+         $open "http://${w}"
+         exit 0
+      fi
+
+      F="$(printf "%s" "${search}" | url_encoding)"
+      $open "http://www.google.com/search?q=site%3A${w}%20${F}"
+      exit 0
+
+   fi
+
+fi
+
+
+# Wikipedia
+if [[ $wp -eq 1 ]]; then 
+
+   if [[ -n "${t}" ]] && [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi
+      F1="$(printf "%s" "${t}" | url_encoding)"
+      F2="$(printf "%s" "${p}" | url_encoding)"
+      str='%22'
+      F2="${str}${F2}${str}"
+      F="${F2}%20${F1}"
+      $open "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search=${F}&=MediaWiki+search&fulltext=Search"
+      exit 0
+
+   elif [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then           
+         t="${search}"                           # set ${t} to ${search} since ${t} is empty
+         F1="$(printf "%s" "${t}" | url_encoding)"
+         F2="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F2="${str}${F2}${str}"
+         F="${F2}%20${F1}"
+         $open "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search=${F}&=MediaWiki+search&fulltext=Search"
+         exit 0
+
+      else
+         F="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F="${str}${F}${str}"
+         $open "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search=${F}&=MediaWiki+search&fulltext=Search"
+         exit 0
+      fi
+
+   elif [[ -n "${t}" ]]; then
+
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi   
+      F="$(printf "%s" "${t}" | url_encoding)"
+      $open "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search=${F}&=MediaWiki+search&fulltext=Search"
+      exit 0
+
+   else
+
+      # just open the given URL 
+      if [[ -z "${search}" ]]; then $open "http://en.wikipedia.org"; exit 0; fi     
+      F="$(printf "%s" "${search}" | url_encoding)"
+      $open "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search=${F}&=MediaWiki+search&fulltext=Search"
+      exit 0
+
+   fi
+
+fi
+
+
+# http://www.yahoo.com
+if [[ $y -eq 1 ]]; then 
+
+   if [[ -n "${w}" ]]; then      # if a website is specified ...
+
+         str="${search}"
+         if [[ -n "${p}" ]]; then str="${str} ${p}"; fi
+         if [[ -n "${t}" ]]; then str="${str} ${t}"; fi
+         F="$(printf "%s" "${str}" | url_encoding)"
+         $open "http://search.yahoo.com/search?p=site%3A${w}%20${F}"
+
+   elif [[ -n "${t}" ]] && [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi
+      F1="$(printf "%s" "${t}" | url_encoding)"
+      F2="$(printf "%s" "${p}" | url_encoding)"
+      str='%22'
+      F2="${str}${F2}${str}"
+      F="${F2}%20${F1}"
+      $open "http://search.yahoo.com/search?p=${F}"
+      exit 0
+
+   elif [[ -n "${p}" ]]; then
+
+      if [[ -n "${search}" ]]; then           
+         t="${search}"                           # set ${t} to ${search} since ${t} is empty
+         F1="$(printf "%s" "${t}" | url_encoding)"
+         F2="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F2="${str}${F2}${str}"
+         F="${F2}%20${F1}"
+         $open "http://search.yahoo.com/search?p=${F}"
+         exit 0
+
+      else
+         F="$(printf "%s" "${p}" | url_encoding)"
+         str='%22'
+         F="${str}${F}${str}"
+         $open "http://search.yahoo.com/search?p=${F}"
+         exit 0
+      fi
+
+   elif [[ -n "${t}" ]]; then
+
+      if [[ -n "${search}" ]]; then t="${t} ${search}"; fi   
+      F="$(printf "%s" "${t}" | url_encoding)"
+      $open "http://search.yahoo.com/search?p=${F}"
+      exit 0
+
+   else
+
+      # just open the given URL
+      if [[ -z "${search}" ]]; then $open "http://search.yahoo.com"; exit 0; fi    
+      F="$(printf "%s" "${search}" | url_encoding)"
+      $open "http://search.yahoo.com/search?p=${F}"
+      exit 0
+
+   fi
+
+fi
+
+
+# Google maps
+if [[ $gm -eq 1 ]]; then 
+   # just open the given URL
+   if [[ -z "${search}" ]] && [[ -n "${p}" ]] && [[ -n "${t}" ]]; then $open "http://maps.google.com"; exit 0; fi    
+   str="${search}"
+   if [[ -n "${p}" ]]; then str="${str} ${p}"; fi
+   if [[ -n "${t}" ]]; then str="${str} ${t}"; fi
+   F="$(printf "%s" "${str}" | url_encoding)"
+   $open "http://maps.google.com/maps?q=${F}"
+   exit 0
+fi
+
+
+export IFS=${OIFS}
+export PATH=${OPATH}
+
+exit 0
+

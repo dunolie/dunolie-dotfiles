@@ -1,0 +1,63 @@
+#!/bin/sh
+# http://discussions.apple.com/thread.jspa?threadID=1682458
+#-----------------------------------------------------------------------------
+# colors.esc - display the terminal colors and the escape sequences that
+#              generate them.  "Blink" is _NOT_ shown, as it is a very
+#              annoying effect, and should be avoided at all costs in normal
+#              daily uses.
+# 
+#   Usage: colors.esc
+#-----------------------------------------------------------------------------
+# Bob Harris
+#-----------------------------------------------------------------------------
+ 
+E=$(printf '\033')      # escape <E>
+R="${E}[0m"             # reset  <E>[0m
+ 
+typeset dsp_str=""
+typeset dsp_txt
+typeset fg_text
+typeset bg_text
+ 
+if [[ $# != 0 ]]; then
+    dsp_str=$(printf "%12.12s" "$*")
+fi
+ 
+color=(Black   Red   Green   Yellow   Blue   Magenta   Cyan    White)
+ 
+for bg in "" 0 1 2 3 4 5 6 7            # for each background color
+do
+    b=$bg && [[ X$b != X ]] && b="4$b;" # deal with no background color ""
+ 
+    echo "                  ------------ ----bold---- -underline-- --reverse---"
+    for fg in 0 1 2 3 4 5 6 7           # for each foreground color
+    do
+        f="3$fg"                        # setup foreground color
+ 
+        line=""
+        for a in "" 1 4 7               # for each attribute
+        do
+            [[ X$a != X ]] && a=";$a"   # deal with no attribute ""
+ 
+            if [[ -z "$dsp_str" ]]; then
+                dsp_txt=$(printf "%12s" "<E>[${b}${f}${a}m") # build esc text
+            else
+                dsp_txt="$dsp_str"      # use supplied text
+            fi
+            line="${line}${E}[${b}${f}${a}m${dsp_txt}${R} " # build entry
+        done
+ 
+        fg_text=$(printf "%-7s" ${color[$fg]})  # translate foreground color
+        bg_text=$(printf "%-9s" "Bg${color[$bg]}") # translate background color
+        [[ X$b = X ]] && bg_text=$(printf "%-9s" " ") # no bckgnd color
+        line="$bg_text $fg_text $line"  # build final display line
+        echo "${line% }"                # display the colorized line
+    done
+done
+ 
+    echo "                  ------------ ----bold---- -underline-- --reverse---"
+bg_text=$(printf "%-9s" " ")
+fg_text=$(printf "%-7s" "Reset")
+dsp_txt=$(printf "%12s" "<E>[0m")
+line="$bg_text $fg_text $dsp_txt"       # build final display line
+echo "${line% }"

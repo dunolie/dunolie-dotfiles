@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+use File::Find;
+use File::Basename;
+
+# here we store the results
+my $target=$ENV{'HOME'} . '/Desktop/OSX-Icons';
+
+# you may change the extensions to use
+my @extensions= qw( icns );
+
+###### POD ######################...
