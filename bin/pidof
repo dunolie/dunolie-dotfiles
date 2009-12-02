@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com
+# Created on: Tuesday,29 July, 2008
+# Description: list pid of app or process
+#########################################################################
+ps -cx | fgrep -i "$@"

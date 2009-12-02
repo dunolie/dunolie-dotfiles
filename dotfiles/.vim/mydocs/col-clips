@@ -1,0 +1,17 @@
+" ----------------------------------------------------------------------------
+"                                COLOURS
+" ----------------------------------------------------------------------------
+" The colour scheme we are using:
+" colorscheme candy
+" colorscheme ir_black "full black blackground -badly formated
+
+color elflord
+colorscheme impact
+"colorscheme rainbow_neon
+"colorscheme elflord
+
+
+" syntax highlighting (use dark if the background is dark).
+set background=dark
+
+"------------------------------------------------------------------------------

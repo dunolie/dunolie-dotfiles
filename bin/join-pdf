@@ -1,0 +1,16 @@
+#!/bin/sh
+# http://trancemist.net/download/osxware/files/join-pdf
+# Join two or more PDF files
+#
+# Mikel Manitius <manitius@yahoo.com>
+# Tue Feb 27 13:18:21 EST 2007
+#
+if [ $# -lt 4 -o "$1" != "-o" ]
+then
+	echo "usage: $0 -o output.pdf file1.pdf file2.pdf [ file3.pdf ... ]"
+	exit 1
+fi
+#
+output="$2"
+shift; shift
+python '/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py' -o "${output}" $@

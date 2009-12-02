@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,20 March, 2009
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#####################################################################
+
+
+  
+INFO=`mocp --info`  
+
+ARTIST=`mocp --info | grep Artist | cut -f2 -d :`  
+TITLE=`mocp --info | grep SongTitle | cut -f2 -d :`
+ALBUM=`mocp --info | grep Album | cut -f2 -d :`
+BITRATE=$(mocp -i | grep "Bitrate" | awk '{print $2}') 
+TimeLeft=$(mocp -i | grep "TimeLeft" | awk '{print $2 $3}')  
+TotalTime=$(mocp -i | grep "TotalTime" | awk '{print $2 $3}') 
+   
+if [ "$INFO" == "State: STOP" ];  
+ then  
+   echo -n ""  
+ else   
+   echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+   echo "%      Now Playing on MOC      %"
+   echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+   echo -e "\E[0;0m% \E[0;91mArtist\E[0;30m:    \E[0;37m$ARTIST"
+   echo -e "\E[0;0m% \E[0;91mTrack\E[0;30m:     \E[0;37m$TITLE"
+   echo -e "\E[0;0m% \E[0;91mAlbum\E[0;30m:     \E[0;37m$ALBUM"
+   echo -e "\E[0;0m% \E[0;91mBitrate\E[0;30m:    \E[0;37m$BITRATE"
+   echo -e "\E[0;0m% \E[0;91mLength\E[0;30m:     \E[0;37m$TimeLeft\E[0;33m/\E[0;91m$TotalTime"
+   echo -e "\E[0;0m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+fi

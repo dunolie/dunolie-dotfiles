@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: irc
+#        Created: TIMESTAMP
+#  Last Modified: TIMESTAMP
+# -------------------------------------------------------------------------------
+#       Comments: irc startup script
+#            url: http://germ.wordpress.com/2005/12/03/screen-irssi-load-script/
+#    Description: This script runs irssi in screen if it has not already been done.
+# If irssi in screen is already running, it will then attach to the irc screen session.
+# -------------------------------------------------------------------------------
+if screen -ls | egrep '^[[:space:]]+[^[:space:]]' | awk '{print $1}' | egrep '.irc$'
+then # running
+screen -x irc
+else # not running
+screen -c ~/.screen/.screenrc.irc -S irc -t irssi irssi
+fi
+

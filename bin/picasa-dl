@@ -1,0 +1,58 @@
+#!/bin/bash
+# Distributed under the terms of the GNU General Public License v3 or later
+# AUTHOR: Loïc Cerf
+# e-mail: magicbanana@gmail.com
+WGET_OPT="-q -T 180 -t 3 -c"
+EX_USAGE=64
+EX_NOHOST=68
+if [ -z "$1" -o "$1" = "--help" -o "$1" = "-h" ]
+then
+echo "Usage: $0 url [destination]"
+exit
+fi
+page=${1#*picasaweb.google.*/}
+if [ "$page" = "$1" ]
+then
+echo "\"$1\" is not the URL of a PicasaWeb album or gallery" 1>&2
+exit $EX_USAGE
+fi
+temp=`mktemp`
+trap "rm $temp" EXIT
+if wget $WGET_OPT -O $temp "$1"
+then
+finalPage=${page#*/}
+if [ -z "$finalPage" -o "$finalPage" = "$page" ]
+then
+# $temp is a gallery
+if [ -z "$2" ]
+then
+destination=`grep -m 1 "^var _user" $temp`
+destination=${destination##*nickname:\"}
+set "$1" "${destination%%\"*}"
+fi
+mkdir -p "$2"
+cd "$2"
+grep -E -o "$1"[/]?[[:alnum:]:.%~_-]+ $temp | sort -u |
+while read album
+do
+"$0" $album &
+done
+else
+# $temp is an album
+if [ -z "$2" ]
+then
+destination=`grep -m 1 "^var _album" $temp`
+destination=${destination##*title:\"}
+set "$1" "${destination%%\"*}"
+fi
+grep -E -o {id:\"[0-9]+\",s:\"[[:alnum:]:\\.%~_-]+ $temp |
+while read picture
+do
+picture=${picture##*\"}
+picture=${picture/\x2Fs144/}
+wget $WGET_OPT -P "$2" ${picture//\x2F//} &
+done
+fi
+else
+exit $EX_NOHOST
+fi

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,15 August, 2008
+# Description:
+# Snipped from website : http://ubuntuforums.org/showthread.php?t=616875&page=7
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+echo Enter the youtube url to begin downloading the video.
+read VIDEO
+echo What is the artist of the song?
+read ARTIST
+echo What is the name of the song?
+read NAME
+youtube-dl $VIDEO -o "${ARTIST} - ${NAME}.flv"
+ffmpeg -i "${ARTIST} - ${NAME}.flv" "${ARTIST} - ${NAME}.mp3"
+rm -rf "${ARTIST} - ${NAME}.flv"
+echo Your video is finally converted into a mp3!

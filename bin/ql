@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#
+# ql(1)
+#
+# Quick Look command for terminal use
+#
+
+if [[ ${#} -lt 1 || ${1} == "-h" || ${1} == "--help" ]]; then
+    echo -e "Usage: ql [options] <file>"
+    echo -e "\t-t\tForce text mode"
+else
+    if [[ ${1} == "-t" ]]; then
+        shift
+        qlmanage -p -c public.plain-text "${@}" >& /dev/null &
+    else
+        qlmanage -p "${@}" >& /dev/null &
+    fi
+    PID=${!}
+    PID_IN_USE=1
+    while [ ${PID_IN_USE} ]; do
+        PID_IN_USE=`ps | awk '{ print $1 }' | grep ${PID}`
+        read -sn 1 -t 1
+        if [[ ${?} -eq 0 && ${PID_IN_USE} ]]; then # user quit via GUI
+            kill ${PID}
+            exit 0
+        fi
+    done
+fi

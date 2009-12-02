@@ -1,0 +1,93 @@
+#!/bin/bash
+# http://bashscripts.org/viewtopic.php?t=486
+#A Quick and Dirty Terminal Front End for nmap
+#Written by DeX 3/20/08 (slightly morphed by jbsnake 3/26/08) (and slightly re-morphed by DeX and jbsnake 3/27/08)
+#This script is completely free and you are welcome to edit and redistribute it as much as you like.
+
+menu ()
+{     
+#The Menu
+       
+
+   clear;
+
+        echo "..........................."
+        echo "...........MENU............"
+        echo
+        echo "1 Target Specification"
+        echo "2 Host Discovery"
+        echo "3 Service / Version Detection"
+        echo "4 OS Detection"
+        echo "5 Firewall Evasion"
+        echo "6 Port Specification"
+        echo "7 Custom Scan"
+        echo "8 Exit"
+}       
+        menu
+
+   read -p "Hello $(whoami), what would you like me to do? " choice
+       
+        while [[ "$choice" != "0" ]]
+        do
+           case $choice in
+             1)  clear;
+                 read -p "Enter Target(s): " target
+                 clear;
+                 nmap $target;
+       echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+                 ;;
+             2)  clear;
+                 read -p "Enter Target(s): " target2
+                 clear;
+                 nmap -sL $target2;
+       echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+                 ;;
+             3)  clear;
+                 read -p "Enter Target(s): " target3
+                 nmap -sV $target3;
+       echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+                 ;;
+             4)  clear;
+                 read -p "Enter Target(s): " target4
+                 nmap -O $target4;
+       echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+                 ;;
+             5)  clear;
+                 read -p "Enter Desired Source Address: " target5
+                 nmap -S $target5;
+       echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+                 ;;
+             6)  clear;
+                 read -p "Enter Port Range: " target6
+                 nmap -p $target6;
+                 echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+       ;;
+             7)  clear;
+                 read -p "Enter Custom Scan String: " cust
+                 read -p "Enter Target(s): " target7
+                 nmap $cust $target7;
+                 echo
+       read -p "Scan Complete!  Press Enter to Return to the Menu." deadArg;
+       ;;             
+             8)  clear;
+                 echo "Thanks $(whoami)!"
+                 exit;
+                 ;;
+
+             *)  clear;
+                 echo "You have entered an invalid option!"
+                 read -p "Press enter to continue." deadArg
+                 ;;
+      esac
+         
+      # menu again
+   
+      menu
+            read -p "Hello $(whoami), what would you like me to do? " choice
+      done

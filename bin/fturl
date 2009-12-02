@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: fturl
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: tiny url script for firefox using growl
+#      Comments: http://bit.ly/60nOFj   &   http://rudis.net/node/258
+################################################################################
+
+usage = '''
+Takes the URL of the frontmost FireFox window/tab and
+shortens using the service at metamark.net. The shortened
+URL, which starts with "http://xrl.us/", is put on the
+clipboard, ready for pasting.
+'''
+
+from urllib import urlopen, urlencode
+from os import popen
+
+# Two functions for getting and setting the beep sound.
+def getBeep():
+  # Next line is for Tiger. Comment it out if you're running Leopard.
+  # cmd = "defaults -currentHost read -g com.apple.sound.beep.sound"
+  
+  # Next line is for Leopard. Comment it out if you're running Tiger.
+  cmd = "defaults read ~/Library/Preferences/com.apple.systemsound com.apple.sound.beep.sound"
+  
+  return popen(cmd).read()
+
+def setBeep(beepFile):
+  # Next line is for Tiger. Comment it out if you're running Leopard.
+  # cmd = "defaults -currentHost write -g com.apple.sound.beep.sound "
+  
+  # Next line is for Leopard. Comment it out if you're running Tiger.
+  cmd = "defaults write ~/Library/Preferences/com.apple.systemsound com.apple.sound.beep.sound "
+  
+  return popen(cmd + beepFile).read()
+
+# Get the URl of the frontmost Safari window/tab though AppleScript.
+applescript = '''tell application "Firefox"
+	set ff to properties of front window as list
+	get item 3 of ff
+end tell'''
+
+url = popen("osascript -e '" + applescript + "'").read().strip()
+
+# Get the shortened URL from Metamark.
+shortURL = urlopen("http://metamark.net/api/rest/simple", 
+             urlencode({'long_url':url})).read()
+
+# Put the shortened URL on the clipboard.
+popen('pbcopy', 'w').write(shortURL)
+
+# Sound the Ping alert to tell the user the shortened URL is ready.
+# Reset the alert sound after beeping.
+oldBeep = getBeep()
+print oldBeep
+setBeep("/System/Library/Sounds/Ping.aiff")
+popen('growlnotify -n "surl" -m "URL Shortened\n' + url + ' :: ' + shortURL + '"') ;
+setBeep(oldBeep)
+

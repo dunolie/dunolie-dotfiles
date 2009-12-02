@@ -1,0 +1,130 @@
+#!/bin/bash
+# A Script that automates pasting to pastebin(s)..
+# Thanks to ed-209 for this wonderful idea.. you can see his version
+# which is located at http://www.alpadesign.com/shpost .. :>
+#
+# Author: floyd_n_milan
+# Date: 08th November 2006
+# Comments: Added features to the original script by zer0python
+#
+# Changelog:
+# 08/11/06: Removed an unnecessary [ and added timeout to curl
+#
+# Usage: shpost.sh [-n nick] [-t type] [-s service] [-d description] \
+# [-f source] [-h|--help|help]
+######################################################################
+
+function showusage
+{
+cat 1>&2 << EOF
+
+nopaste: Automatic posting to pastebin(s).
+
+Usage:
+$0 [-n nick] [-t type] [-s service] [-d description] [-f source] [-h|--help|help]
+
+Default nick is randomized.
+
+type is one of the following:
+
+"C89", "C", "C++", "C#"
+"Java", "Pascal", "Perl"
+"PHP", "PL/I", "Python"
+"Ruby", "SQL", "VB"
+"Plain Text"
+
+BE SURE TO USE THE QUOTES FOR AT LEAST "Plain Text"
+
+Default is Plain Text.
+
+service can be one of the following:
+
+rafb - http://rafb.net/post
+sh - http://sh.nu/p/
+
+Default is rafb.
+
+Description must be quoted (""), if more than one word.
+
+Default source is read from the keyboard. :-)
+
+-h or --help or help shows this usage summery.
+
+Mail comments, suggestions, bugs etc to:
+ >>>>   mrugeshkarnik@gmail.com    <<<<
+EOF
+}
+
+nick=""
+lang=""
+service=""
+desc=""
+input=""
+url=""
+
+if grep help <<<"$@"; then
+showusage
+exit 0
+elif [[ ! $1 ]]; then
+input="$(</dev/stdin)"
+nick="shpostuser${$}"
+lang="Plain Text"
+service="rafb"
+desc="shpost Post"
+fi
+
+while getopts ":n:t:s:d:f:h" opt; do
+case $opt in
+n )
+nick="${OPTARG:=nopasteuser$$}"
+;;
+
+t )
+lang="${OPTARG:="Plain Text"}"
+;;
+
+s )
+service="${OPTARG:=rafb}"
+;;
+
+d )
+desc="${OPTARG:="shpost Post"}"
+;;
+
+f )
+input="$(<"${OPTARG:=/dev/stdin}")"
+;;
+
+h )
+showusage
+exit 0;;
+
+? )
+showusage
+exit 64 #E_WRONGARGS (What's that?)
+esac
+done
+
+input="${input:="$(</dev/stdin)"}"
+nick="${nick:="shpostuser${$}"}"
+lang="${lang:="Plain Text"}"
+service="${service:="rafb"}"
+desc="${desc:="shpost Post"}"
+
+if [[ $service = rafb ]]; then
+url=$(\
+curl -i --connect-timeout 10\
+-F "lang=$lang" \
+-F "nick=$nick" \
+-F "desc=$desc" \
+-F "cvt_tabs=2" \
+-F "text=$input" \
+http://rafb.net/paste/paste.php 2>/dev/null | grep -i location)
+echo "Your paste can be seen here: http://rafb.net${url:10}"
+exit 0
+elif [[ $service = sh ]]; then
+curl --connect-timeout 10 -F "code=$input" -F "poster=$nick" http://sh.nu/p/
+exit 0
+fi
+
+exit 0

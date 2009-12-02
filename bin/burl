@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,16 September, 2009
+# Description: url shortner (with personal user name and API)
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+# Shorten any Url using bit.ly API, using your API Key which enables you to Track Clicks
+#########################################################################
+curl -q "http://api.bit.ly/shorten?version=2.0.1&longUrl=${$1} &login=dunolie&apiKey=R_8453391653b3f72769e0e983b5643186" | pbcopy
+echo -e "Link Copied To Clipboard:\e[0;31m $(pbpaste)\e[0m"
+
+

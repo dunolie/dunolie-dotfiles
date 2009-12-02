@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,22 August, 2008
+# Description: plays todays world at one radio show via mplayer
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+LATEST=ls -t | head -n 1
+cd ~/Radio-Recordings/BBC-Radio4/World-at-One
+
+mplayer ~/Radio-Recordings/BBC-Radio4/World-at-One/$(ls -t *.mp3 | head -n 1)

@@ -1,0 +1,53 @@
+#!/bin/bash
+# list the existing "gnu screen" sessions and reattach to one using the index number: 
+# colhttp://gentoo-wiki.com/TIP_Using_screen
+
+
+# filters the screen -ls output to show the sesssions
+sessions=`screen -ls | sed -ne 's/[[:space:]]//' -ne 's/\((Attached)\|(Detached)\)// p'`
+res=`echo "$sessions" | wc -w`
+
+if [[ "$res" == "0" ]]
+then
+        echo -e "\e[0;32m  No existing SCREEN session to reattach to...\e[0m"
+        exit
+fi
+
+echo ''
+echo -e "\e[1;34m  CURRENT SESSIONS \e[0m"
+echo -e "\e[1;34m  ------------------------ \e[0m"
+#screen -ls | sed -ne 's/[[:space:]]//' -ne 's/\((Attached)\|(Detached)\)// p' | cat -n
+echo -e "\e[0;32m $sessions \e[0" | cat -n
+echo -e "\e[1;34m  ------------------------ \e[0m"
+echo ''
+
+#if first argument is not specified, script will ask for number of screen
+
+if [ -z $1 ]
+then
+        echo -en "\e[0;32m  Reattach to session:\e[0m "
+        read session
+else
+        session=$1
+fi
+
+
+#attach to specified session
+linenum=0
+name=`screen -ls | sed -ne 's/[[:space:]]//' -ne 's/\((Attached)\|(Detached)\)// p' |
+while read line
+do
+ let "linenum += 1"
+ if [[ "$linenum" -eq "$session" ]]
+ then
+        echo $line
+        break
+ fi
+done`
+
+if [[ "$name" != "" ]]
+then
+   screen -d -r "$name"
+else
+   echo -e "\e[0;31m  Could not reattach to '$session'\e[0m"
+fi

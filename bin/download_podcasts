@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,22 October, 2009
+# Description: use the podcatcher script to download latest podcasts
+#########################################################################
+# Script Comments if needed : best run daily with cron
+# http://podcatcher.rubyforge.org/
+#########################################################################
+podcatcher -d "/Volumes/DZ-Audio-270GB/Music/Podcasts/NetNewsWire Enclosures" -s 0 -p --perfeed -r 2 -o sequential --horizon 2009.010.20 --checkforupdate --no-vote "/Volumes/DZ-Audio-270GB/Music/Podcasts/NetNewsWire Enclosures/podcasts.opml" >> "/Volumes/DZ-Audio-270GB/Music/Podcasts/NetNewsWire Enclosures/latest-podcasts.m3u"
+
+growlnotify -s -I "/Volumes/DZ-Audio-270GB/Music/Podcasts" -t "Podcatcher finished"

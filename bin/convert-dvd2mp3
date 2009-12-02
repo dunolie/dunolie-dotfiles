@@ -1,0 +1,10 @@
+mplayer -vc null -vo null -aid 128 -ao pcm:file=vts_04_1.wav VTS_04_1.VOB
+mplayer -vc null -vo null -aid 128 -ao pcm:file=vts_04_2.wav VTS_04_2.VOB
+mplayer -vc null -vo null -aid 128 -ao pcm:file=vts_04_3.wav VTS_04_3.VOB
+mplayer -vc null -vo null -aid 128 -ao pcm:file=vts_04_4.wav VTS_04_4.VOB
+
+lame vts_04_1.wav vts_04_1.mp3 -V2 --vbr-new -q0 --lowpass 19.7 -b96   
+lame vts_04_2.wav vts_04_2.mp3 -V2 --vbr-new -q0 --lowpass 19.7 -b96 
+lame vts_04_3.wav vts_04_3.mp3 -V2 --vbr-new -q0 --lowpass 19.7 -b96 
+lame vts_04_4.wav vts_04_4.mp3 -V2 --vbr-new -q0 --lowpass 19.7 -b96 
+

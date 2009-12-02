@@ -1,0 +1,254 @@
+# Read music file tags
+ReadTags = yes
+
+
+
+#MusicDir = “/home/lukasz/music”
+
+# Czy program ma pokazywać błędy w odczycie plików bądź strumieni,
+
+ShowStreamErrors = no
+
+# Czy program ma ignorować błędy CRC w plikach mp3.
+
+Mp3IgnoreCRCErrors = yes
+
+# Track info
+# %n - Track number
+# %a - Artist
+# %A - Album
+# %t - Tytuł
+# %(X:TRUE:FALSE) - potrójne wyrażenie - jeśli X występuje, wyświetl TRUE, jeśli nie
+# pokaż FALSE. Więcej info w manualu dla zshmisc.
+FormatString = “%(n:%n :)%(a:%a - :)%(t:%t:)%(A: \(%A\):)”
+
+# Bufor wyjścia w KB. Minimalną wartością jest 128.
+OutputBuffer = 2048
+
+# Bufor wejścia w KB. Minimalną wartością jest 32.
+InputBuffer = 512
+
+# Jak dużo muzyki MOC ma ładować do podręcznego bufora (w KB),
+# wartość ta nie możę być większa niż wartość buforu wejścia.
+
+Prebuffering = 64
+
+# Wskazuje na użycie serwera proxy dla internetowych strumieni. Jeśli zakomentowane
+# (jak w tym przypadku), zmienne systemowe http_proxy i ALL_PROXY będą użyte, jeśli istnieją.
+#HTTPProxy = my_proxy:port
+
+# Sterownik dźwięku - OSS, ALSA, JACK, lub null (dla testów)
+# Można tutaj dać więcej, niż jeden sterownik. W tym wypadku pierwszy
+# działający sterownik będzie użyty.
+SoundDriver = JACK, ALSA, OSS
+
+# Ustawienia wyjścia sterownika JACK.
+JackOutLeft = “alsa_pcm:playback_1″
+JackOutRight = “alsa_pcm:playback_2″
+
+# Ustawienia wyjścia sterownika OSS
+OSSDevice = /dev/dsp
+
+# Urządzenie w OSS służące do miksowania dźwięku.
+OSSMixerDevice = /dev/mixer
+
+# Pierwszy kanał miksera w OSS: pcm lub master.
+OSSMixerChannel = pcm
+
+# Drugi kanał miksera w OSS: pcm lub master.
+OSSMixerChannel2 = master
+
+# Urządzenie w ALSA służące do miksowania dźwięku.
+AlsaMixer = PCM
+
+# Pierwszy kanał miksera w ALSA.
+AlsaMixer2 = Master
+
+# Pierwszy kanał miksera w ALSA.
+AlsaDevice = default
+
+# Pokazywać pliki i katalogi rozpoczynające się od kropki?
+ShowHiddenFiles = no
+
+# Rozpocząć prace w naszym folderu z muzyką?. Jeśli nie, mocp
+# rozpocznie działanie w aktualnym katalogu.
+StartInMusicDir = no
+
+# Ukrywa rozszerzenia plików
+HideFileExtension = yes
+
+# Show file format in menu. Pokazuj rozszerzenie pliku w menu
+ShowFormat = yes
+
+#Pokazuje czas trwania piosenki w menu. Opcje to: yes, no, IfAvailable - pokazuje wtedy,
+# kiedy plik został wcześniej odtwarzany.
+ShowTime = IfAvailable
+
+# Plik z tematem wyglądu. Można podać pełną ścieżkę, bądź samą nazwę pliku, który jest w
+# /usr/share/moc/themes/ lub w ~/.moc/themes/
+Theme = moc-orpheus
+
+# Temat, który będzie używany, gdy MOC uruchomimy spod Xterma.
+# XTermTheme = transparent-background
+
+# Katalog MOC, domyślnym jest ~/.moc.
+MOCDir = ~/.moc
+
+# Używaj funkcji mmap() do odczytu plików (aktualnie używany do czytania mp3). mmap() jest dużo
+# wolniejszy, gdy używamy NFS (Network File System).
+UseMmap = yes
+
+# Jakie kodowanie ma być używane do odczytywania tagów oraz nazw plików?
+# Jeśli chcemy pobrać listę wspieranych kodowań, możemy użyć polecenia iconv -l.
+
+#ID3v1TagsEncoding = WINDOWS-1250
+
+# Czy program ma używać librcc do pomocy przy enkodowaniu tagów ID3 v. 1/1.1.
+#UseRCC = yes
+
+# Czy program ma pamiętać zawartość playlisty po wyłączeniu go?
+SavePlaylist = yes
+
+# Jeśli używamy naraz kilku klientów MOC, opcja ta powoduje, że playlista jest aktualna
+# na obydwóch klientach.
+SyncPlaylist = yes
+
+# Choose a keymap file (relative to ~/.moc/ or absolute path)
+# Example keymap with description is included (keymap.example).
+#Keymap = my_keymap
+
+# Use ASCII characters instead of graphic for drawing lines. This helps on
+# some terminals.
+ASCIILines = no
+
+# FastDirs, these allow you jump directly to a directory, the key bindings are
+# in the keymap file.
+#Fastdir1 = /mp3/rock
+#Fastdir2 = /mp3/electronic
+#Fastdir3 = /mp3/rap
+#Fastdir4 = /mp3/etc
+#Fastdir5 =
+#Fastdir6 =
+#Fastdir7 =
+#Fastdir8 =
+#Fastdir9 =
+#Fastdir10 =
+
+# How fast to seek? Number of seconds per key stroke.
+#SeekTime = 1
+
+# How fast to seek (when using silent seeking)? Number of seconds per key
+# stroke.
+#SilentSeekTime = 5
+
+# Metoda resamplingu. Domyślną metodą jest linear. Pełen opis jest na stronie:
+# http://www.mega-nerd.com/libsamplerate/api_misc.html#Converters
+#
+# SincBestQuality - Najlepsza jakość, ale i strasznie wolny
+# SincMediumQuality - Gorsza jakość; większa szybkość działania
+# SincFastest - Najszybsza, jakość dźwięku wciąż jest dobra
+# ZeroOrderHold - Bardzo słaba jakość dźwięku, ale najszybsza prędkość działania
+# Linear - Dobra jakość dźwięku i zadowalająca w większości przypadków jakość brzmienia
+#
+#
+# Słowo ode mnie (Treadstone): nie warto wybierać innej metody niż Linear, jeśli nie
+# potrzebujemy krystalicznie czystego dźwięku, który będzie słyszalny jedynie w najwyższej jakości
+# plików przy świetnym sprzęcie nagłaśniającym - na moich głośnikach 2.1 nie słyszałem
+# różnicy dźwięku pomiędzy tak skonfigruowanym MOC, a xmms, Audacious czy Amarok
+#ResampleMethod = Linear
+
+# Częstotliwość próbkowania
+# Jeśli wynosi 0, bądź wpis zakomentowany będzie odczytana z pliku
+#ForceSampleRate = 48000
+
+# Opcja umożliwia ustawienie priorytetu czasu rzeczywistego dla buforu wyjścia
+# Musisz mieć pozwolenie, by używać tej opcji, bądź po prostu być rootem
+# Ustawienie tej opcji może być niebezpieczne, ponieważ bład w MOC
+# może bardzo łatwo zawiesić Twój komputer.
+#UseRealtimePriority = no
+
+# Rozmiar rezerwowanej pamięci dla tagów mp3.
+TagsCacheSize = 256
+
+# Czy pokazywać numery przy utworach.
+#PlaylistNumbering = yes
+
+# Jeśli piosenka się zmieni, menu powinno się przesunąć tak, aby aktualnie
+# odtwarzany plik był widoczny?
+FollowPlayedFile = yes
+
+# Co program ma zrobić, jeśli uruchomiliśmy interfejs podczas, gdy coś z playlisty działa?
+# playing? Jeśli ta opcja jest ustawiona na “yes”, interfejs przełączy się na playliste.
+# Jeśli na “no”, uruchomi się wraz z widokiem na ostatni katalog (można ustawić w opcjach).
+CanStartInPlaylist = yes
+
+# Uruchamianie wybranych komend (10 max) wybierane po naciśnięciu przycisków (F1 - F10
+# domyślnie).
+# Poniższe argumenty mogą być użyte:
+# %f - ścieżka do pliku
+# %i - pełny tytuł z tagu
+#
+# Informacje pobierane z tagów:
+# %t - tytuł
+# %a - album
+# %r - artysta
+# %n - ścieżka
+# %m - czas trwania pliku (w sekundach)
+#
+# Powyższe parametry odnoszą się do aktualnie zaznaczonego pliku. Jeśli zmienimy je
+# tak, aby były pisane z dużych liter (np. %A zamiast %a), będą odnosić się do aktualnie
+# odtwarzanego pliku.
+#
+# Programy są uruchamiane używając funkcji execv(), nie shella, więc nie możemy np.
+# przekierować wyjścia do pliku czy wykorzystać innych funkcji shella.
+#
+# Przykład:
+# ExecCommand1 = “cp %f /mnt/usb_drive”
+
+# Czy program ma ustawiać tytuł Xterma.
+#SetXtermTitle = yes
+
+# Czy wyświetlać pełne nazwy plików wraz ze ścieżką zamiast tylko nazwy pliku w playliście.
+#PlaylistFullPaths = yes
+
+# Włączyć oversampling (yes/no)?
+#ModPlug_Oversampling = yes
+# Włączyć redukcję szumów (yes/no)?
+#ModPlug_NoiseReduction = yes
+# Właczyć reverb (yes/no)
+#ModPlug_Reverb = no
+# Włączyć wzmocnienie basów (yes/no)?
+#ModPlug_MegaBass = no
+# Użyć systemu Surround (yes/no)?
+#ModPlug_Surround = no
+# Metoda resamplingu. Możliwe opcje to: FIR,SPLINE,LINEAR i NEAREST
+# FIR : Najlepsza jakość
+# SPLINE : Wysoka jakość
+# LINEAR : Dobra jakość, niezła szybkość
+# NEAREST : Brak interpolacji - najszybszy, zła jakość
+#ModPlug_ResamplingMode = FIR
+
+# Poniższych opcji nie tłumaczyłem ze względu, że nie chcę tego robić dosłownie nie mając
+# pojęcia jak działa dana funkcja. Jeśli czujesz się na siłąch, możesz dostarczyć mi tłumaczenie
+# które na pewno wkleje zamiast poniższych angielskich zdań.
+
+# Number of channles (1 or 2)
+#ModPlug_Channels = 2
+# Bits per sample (8,16,32). 32 Bits seems ot be buggy…
+#ModPlug_Bits = 16
+# Sampling rate (11025, 22050, 44100, 48000)
+#ModPlug_Frequency = 44100
+# Reverb level 0(quiet)-100(loud)
+#ModPlug_ReverbDepth = 0
+# Reverb delay in ms, usually 40-200ms
+#ModPlug_ReverbDelay = 0
+# Bass level 0(quiet)-100(loud)
+#ModPlug_BassAmount = 0
+# Bass cutoff in Hz (10-100)
+#ModPlug_BassRange = 10
+# Surround level 0(quiet)-100(heavy)
+#ModPlug_SurroundDepth = 0
+# Surround delay in ms, usually 5-40ms
+#ModPlug_SurroundDelay = 0
+# Number of times to loop. Zero prevents looping. -1 loops forever.
+#ModPlug_LoopCount = 0

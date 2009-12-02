@@ -1,0 +1,7 @@
+#!/bin/sh
+# http://www.zinkwazi.com/unix/notes/tricks.vim.html
+# shell> 2html.sh foo.py
+# " Htmlize a file using the current syntax highlighting:
+# :so $VIMRUNTIME/syntax/2html.vim
+
+vim -c ":colorscheme ir_black" -n -c ':so $VIMRUNTIME/syntax/2html.vim' -c ':wqa' $1 > /dev/null 2> /dev/null

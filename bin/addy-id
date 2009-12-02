@@ -1,0 +1,23 @@
+#!/usr/bin/python
+# http://www.leancrew.com/all-this/2008/06/address-book-urls-revisited/
+# http://appscript.sourceforge.net/py-appscript/install.html
+import sys
+from appscript import *
+
+# Find the contacts that have all the names in the given list.
+def searchName(nameList):
+  names = [ x.lower() for x in nameList ]
+  # Get everyone whose last name matches.
+  matches = [ x for x in app('Address Book').people.get() if names[-1] in x.name.get().lower() ]
+  # Look for matches with the other names if there are any.
+  while len(names) > 1:
+    del names[-1]
+    matches = [ x for x in matches if names[-1] in x.name.get().lower() ]
+  # Return the list of matches.
+  return matches
+
+# Print the ID of the top match. Or print an error message.
+try:
+  print searchName(sys.argv[1:])[0].id.get().replace(':', '%3A')
+except IndexError:
+  print "No matches!"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,10 September, 2009
+# Description: date-clipboard
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+echo -e "`date +%d\-%B\-\%G`" | pbcopy

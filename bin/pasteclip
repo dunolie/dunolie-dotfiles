@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,10 September, 2009
+# Description: pasteclip
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed : uses paste2pastebin.pl (rename by me to pastebin)
+# copies the clipboard to ~/tmp/clipboard and then pastebin uploads it
+#########################################################################
+rm ~/tmp/clipboard
+pbpaste > ~/tmp/clipboard
+pastebin ~/tmp/clipboard
+
+
+
+
+

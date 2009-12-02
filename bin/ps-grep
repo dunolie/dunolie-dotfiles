@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# Shortcut to ps -ef | grep foo
+
+GREP="|grep"
+CMD="ps -ef"
+CMD2=
+finalStr=
+commandStr="/bin/bash $0"
+
+printHelp() {
+echo -e "Shortcut to \"ps -ef | grep foo\"\n"
+echo "Usage: $(basename "$0") [-i] [-v] pattern1 [pattern2 [pattern3 [...]]]"
+echo "-i: case-insensitive grep"
+echo "-v: inverse grep: return lines that do NOT match the pattern"
+exit
+}
+
+for i in "$@"; do commandStr="$commandStr $i"; done
+
+for i in "$@"; do
+getopts ivh option
+if [ $option == i ]; then GREP="${GREP} -i"
+elif [ $option == v ]; then GREP="${GREP} -v"
+elif [ $option == h -o "$i" == "--help" ]; then printHelp; fi
+done
+
+for i in "$@"; do
+if [ "$i" == "-i" -o "$i" == "-v" -o "$i" == "-vi" -o "$i" == "-iv" ]; then shift
+else break; fi
+done
+
+for i in "$@"; do CMD2="${CMD2}${GREP} \"$i\""; done
+
+finalStr="${CMD}${CMD2} | grep -v 'ps -ef' | grep -v ' grep ' | grep -v '/grep ' | grep -v '$commandStr'"

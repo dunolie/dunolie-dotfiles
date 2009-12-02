@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# http://www.alecjacobson.com/weblog/?p=180
+cat "$1" | sed s/\</\\\&lt\;/g | sed s/\>/\\\&gt\;/g | pbcopy
+
+

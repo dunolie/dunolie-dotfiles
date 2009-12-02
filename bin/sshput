@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,23 September, 2009
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://www.qandr.org/quentin/software/sshput
+#########################################################################
+# Script Comments if needed :
+#
+# sshput <remotehost>
+#
+# Puts your local DSA public key into the .ssh/authorized_keys 
+# on a remote machine.  This should allow you to login without
+# needing a password.
+#
+# This software comes with no guarantees whatsoever, and is yours to 
+# do with as you will. I'd be grateful if you feed any generally-useful 
+# improvements back to me, for the benefit of others.
+#
+#                Quentin Stafford-Fraser  http://www.qandr.org/quentin
+
+PUBKEY="${HOME}/.ssh/id_dsa.pub"
+
+if [ $# -ne 1 -o "$1" = "-h" ]
+then
+    echo
+    echo Syntax:
+    echo "$0 [user@]<remotehost>"
+    echo
+    exit 1
+fi
+
+if [ ! -r ${PUBKEY} ]
+then
+    echo
+    echo Public key ${PUBKEY} not found.
+    echo You can generate this by running
+    echo "  ssh-keygen -t dsa"
+    echo Then come back and run $0 again.
+    echo
+    exit 1
+fi
+
+echo If you are prompted for a password, enter your password on the
+echo remote machine.
+
+cat ${HOME}/.ssh/id_dsa.pub | \
+  ssh $1 'mkdir -p -m 0700 ${HOME}/.ssh && \
+    cat >> $HOME/.ssh/authorized_keys && \
+    chmod 0600 $HOME/.ssh/authorized_keys'
+
+if [ $? -eq 0 ]
+then
+    echo Public key installed on remote machine.
+    echo You should now be able to connect with
+    echo "    ssh $1"
+    exit 0
+else
+    echo Sorry, an error occurred!
+    exit 1
+fi
+
+

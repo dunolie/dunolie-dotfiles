@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,25 October, 2009
+# Description: get stats on ruby gems
+# Snipped from website : http://gist.github.com/108660
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+# http://prometheusfusionperfection.com/2009/05/08/gem-download-stats/
+#########################################################################
+require 'fastercsv'
+require 'daimpi-google-rest'
+arr_of_arrs = FasterCSV.read("/Users/$USER/Desktop/gem_download_stats.csv") # in the interest of dirty hack I just made a CSV of the data
+google = GoogleSearch.new
+arr_of_arrs.map do |row|
+begin
+result = google.search(:q => "#{row[0]} ruby gem")[0]
+puts "<div style=\"margin-top:10px\">
+#{row[0]}</div>
+<div style=\"margin-top:5px\"><a href=\"#{result.url}\" >#{result.content}</a></div>"
+rescue SyntaxError => error
+rescue => exc
+end
+end

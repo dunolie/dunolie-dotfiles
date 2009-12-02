@@ -1,0 +1,13 @@
+#!/usr/bin/perl  
+ 
+use IMDB::Film;  
+use LWP::Simple;  
+ 
+my $imdbNumber = $ARGV[0];  
+my $film = new IMDB::Film(crit => $imdbNumber);  
+ 
+my $title = $film->title();  
+my $file = "$title.jpg";  
+ 
+my $cover = $film->cover();  
+getstore($cover,$file);

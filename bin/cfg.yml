@@ -1,0 +1,5 @@
+cfg.yml:
+# This is a simple configuration file to show where your ipod files will go.
+# On my computer, my todo files would be saved to the following directory on my iPod:
+# E:\Notes\Todo\
+directory: "/Volumes/Robbie’s\ iPod/Notes/ToDo"

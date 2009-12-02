@@ -1,0 +1,170 @@
+#!/bin/bash
+
+######################################################################
+#
+#InsTar v0.3: simple script to install source code from a tarball
+#Copyright (C) 2004 Russell Phillips
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the
+# Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330,
+# Boston,
+# MA 02111-1307,
+# USA.
+#
+# or go to http://www.fsf.org/licenses/gpl.html
+#
+#The author, Russell Phillips, can be contacted at:
+#avantman42@users.sourceforge.net
+#
+######################################################################
+
+#define version info
+VER_NUM="0.3"
+VER_INFO="InsTar version $VER_NUM: simple script to install source code from a tarball"
+
+#Show GPL notice
+echo "InsTar version $VER_NUM, Copyright (C) 2004 Russell Phillips"
+echo "This is free software; you can redistribute it and/or"
+echo "modify it under the terms of the GNU General Public License"
+echo "as published by the Free Software Foundation; either version 2"
+echo "of the License, or (at your option) any later version."
+echo
+
+#Check for --help or -h
+if [ $1 = "--help" -o $1 = "-h" ]
+then
+    echo "Usage: instar FILE"
+    echo "InsTar will install a source code file. Do not include the extension"
+    echo "example: instar SOURCE_CODE_1.1.0"
+    echo "will install file named SOURCE_CODE_1.1.0.tar.gz"
+    echo "or SOURCE_CODE_1.1.0.tgz"
+    echo "or SOURCE_CODE_1.1.0.tar.bz2"
+    echo
+    echo "instar should be run as root"
+    echo
+    echo "to install, run ./instar --install"
+    echo "to un-install, run instar --remove"
+    echo
+    exit 0
+fi
+
+#Check for --install
+if [ $1 = "--install" ]
+then
+    #Check user is root
+    if [ `whoami` = "root" ]
+    then
+        #copy to /bin
+        cp $0 /bin/instar
+        #make executable by anyone
+        chmod a+x /bin/instar
+        exit 0
+    else
+        echo "Error: You must be root to install instar"
+        exit 1
+    fi
+fi
+
+#Check for --remove
+if [ $1 = "--remove" ]
+then
+    #Check user is root
+    if [ `whoami` = "root" ]
+    then
+        #remove /bin/instar
+        rm -f /bin/instar
+        exit 0
+    else
+        echo "Error: You must be root to un-install instar"
+        exit 1
+    fi
+fi
+
+#Check for --version
+if [ $1 = "--version" ]
+then
+    echo $VER_INFO
+    exit 0
+fi
+
+#Check for common file extensions - .tar.gz
+if [ -f ${1}.tar.gz ]
+then
+    if ! tar -xzvf ${1}.tar.gz 2>/dev/null >/dev/null
+    then
+        echo "Error: unable to untar file ${1}.tar.gz"
+        exit 1
+    fi
+fi
+
+#Check for common file extensions - .tgz
+if [ -f ${1}.tgz ]
+then
+    if ! tar -xzvf ${1}.tgz 2>/dev/null >/dev/null
+    then
+        echo "Error: unable to untar file ${1}.tgz"
+        exit 1
+    fi
+fi
+
+#Check for common file extensions - .tar.bz2
+if [ -f ${1}.tar.bz2 ]
+then
+    if ! tar -xjvf ${1}.tar.bz2 2>/dev/null >/dev/null
+    then
+        echo "Error: unable to untar file ${1}.bz2"
+        exit 1
+    fi
+fi
+
+#cd into new directory
+if ! cd $1 2>/dev/null >/dev/null
+then
+    echo "Error: unable to enter directory $1"
+    exit 1
+fi
+
+#run configure
+if ! ./configure 2>/dev/null >/dev/null
+then
+    echo "Error while running ./configure"
+    exit 1
+fi
+
+#run make
+if ! make 2>/dev/null >/dev/null
+then
+    echo "Error while running make"
+    exit 1
+fi
+
+#run make install
+if ! make install 2>/dev/null >/dev/null
+then
+    echo "Error while running make install"
+    exit 1
+fi
+
+#cd back to parent directory
+cd ..
+
+#Clean up
+if ! rm -rf $1 2>/dev/null >/dev/null
+then
+    echo "Error: unable to remove source code directory $1"
+    exit 1
+fi
+
+echo "Finished installing $1"

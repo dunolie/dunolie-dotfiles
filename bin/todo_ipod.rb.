@@ -1,0 +1,145 @@
+#!/usr/bin/env ruby
+
+# todo_ipod.rb v0.1:
+# http://tech.groups.yahoo.com/group/todotxt/message/108
+# todo_ipod.rb - iPod Dumper
+# Author: Sean Armstrong (phinsxiii@...)
+# Contributing Author: Jeffrey Schwab
+# Release date: 7/4/2006
+# Last updated: 7/4/2006
+# License: GPL, http://www.gnu.org/copyleft/gpl.html
+# Version: 0.1
+# More info: Soon to come
+# Special Thanks to Jeffrey Schwab for coming up with the TaskFormatError
+# and Task classes.
+
+require 'yaml'
+require 'fileutils'
+
+class TaskFormatError < StandardError
+end
+
+class Task
+
+attr :priority, true
+attr :project, true
+attr :context, true
+attr :description, true
+attr :due_date, true
+
+# Initialize a task based on one line of a task file. Each line
+# should have the following format, such that each item can be
+# matched by the given regex. Items should be separated by
+# white-space.
+#
+# 1. Optional priority as first item on line: /\(([ABC]))/
+# 2. Optional project name: /p:(\S*)/
+# 3. Optional context: /@(\S*)/
+# 4. Optional due date: /d:(\S*)/
+# 5. Task description: /.*/
+
+def initialize(line)
+raise TaskFormatError unless line =~
+/(?:\(([ABC])\))?\s* # priority
+(?:p:(\S*))?\s* # project
+(?:@(\S*))?\s* # context
+(?:d:(\S*))? # due date
+(.*)/x # description + trailing
+whitespace
+
+
+@priority = $1
+@project = $2
+@context = $3
+@due_date = $4
+@description = $5
+
+#Remove trailing whitespace from description.
+@description.gsub(/\s+$/, '')
+
+end
+
+# Return a one-line string summarizing this task. The string line
+# can be read later by Task#initialize(line).
+
+def to_s
+s = ''
+s << "(#{@priority}) " if @priority
+s << "p:#{@project} " if @project
+s << "@#{@context} " if @context
+s << "#{@description} " if @description
+s << " d:#{@due_date}" if @due_date
+s
+end
+
+end
+
+tasks = []
+
+ARGF.each do |line|
+next if line =~ /^\s*$|^#/ # Skip blank lines and comments.
+tasks << Task.new(line) # Read in each line and add to the tasks
+array
+end
+
+contexts = [] # Set up an array to hold all task contexts
+projects = [] # Set up an array to hold all task projects
+
+directory = open('cfg.yml') {|f| YAML.load(f)} # Save the ipod save
+directory from the configuration file for later use
+save_dir = directory["directory"]
+proj_dir = save_dir + 'projects/'
+con_dir = save_dir + 'contexts/'
+Dir.foreach(proj_dir) do |x|
+if x != '.' && x != '..'
+File.delete(proj_dir + x)
+end
+end
+Dir.foreach(con_dir) do |x|
+if x != '.' && x != '..'
+File.delete(con_dir + x)
+end
+end
+
+# We will start with the easiest first. This loop will extract all
+tasks with
+# a due date starting with a "d:". The coolthing is that you can use
+any date fromat
+# as long as there is no spaces in the date. The project with the due
+dates are saved
+# to the "due" text file on your ipod.
+open(save_dir + 'due', 'w') do |due|
+tasks.each do |task|
+due << 'd:' + task.due_date.to_s + " " + task.description.to_s if
+task.due_date
+end
+end
+
+# Saving the next files gets a little more complex. The next couple
+of loops will
+# break down and save each task in it's own project/context file on
+the ipod. Each task assigned
+# to a specific project/context will be saved to the project/context
+file with it's due date if applicable.
+# The format for each line will be "(pri) d:(due_date) (task)"
+tasks.each do |task|
+proj_dir = save_dir + 'projects/'
+save_file = proj_dir + task.project.to_s.capitalize + "_Tasks"
+if task.project
+open(save_file, 'a') do |f|
+f << '(' + task.priority.to_s + ') ' if task.priority
+f << '@' + task.context.to_s + ' ' if task.context
+f << 'd:' + task.due_date.to_s + ' ' if task.due_date
+f << task.description.to_s
+end
+end
+con_dir = save_dir + 'contexts/'
+save_file = con_dir + task.context.to_s.capitalize + "_Tasks"
+if task.context
+open(save_file, 'a') do |f|
+f << '(' + task.priority.to_s + ') ' if task.priority
+f << 'd:' + task.due_date.to_s + ' ' if task.due_date
+f << task.description.to_s
+end
+end
+end

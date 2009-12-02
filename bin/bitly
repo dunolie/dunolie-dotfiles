@@ -1,0 +1,10 @@
+#!/bin/sh
+# http://www.geekology.co.za/blog/2009/08/creating-shortened-urls-from-the-command-line/
+
+
+
+curl -s http://bit.ly/?url=$1 \
+| sed -n 's/.*\(shortened-url" value="http:\/\/bit.ly\/[a-zA-Z0-9][a-zA-Z0-9]*\).*/\1/p' \
+| sed -n 's/.*\(http:\/\/bit.ly\/[a-zA-Z0-9][a-zA-Z0-9]*\).*/\1/p' \
+| uniq
+

@@ -1,0 +1,67 @@
+# Created on: 10/07/08 @ 01:18:40
+# /Robbie Terris
+
+URxvt*cutchars: `"()'*<>[]{|}
+
+
+# http://dotfiles.org/~davidlee/.Xdefaults
+XTerm*VT100.metaSendsEscape: True
+
+## XTERM SETTINGS
+## see /usr/X11R6/lib/X11/doc/html/xterm.1.html
+## or man xterm
+# *XTerm*deleteIsDEL: true
+xterm*saveLines: 10000
+# xterm*scrollBar: true
+# xterm*rightScrollBar: true
+xterm*jumpScroll: true
+xterm*cursorColor: red
+# xterm*colorBD: darkblue
+xterm*colorBDMode: true
+xterm*highlightColor: darkgray
+xterm*activeIcon: false
+# xterm*awaitInput: true
+xterm*scrollTtyOutput: false
+xterm*scrollKey: true
+
+xterm*Background: black
+xterm*Foreground: white
+
+XTerm*eightBitInput:   false
+XTerm*metaSendsEscape: true
+
+## TERMINAL KEY SETTINGS
+## Adjust to OSX Terminal.app behaviour
+*VT100.translations: #override\
+#<Key>Prior: scroll-back(1,pages) \n\
+#<Key>Next: scroll-forw(1,pages)\n\
+Meta <Key> K: send-signal(int) clear-saved-lines() \n\
+Meta <Key> P: print() \n\
+Meta <Key> minus: smaller-vt-font() \n\
+Meta <Key> KP_Subtract: smaller-vt-font() \n\
+Meta <Key> plus: larger-vt-font() \n\
+Meta <Key> KP_Add: larger-vt-font() \n\
+Meta <Key> C: select-cursor-start() \
+Meta <Key> E: select-cursor-end(PRIMARY, CUT_BUFFER0) \n\
+Meta <Key> V: insert-selection(PRIMARY, CUT_BUFFER0) \n\
+Meta <Key> M: iconify() \n\
+
+
+## EXTRA SETTINGS FOR XAW SCROLLBAR
+## see /usr/X11R6/include/X11/Xaw/Scrollbar.h
+## for full reference of available recources
+#*Scrollbar.background: gray50
+#*Scrollbar.foreground: gray50
+#*Scrollbar.borderWidth: 0
+*Scrollbar.shadowWidth: 0
+*Scrollbar.thickness: 10
+*Scrollbar.minimumThumb: 20
+# *Scrollbar.backgroundPixmap: gradient:horizontal?dimension=14&start=gray80&end=white
+# *Scrollbar.borderPixmap: gradient:horizontal?dimension=14&start=white&end=grey80
+
+*Scrollbar.translations: #override\
+<Btn2Down>: StartScroll(Forward) \n\
+<Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb() \n\
+<Btn3Down>: StartScroll(Backward) \n\
+<Btn1Motion>: MoveThumb() NotifyThumb() \n\
+<BtnUp>: NotifyScroll(Proportional) EndScroll()

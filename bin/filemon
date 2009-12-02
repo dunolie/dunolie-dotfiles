@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# File Monitor  btodd3
+#
+# 3/14/07	Initial Version
+
+function list () {
+ls -l
+sleep 1
+}
+
+while true; do
+list | grep $1
+done

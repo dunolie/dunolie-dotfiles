@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# daily quote script using quote_of_the_day.rb
+# run as a cron job every morning :)
+# http://github.com/shenie/scripts/tree/master/ruby/quote_of_the_day.rb
+
+ruby /Users/$USER/Sync/Bash/bin/quote_of_the_day.rb | growlnotify -s -a "Terminal" -t "Quote of the Day"  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

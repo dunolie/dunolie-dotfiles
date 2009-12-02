@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,13 September, 2009
+# Description: iplayer stream URL
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+
+growlnotify -s -I "~/Sync/Bash/bin/growl-icons/iplayer" -t "iPlayer Streaming" -m "$1"
+get_iplayer --stream --type=livetv $1 --player='mplayer -cache 128 -'

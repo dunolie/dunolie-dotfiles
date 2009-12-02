@@ -1,0 +1,54 @@
+# #!/bin/bash
+snippet bash
+	#!/bin/bash
+snippet #!
+	#!/usr/bin/env bash
+snippet if
+	if [[ ${1:condition} ]]; then
+		${2:#statements}
+	fi
+snippet elif
+	elif [[ ${1:condition} ]]; then
+		${2:#statements}
+snippet for
+	for (( ${2:i} = 0; $2 < ${1:count}; $2++ )); do
+		${3:#statements}
+	done
+snippet wh
+	while [[ ${1:condition} ]]; do
+		${2:#statements}
+	done
+snippet until
+	until [[ ${1:condition} ]]; do
+		${2:#statements}
+	done
+snippet case
+	case ${1:word} in
+		${2:pattern})
+			${3};;
+	esac
+snippet colors
+	NC='\e[0m'
+	WHITE='\e[1;37m'
+	BLACK='\e[0;30m'
+	BLUE='\e[0;34m'
+	L_BLUE='\e[1;34m'
+	GREEN='\e[0;32m'
+	L_GREEN='\e[1;32m'
+	CYAN='\e[0;36m'
+	L_CYAN='\e[1;36m'
+	RED='\e[0;31m'
+	L_RED='\e[1;31m'
+	PURPLE='\e[0;35m'
+	L_PURPLE='\e[1;35m'
+	YELLOW='\e[1;33m'
+	L_YELLOW='\e[0;33m'
+	GRAY='\e[1;30m'
+	L_GRAY='\e[0;37m'
+	
+snippet growl
+	growlnotify -s -a "Terminal" -t "${1:Title}" -m "${2:Message}"
+snippet var
+	${1:VARIABLE}="${2:Something}"
+
+

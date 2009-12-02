@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,21 August, 2008
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# Net Growl Support : uncomment lines if need and copy to base of script
+# This is used to call netgrowl.py for network notifications 
+# More info here : http://blog.mckuhn.de/ 
+# More info here : http://the.taoofmac.com/space/Projects/netgrowl
+# Good for use on unix machines :)
+#
+#uncomment# import growlnotify
+#uncomment# growlnotify.growlNotify()	
+#
+#########################################################################
+
+
+
+defaults write com.apple.ScreenSharing \ 'NSToolbar Configuration ControlToolbar' -dict-add 'TB Item Identifiers' \ '(Scale,Control,Share,Curtain,Capture,FullScreen,GetClipboard,SendClipboard,Quality)'
+
+

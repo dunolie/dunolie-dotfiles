@@ -1,0 +1,33 @@
+#!/bin/sh
+# Check alias
+# http://forums.macosxhints.com/showthread.php?t=19960
+
+if [ $# -eq 0 ]; then
+  echo "Usage: aliascheck file1 file2 file3..."
+  echo "  where alias1, alias2, etc are files."
+  echo "  Each file will be tested to see if it is an alias."
+fi
+
+while [ $# -gt 0 ]; do
+  if [ -f "$1" -a ! -L "$1" ]; then
+    item_name=`basename "$1"`
+    item_parent=`dirname "$1"`
+    # Next two rows should be entered as one row #
+    item_parent="`cd \"${item_parent}\" 2>/dev/null && pwd || echo \"${item_parent}\"`"
+    item_path="${item_parent}/${item_name}"
+linksource=`osascript<<EOS
+tell app "Finder"
+set theItem to (POSIX file "${item_path}") as alias
+if the kind of theItem is "alias" then
+get the posix path of (original item of theItem as text)
+end if
+end tell
+EOS`
+    if [ $? -eq 0 ]; then
+      if [ ! -z "$linksource" ]; then
+        echo "\"${1}\" -> \"${linksource}\""
+      fi
+    fi
+    shift
+  fi
+done

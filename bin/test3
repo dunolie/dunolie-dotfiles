@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,09 September, 2009
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+
+python ~/bin/imgupload.py $1 | echo
+
+

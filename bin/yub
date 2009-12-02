@@ -1,0 +1,7 @@
+#!/bin/sh
+
+#BROWSER=firefox # you can use w3m to get output in the shell
+BROWSER=w3m # you can use w3m to get output in the shell
+COMMAND=$(echo $* | sed -e 's/ /+/g')
+
+$BROWSER http://yubnub.org/parser/parse?command=$COMMAND

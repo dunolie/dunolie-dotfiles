@@ -1,0 +1,4 @@
+#!/bin/bash
+# search wikipedia via links cli browser
+# http://www.macosxhints.com/article.php?story=2005020811374390&query=gnu%2Bscreen
+links http://en.wikipedia.org/wiki/Special:Search?search=$(echo $@ | sed 's/ /+/g')

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie ( dunolie@gmail.com )
+#        Created: 15/10/09 @ 06:52:41
+#      File name: Battery status for use in my prompt
+#  Last modified:
+# -------------------------------------------------------------------------------
+#       Comments:
+#    Description:
+# -------------------------------------------------------------------------------
+CHARGE=$(batterystat -p charge)
+POWER=echo -e "${COLOR_GREEN}⚡"
+CHARGING=echo -e "${COLOR_YELLOW}⚡"
+
+if [[ $(batterystat -p charging) -eq 0 ]]; then
+	$CHARGING
+fi
+
+if [[ $(batterystat -p plugged) -eq 0 ]]; then
+	$POWER
+fi
+
+if [[ $(hostname) = "ibook" ]]; then
+	if [[ $CHARGE >= 50 && $CHARGE <= 100 ]]; then
+		echo -e "${COLOR_MEGENTA}[$CHARGING$POWER${COLOR_GREEN}$CHARGE%${COLOR_MEGENTA}]"
+	fi
+fi
+
+if [[ $(hostname) = "ibook" ]]; then
+	if [[ $CHARGE >= 20 && $CHARGE <= 50 ]]; then
+		echo -e "${COLOR_MEGENTA}[$CHARGING$POWER${COLOR_YELLOW}$CHARGE%${COLOR_MEGENTA}]"
+	fi
+fi
+
+if [[ $(hostname) = "ibook" ]]; then
+	if [[ $CHARGE -lt 20 ]]; then
+		echo -e "${COLOR_MEGENTA}[$CHARGING$POWER${COLOR_RED}$CHARGE%${COLOR_MEGENTA}]"
+	fi
+fi
+
+

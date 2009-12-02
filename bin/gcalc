@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+  array_shift ($argv);
+  if (count ($argv) == 0) die ("Not enough arguments\n");
+  $q = implode ("+", $argv);
+  $c = file_get_contents ("http://www.google.com/search?q=$q");
+  preg_match ('/<div id=res.+?<\/h2>/', $c, $r);
+  $a = str_replace (' ', '', strip_tags ($r[0]));
+  if ($a == "Search Results") $a = "No results";
+  printf ("%s\n", $a);
+
+?>

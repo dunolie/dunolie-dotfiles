@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,27 March, 2008
+# Description: count .htm or .html files in the directory.
+# http://snipplr.com/view/5573/count-htmhtml-files-in-the-directory-recursive/
+ls -R | grep -c '.htm'
+

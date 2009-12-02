@@ -1,0 +1,12 @@
+#!/bin/sh
+
+for file in "$@"; do
+    feh -Z -g 560x700 "$file" &
+    echo "$file"
+    read -p "Title: " title
+    read -p "Description: " description
+    read -p "Tags: " tags
+    exiftool -overwrite_original -Headline="$title" -ImageDescription="$description" -Keywords="$tags" "$file"
+    echo ""
+    wait
+done

@@ -1,0 +1,12 @@
+#!/bin/bash
+#http://snipplr.com/view.php?codeview&id=2833
+# Sends the current selection text or document (if no selection) to quicksilver 
+# To use this you must install the "Command Line Tools (qs)" plugin in quicksilver
+#
+# Create a new bundle command and call it "Send to Quicksilver"
+# Set command input to Selection Or Document
+# set command output to discard
+# set key equivalent (I set mine to command + escape)
+# Leave Scope Selector blank
+
+cat /dev/stdin | qs

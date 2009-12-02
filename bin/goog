@@ -1,0 +1,87 @@
+#!/bin/sh
+# \
+exec tclsh8.4 "$0" "$@"
+
+#
+# google for <terms>
+#
+# This script is hereby placed into the public domain by its author,
+# Dossy Shiobara <dossy@panoptic.com>, on November 24, 2008.
+#
+
+package require http
+package require tdom
+
+proc striptags str {
+    regsub -all {<.*?>} $str {} str
+    return $str
+}
+
+proc main args {
+    ## I often type "google for ..." so, correct that here.
+    if {[lindex $args 0] eq "for"} {
+        set args [lrange $args 1 end]
+    }
+
+    # Squelch broken pipe errors, etc.
+    close stderr
+
+    set query [join $args " "]
+    set url "http://www.google.com/search?[http::formatQuery q $query]"
+    puts $url
+    puts ""
+
+if 1 {
+    ## Google seems to refuse requests from Tcl http's default user agent.
+    http::config -useragent "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.0.4) Gecko/2008102920 Firefox/3.0.4"
+    set token [http::geturl $url]
+    set data [http::data $token]
+    http::cleanup $token
+} else {
+    set f [open data r]
+    set data [read $f]
+    close $f
+}
+
+    set tmpfile "/tmp/tmpfile[expr int(rand()*32768)].[pid]"
+    set f [open $tmpfile [list RDWR CREAT EXCL] 0600]
+    puts -nonewline $f $data
+    close $f
+
+    set f [open "|tidy -q -w 0 -asxml $tmpfile 2> /dev/null" r]
+    set tidy [read $f]
+    catch { close $f }
+
+    file delete -force -- $tmpfile
+
+    set doc [dom parse -html $tidy]
+    set root [$doc documentElement]
+
+    set res [$root selectNodes {//div[@id="res"]}]
+    if {$res eq ""} {
+        puts "No results."
+        return
+    }
+
+    set table [$res selectNodes {table}]
+    if {$table ne ""} {
+        ## Special Google result.
+        set r [$table selectNodes {.//h2[@class='r']}]
+        if {$r ne ""} {
+            puts [$r asText]
+        }
+        puts ""
+    }
+
+    set n 0
+    foreach li [$res selectNodes {div/ol/li}] {
+        set a [$li selectNodes {h3[@class='r']/a}]
+        if {$a ne ""} {
+            incr n
+            puts [format "%2u. %s" $n [$a asText]]
+            puts "    [$a getAttribute href]"
+        }
+    }
+}
+
+eval main $argv

@@ -1,0 +1,449 @@
+#!/bin/bash
+
+# Paths to commands executed by this script.
+# (Anything you pass into -f is your responsibility.)
+my_basename="/usr/bin/basename"
+my_bash="/bin/bash"
+my_cat="/bin/cat"
+my_ditto="/usr/bin/ditto"
+my_echo="/bin/echo"
+my_expr="/bin/expr"
+my_mktemp="/usr/bin/mktemp"
+my_rm="/bin/rm"
+my_srm="/usr/bin/srm"
+my_ssh="/usr/bin/ssh"
+
+function echo_err {
+#	Echoes a string to stderr
+# 	Input: $1 = string
+
+	$my_echo "$1">&2
+}
+
+function show_usage {
+# 	Input: $1 = exit code used to terminate script
+
+	echo_err ""
+	echo_err "rditto v1.0: Copyright [C] 2005 by Edward K. Chew, All rights reserved."
+	echo_err ""
+	echo_err "rditto is my crude attempt to combine ditto and ssh, so that you can copy and"
+	echo_err "archive your Mac files in their entirety (resource forks and all) across remote"
+	echo_err "servers.  This is mainly useful for dealing with pre-10.4 systems, since as of"
+	echo_err "Tiger, other tools like scp and rsync can also preserve your Mac meta-data."
+	echo_err "(They may not do archiving, mind you.)"
+	echo_err ""
+	echo_err "rditto does not replicate all the functionality of ditto, and differs from it"
+	echo_err "in a number of important ways:"
+	echo_err ""
+	echo_err "1.  THE DESTINATION IS ALWAYS A DIRECTORY INTO WHICH SOURCE FILES ARE COPIED."
+	echo_err "    There is no special case for single source files like you see in ditto."
+	echo_err "    (Frankly, I always found that counter-intuitive, so I don't miss it.)"
+	echo_err ""
+	echo_err "2.  You can compress multiple sources into the same archive.  Normal ditto will"
+	echo_err "    not permit this, so I had to go to some extremes to enable it.  The files"
+	echo_err "    are first copied into a temporary directory before being compressed to fool"
+	echo_err "    ditto into thinking it is only dealing with one item.  (The enclosing"
+	echo_err "    directory is NOT stored in the archive.)  This directory is later deleted,"
+	echo_err "    and you can fine-tune how thoroughly it is deleted using -r."
+	echo_err "    (The temporary directory is stored within \"~/Temporary Items\", and its"
+	echo_err "    name should begin with \"rditto\".)"
+	echo_err ""
+	echo_err "3.  Alternatively, there is a batch mode where you can compress multiple"
+	echo_err "    sources into individual archives in a target directory.  This is basically"
+	echo_err "    the equivalent of calling rditto -c multiple times."
+	echo_err ""
+	echo_err "4.  Paths arguments take the following form:"
+	echo_err ""
+	echo_err "        [[user@]remote.host:]/local/path/to/file"
+	echo_err "        [[user@]remote.host:]/local/path/to/directory/"
+	echo_err ""
+	echo_err "    Notice the trailing slash at the end of the directory path.  rditto uses"
+	echo_err "    this to distinguish between files and directories in source arguments."
+	echo_err "    (It is cumbersome to tell them apart on remote hosts.)"
+	echo_err ""
+	echo_err "5.  rditto may or may not apply the ditto --keepParent flag automatically when"
+	echo_err "    creating archives or copying files, depending on whether the source"
+	echo_err "    argument is a directory or a file.  ditto leaves it off by default, but"
+	echo_err "    rditto activates it for directories to avoid losing that outermost"
+	echo_err "    enclosing directory (something I hate about the regular ditto)."
+	echo_err "    There is a catch, however, so pay attention!  Since it is difficult to"
+	echo_err "    tell if an item on a remote host is a file or a directory (you would"
+	echo_err "    have to open a session to host just for that, which seems a waste of"
+	echo_err "    resources), in that case, rditto just looks for a trailing slash in the"
+	echo_err "    path name to indicate that it is a directory.  At any rate, you can always"
+	echo_err "    override the default behaviour using either -e or -E."
+	echo_err ""
+	echo_err "6.  There is an implied --rsrc flag in all rditto calls except when you use"
+	echo_err "    the -k (zip archive) option.  In that case, I use --sequesterRsrc instead."
+	echo_err ""
+	echo_err "7.  You can insert a filter to munge the data stream en-route to its"
+	echo_err "    destination.  For example, you might want to encrypt the data going into"
+	echo_err "    an archive.  The filter should accept data from stdin and spit it out to"
+	echo_err "    stdout.  Filters always execute on the machine running rditto."
+	echo_err ""
+	echo_err "USAGE:"
+	echo_err ""
+	echo_err "    $0 [OPTIONS] SRC_PATH ... DST_DIR"
+	echo_err "    $0 -c [-z|-k] [OPTIONS] SRC_PATH ... DST_ARCHIVE"
+	echo_err "    $0 -b SUFFIX [-z|-k] [OPTIONS] SRC_PATH ... DST_DIR"
+	echo_err "    $0 -x [-z|-k] [OPTIONS] SRC_ARCHIVE ... DST_DIR"
+	echo_err ""
+	echo_err "    -c:  Equivalent to ditto -c"
+	echo_err "    -b SUFFIX:"
+	echo_err "         Batch compression mode creates multiple archives from multiple sources"
+	echo_err "         in your destination directory.  You must provide the appropriate"
+	echo_err "         suffix (e.g. .zip) to be appended to every source name.  (Note that"
+	echo_err "         -b implies -c.)"
+	echo_err "    -x:  Equivalent to ditto -x"
+	echo_err "    -e:  Equivalent to ditto --keepParent."
+	echo_err "	  -E:  Removes --keepParent.  (See note above about default behaviour.)"
+	echo_err "    -k:  Equivalent to ditto -k"
+	echo_err "    -z:  For archiving, equivalent to ditto -z."
+	echo_err "         For copying, compresses the data stream."
+	echo_err "    -r REMOVE_LEVEL (0-3):"
+	echo_err "         This option is only relevant when you are compressing an archive from"
+	echo_err "         multiple sources.  As mentioned earlier, this involves an interim"
+	echo_err "         stage at which all the source files are copied into a temporary"
+	echo_err "         directory.  For security purposes, you might want to overwrite this"
+	echo_err "         data before deleting it.  The allowed values are:"
+	echo_err "             0:  rm     -- unlink the file without overwriting data (default)"
+	echo_err "             1:  srm -s -- overwrite once (should prevent software recovery)"
+	echo_err "             2:  srm -m -- overwrite 7 times"
+	echo_err "             3:  srm    -- overwrite 35 times"
+	echo_err "    -v:"
+	echo_err "    -V:  Equivalent to ditto -v or -V, but with some extra annotations."
+	echo_err ""
+	echo_err "    -o \"SSH_OPTIONS\":"
+	echo_err "         Additional options for ssh in quotes."
+	echo_err "    -O \"SSH_OPTIONS\":"
+	echo_err "         If both your source and destination lie on different remote servers,"
+	echo_err "         you can use -O to specify different options for the destination."
+	echo_err "         Otherwise, the -o options will be used for both."
+	echo_err ""
+	echo_err "    -f \"FILTER\":"
+	echo_err "         The filter command, enclosed in quotes (see description above)."
+	echo_err ""
+#             0123456789012345678901234567890123456789012345678901234567890123456789012345678
+	exit $1
+}
+
+function prep_compress_mult {
+#	Sets up a temporary directory and determines how to eventually remove it.
+#	Also disables the user-supplied filter, since this should only be applied
+#	once later on when the temporary directory gets compressed into an archive.
+#	Input:
+#		$remove_mode = 0, 1, 2, or 3, if user entered it right
+#		$filter = user-specified filter
+#	Output:
+#		$temp_dir = "~/Temporary Items/rdittoXXXXXX"
+#		$remove_temp = corresponding remove command
+#		$saved_filter = original filter
+#		$filter = ""
+
+#	Set up the remove temporary directory command.
+	case "$remove_mode" in
+	0)	remove_temp="$my_rm";;
+	1)	remove_temp="$my_srm -s";;
+	2)	remove_temp="$my_srm -m";;
+	3)	remove_temp="$my_srm";;
+	*)	show_usage 2;;
+	esac
+
+#	Create the temporary directory.
+	temp_dir=`$my_mktemp -d "$HOME/Temporary Items/rditto-XXXXXX"` || exit 1
+
+#	Disable the filter
+	saved_filter="$filter"
+	filter=""
+}
+
+function compress_temp_dir {
+#	Compresses the temporary directory to its destination and removes it
+#	after restoring the saved filter.
+#	Input:
+#		$temp_dir
+#		$remove_temp
+#		$saved_filter
+#	Output:
+#		$filter = restored filter
+
+#	Restore the filter.
+	filter="$saved_filter"
+
+#	Compress the temporary directory without the --keepParent flag.
+	keepParent_mode="no"
+	compress_one "$temp_dir" "$dst_arg"
+	
+#	Remove the temporary directory.
+	[ -n "$verbose" ] && verbose="-v "
+	remove_cmd="$remove_temp -r -f $verbose\"$temp_dir\""
+	run_in_bash "$remove_cmd"
+}
+
+function parse_path {
+#	Input: $1 = full scp-style path
+#	Output:
+#		$remote_host = user@remote.host or empty string if local host
+#		$local_path = /local/path on remote or local host
+
+	if [ "${#1}" -lt "3" ]; then
+		got_remote_host="0"
+	else
+		got_remote_host=`$my_expr "$1" : '.*:'`
+	fi
+	if [ "$got_remote_host" -eq "0" ]; then
+		remote_host=""
+		local_path="$1"
+	else
+		remote_host="${1%:*}"
+		local_path="${1#*:}"
+	fi
+}
+
+function parse_src_and_dst {
+#	This function just calls parse_path twice for the source and destination.
+#	Input:
+#		$1 = source path
+#		$2 = destination path
+#	Output:
+#		$src_host = user@source.host or empty string if local host
+#		$src_path = /source/path on remote or local host
+#		$dst_host = user@destination.host or empty string if local host
+#		$dst_path = /destination/path on remote or local host
+
+	src_path="$1"
+	dst_path="$2"
+	parse_path "$src_path"
+	src_host="$remote_host"
+	src_path="$local_path"
+	parse_path "$dst_path"
+	dst_host="$remote_host"
+	dst_path="$local_path"
+}
+
+function check_keepParent {
+# 	Check to see if we need the ditto --keepParent flag or not.
+# 	Input:
+#		$1 = source host
+#		$2 = source path
+#		$keepParent_mode = "yes", "no", or "default"
+# 	Output: $keepParent = "--keepParent " or ""
+
+	#	First check if the user had explicitly indicated what to do using
+	#	either -e or -E in the command line.
+	if [ "$keepParent_mode" = "yes" ]; then
+		keepParent="--keepParent "
+	elif [ "$keepParent_mode" = "no" ]; then
+		keepParent=""
+	
+	else
+		
+		#	Otherwise, we need to know if the we are dealing with a file or a directory.
+		#	The -d test should do the trick if the source is on the local host, but it
+		#	seemed a waste of resources to open an ssh connection just to test this on
+		#	a remote host, so I cheated.  In the latter case, I look to see if the path
+		#	name ends with a trailing slash.  If so, I take it to be a directory.
+		#	This behaviour is documented in the usage notes.
+		if [ -n "$1" ]; then
+			is_directory=`$my_expr "$2" : '.*/$'`
+		elif [ -d "$2" ]; then
+			is_directory="1"
+		else
+			is_directory="0"
+		fi
+		
+		#	Use --keepParent only on directories.
+		if [ "$is_directory" -gt "0" ]; then
+			keepParent="--keepParent "
+		else
+			keepParent=""
+		fi
+	fi
+}
+
+function run_in_bash {
+#	Input:
+#		$1 = command
+#		$verbose
+
+	[ -n "$verbose" ] && echo_err "rditto executes: $1"
+	$my_bash -c "$1"
+	exit_code="$?"
+	if [ "$exit_code" -ne "0" ]; then
+		echo_err "$0 terminated with exit code: $exit_code"
+		exit 1
+	fi
+}
+
+function copy_one {
+#	Input:
+#		$1 = source path
+#		$2 = destination path
+#		command line option globals also used
+
+	parse_src_and_dst "$1" "$2"
+	
+	if [ -n "$src_host" ] || [ -n "$dst_host" ] || [ -n "$filter" ]; then
+	
+		check_keepParent "$src_host" "$src_path"
+		
+		full_cmd="$my_ditto -c $compress$verbose$rsrc$keepParent\"$src_path\" \"-\""
+		[ -n "$src_host" ] && full_cmd="$my_ssh $ssh_src_opts \"$src_host\" '$full_cmd'"
+		
+		[ -n "$filter" ] && full_cmd="$full_cmd | $filter"
+		
+		dst_cmd="$my_ditto -x $compress$rsrc\"-\" \"$dst_path\""
+		[ -n "$dst_host" ] && dst_cmd="$my_ssh $ssh_dst_opts \"$dst_host\" '$my_cat \"-\" | $dst_cmd'"
+		full_cmd="$full_cmd | $dst_cmd"
+	
+	else
+	
+		[ `$my_expr "$dst_path" : '.*/$'` -eq "0" ] && dst_path="$dst_path/"
+		dst_name=`$my_basename "$src_path"`
+		full_cmd="$my_ditto $verbose--rsrc \"$src_path\" \"$dst_path$dst_name\"" 
+	
+	fi
+	
+	run_in_bash "$full_cmd"
+}
+
+function compress_one {
+#	Input:
+#		$1 = source path
+#		$2 = destination archive path
+#		command line option globals also used
+
+	parse_src_and_dst "$1" "$2"
+	check_keepParent "$src_host" "$src_path"
+	
+	if [ -n "$src_host" ] || [ -n "$dst_host" ] || [ -n "$filter" ]; then
+	
+		full_cmd="$my_ditto -c $compress$verbose$rsrc$keepParent\"$src_path\" \"-\""
+		[ -n "$src_host" ] && full_cmd="$my_ssh $ssh_src_opts \"$src_host\" '$full_cmd'"
+		
+		[ -n "$filter" ] && full_cmd="$full_cmd | $filter"
+		
+		if [ "$2" != "-" ]; then
+			if [ -n "$dst_host" ]; then
+				full_cmd="$full_cmd | $my_ssh $ssh_dst_opts \"$dst_host\" '$my_cat \"-\" > \"$dst_path\"'"
+			else
+				full_cmd="$full_cmd > \"$dst_path\""
+			fi
+		fi
+	
+	else
+	
+		full_cmd="$my_ditto -c $compress$verbose$rsrc$keepParent\"$src_path\" \"$dst_path\""
+	
+	fi
+	
+	run_in_bash "$full_cmd"
+}
+
+function expand_one {
+#	Input:
+#		$1 = source archive path
+#		$2 = destination directory path
+#		command line option globals also used
+
+	parse_src_and_dst "$1" "$2"
+	
+	if [ -n "$src_host" ] || [ -n "$dst_host" ] || [ -n "$filter" ]; then
+	
+		full_cmd="$my_ditto -x $compress$verbose$rsrc\"-\" \"$dst_path\""
+		[ -n "$dst_host" ] && full_cmd="$my_ssh $ssh_dst_opts \"$dst_host\" '$my_cat \"-\" | $full_cmd'"
+		
+		[ -n "$filter" ] && full_cmd="$filter | $full_cmd"
+		
+		if [ "$1" != "-" ]; then
+			src_cmd="$my_cat \"$src_path\""
+			[ -n "$src_host" ] && src_cmd="$my_ssh $ssh_src_opts \"$src_host\" '$src_cmd'"
+			full_cmd="$src_cmd | $full_cmd"
+		fi
+	
+	else
+	
+		full_cmd="$my_ditto -x $compress$verbose$rsrc\"$src_path\" \"$dst_path\""
+	
+	fi
+	
+	run_in_bash "$full_cmd"
+}
+
+function process_one {
+#	Calls the appropriate function to process one source argument.
+#	Input:
+#		$1 = source argument
+#		$2 = destination argument
+#		command line option globals also used
+
+	case "$ditto_mode" in
+	"copy")				copy_one "$1" "$2";;
+	"compress_one")		compress_one "$1" "$2";;
+	"compress_mult")	copy_one "$1" "$temp_dir";;
+	"batch_compress")	archive_name=`$my_basename "$1"`"$batch_suffix"
+						compress_one "$1" "$2$archive_name";;
+	"expand")			expand_one "$1" "$2";;
+	esac
+}
+
+# Parse command line options.
+ditto_mode="copy"
+keepParent_mode="default"
+remove_mode="0"
+
+while getopts "cb:eEr:vVxzko:O:f:" options; do
+	case "$options" in
+	c)  [ "$ditto_mode" != "batch_compress" ] && ditto_mode="compress_one";;
+	b)	ditto_mode="batch_compress"
+		batch_suffix="$OPTARG";;
+	e)	keepParent_mode="yes";;
+	E)	keepParent_mode="no";;
+	r)	remove_mode="$OPTARG";;
+	v)	verbose="-v ";;
+	V)	verbose="-V ";;
+	x)	ditto_mode="expand";;
+	z)  compress="-z ";;
+	k)	compress="-k ";;
+	o)	ssh_src_opts="$OPTARG";;
+	O)	ssh_dst_opts="$OPTARG";;
+	f)	filter="$OPTARG";;
+	\?)	show_usage 2;;
+	esac
+done
+
+# Move past the options and make sure there are at least two path
+# arguments remaining.
+shift $(($OPTIND-1))
+[ "$#" -lt "2" ] && show_usage 2
+
+# Check for multiple sources in compression mode.
+if [ "$ditto_mode" = "compress_one" ] && [ "$#" -gt "2" ]; then
+	ditto_mode="compress_mult"
+	prep_compress_mult
+fi
+
+# Use ssh source options for destination if the latter are unavailable.
+ssh_dst_opts="${ssh_dst_opts:-$ssh_src_opts}"
+
+# Set $rsrc to either "--rsrc " or "--sequesterRsrc " depending on whether
+# -k was specified on the command line.
+rsrc="--rsrc "
+[ "$compress" = "-k " ] && rsrc="--sequesterRsrc "
+
+# The last argument is always the ultimate destination.
+# For batch compression mode, make sure its path has a trailing slash.
+eval dst_arg="\${$#}"
+[ "$ditto_mode" = "batch_compress" ] && [ `$my_expr "$dst_arg" : '.*/$'` -eq "0" ] && dst_arg="$dst_arg/"
+
+# Loop through the source arguments.
+while [ "$#" -gt "1" ]; do
+	process_one "$1" "$dst_arg"
+	shift
+done
+
+# In multiple compression mode, everything should be nestled in temporary
+# directory by now, so it's finally time to compress it.
+[ "$ditto_mode" = "compress_mult" ] && compress_temp_dir
+
+exit 0

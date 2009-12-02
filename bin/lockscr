@@ -1,0 +1,6 @@
+#!/bin/bash
+SCRS=`ps xcopid,command|grep ScreenSaverEng|cut -b1-5`
+if [ -z "$SCRS" ]; then
+  /System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine
+fi
+

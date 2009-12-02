@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#       Created: TIMESTAMP       
+# Last Modified: TIMESTAMP
+#   Description: mutt-print script for osx
+#      Comments: http://linsec.ca/Using_mutt_on_OS_X
+################################################################################
+pfile="${1}"
+pdir="${HOME}/tmp/mutt-print"
+
+if [ ! -d ${pdir} ]; then
+    mkdir -p ${pdir}
+fi
+
+# delete any old temporary files first
+rm -f ${pdir}/*_mutt.pdf
+
+tmpfile="`mktemp ${pdir}/mutt-XXXXXXXX`"
+mv -f ${tmpfile} ${tmpfile}.pdf
+enscript --font=Times-Roman10 --pretty-print ${1} -o - 2>/dev/null | pstopdf -i -o ${tmpfile}.pdf
+open ${tmpfile}.pdf

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#
+# YouTube Leech & Play Script
+# eg. ./youtube.sh http://www.youtube.com/watch?v=UsAl3HsCXf0
+#
+# Remember: Install the sox package for 'play' and put yourself in the audio group!
+#
+
+YOUTUBE=$(curl -s $1 | grep watch_fullscreen)
+VIDEOID=$(echo $YOUTUBE | sed "s!.*\(video_id.\+\)&title.*!\1!")
+TITLE=$(echo $YOUTUBE | sed "s!.*&title=\(.*\)';!\1!" | sed 's!&[^;]*;!!g' | sed 's![^-a-zA-Z0-9 ]!!g' | sed 's! !_!g').mp3
+TEMP=$(mktemp)
+
+echo -e "Downloading $TITLE from YouTube ...\n"
+curl -L http://youtube.com/get_video.php\?$VIDEOID > $TEMP
+
+echo -e "Demuxing ... \n"
+ffmpeg -i $TEMP $TITLE
+rm $TEMP
+
+echo -e "Playing ... \n"
+play $TITLE
+
+exit 0

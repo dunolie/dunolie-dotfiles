@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,15 August, 2008
+# Description: tail a file to growlnotify for alerts
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://gorn.ch/archive/2007/01/23/tail-f-to-growl.html
+#########################################################################
+if [ -z "$1" ]; then
+    echo "Missing filename"
+    exit 1
+fi
+
+tail -n0 -F $1 | while read; do
+    echo $REPLY | growlnotify -a tailfgrowl -t $1;
+done
+

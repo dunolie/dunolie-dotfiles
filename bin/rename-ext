@@ -1,0 +1,153 @@
+#!/bin/bash
+
+#----------------------------------------
+#          rename.sh
+#
+# Change extension of a run of files 
+#
+# (c) 2005, ADX Consulting sprl
+# Version 1.0b0 -- Dec. 30, 2005
+#
+#----------------------------------------
+
+SCRPTNAME="rename"
+VERSION=${SCRPTNAME}".sh  v1.0b0  --  (c) 2005, ADX Consulting"
+LOG="/tmp/"${SCRPTNAME}".log"
+HELP="no"
+HFLDR=""
+OLD_EXT=""
+NEW_EXT=""
+DMP="no"
+SILENT="no"
+
+DUMP () {
+	echo -e "SCRPTNAME =" ${SCRPTNAME}
+	echo -e "VERSION   =" ${VERSION}
+	echo -e "HELP      =" ${HELP}
+	echo -e "HFLDR     =" ${HFLDR}
+	echo -e "OLD_EXT   =" ${OLD_EXT}
+	echo -e "NEW_EXT   =" ${NEW_EXT}
+	echo -e "LOG       =" ${LOG}
+	echo -e "DUMP      =" ${DMP}
+	echo -e "SILENT    =" ${SILENT}
+	echo
+}
+
+HELP () {
+	echo -e "\n"${VERSION}
+	echo -e "Usage:"
+	echo -e "\tsudo rename.sh [-h] | [-k] [-s] -w <location> -o <old_ext> -n <new_ext>"
+	echo -e "where:"
+	echo -e "\t-h:              prints this help then exit"
+	echo -e "\t-k:              dumps local variables then exit"
+	echo -e "\t-s:              goes silent, i.e. doesn't open log file"
+	echo -e "\t-w <location>:   starting point in the file system"
+	echo -e "\t-o <old_ext>:    current extension to replace"
+	echo -e "\t-n <new_ext>:    new extension to apply"
+	echo
+}
+
+ERROR () {
+	echo -e "\n"${VERSION}
+	echo -e "*** Error:"
+	echo -e "\t"$1
+	echo -e "\tType   ${SCRPTNAME}.sh -h   for usage.\n"
+	DONE 1
+}
+
+DONE () {
+	exit $1
+}
+
+#	Parameters parsing & tests
+
+while getopts ":hksw:o:n:" OPTION
+do
+	case "${OPTION}" in
+		h)	HELP="yes"
+			;;
+		k)	DMP="yes"
+			;;
+		s)	SILENT="yes"
+			;;
+		w)	HFLDR=${OPTARG}
+			;;
+		o)	OLD_EXT=${OPTARG}
+			;;
+		n)	NEW_EXT=${OPTARG}
+			;;
+		:)	ERROR "Parameter ${OPTARG} requires an argument."
+			;;
+		\?)	ERROR "Parameter ${OPTARG} not yet implemented."
+			;;
+	esac
+done
+
+if [[ ${HELP} = "yes" ]]
+then
+	HELP
+	DONE 0
+fi
+
+if [[ ! -d "${HFLDR}" ]]
+then
+	ERROR "Starting point ${HFLDR} doesn't exist!"
+else
+	HOME="`echo ${HFLDR} | sed s/"\/$"//g`"
+	HFLDR=${HOME}/.
+fi
+
+if [[ -z ${OLD_EXT} ]]
+then
+	ERROR="Current extension missing"
+fi
+
+if [[ -z ${NEW_EXT} ]]
+then
+	ERROR="New extension missing"
+fi
+
+if [ ${DMP} = "yes" ]
+then
+	DUMP
+	DONE 0
+fi
+
+#	main batch actions take place here
+
+exec 1> ${LOG} 2>&1
+
+echo -e "\nStarting at: "`date` "\n"
+
+DUMP
+
+cd "${HFLDR}"
+
+pwd
+
+NBR=`ls -l *."${OLD_EXT}" | wc -l`
+
+if [[ ${NBR} -lt 1 ]]
+then
+	echo "No file(s) to rename!"
+else
+	echo -e "${NBR} file(s) to go:"
+
+	for fic in *."${OLD_EXT}"
+	do
+		echo -e "Renaming ${fic} to \c"
+		foc="`echo ${fic%.*}`"
+		mv "${fic}" "${foc}.${NEW_EXT}"
+		echo -e "${foc}.${NEW_EXT}"
+	done
+
+fi
+
+echo -e "\nDone at: "`date` "\n"
+
+if [[ ${SILENT} = "no" ]]
+then
+	open -e "${LOG}"
+fi
+
+DONE 0

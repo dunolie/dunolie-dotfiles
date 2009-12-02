@@ -1,0 +1,139 @@
+Theme = transparent-background
+
+# Hide file extensions
+HideFileExtension = yes
+
+# Shows the duration of the song in the menu. Options are: yes, no, IfAvailable - shows if
+# When the file has been previously played.
+Showtime = IfAvailable
+
+# Do not forget the contents of the program is off the playlist?
+SavePlaylist = yes
+
+# If you use several clients at once MOC, this means that the current PLAYLIST
+# On both clients.
+SyncPlaylist = yes
+
+# Cache memory for MP3 tags.
+TagsCacheSize = 256
+
+# Do the numbers show in the works.
+PlaylistNumbering = yes
+# If the song changes, you should move the menu, so that currently
+# Playing the file was visible?
+FollowPlayedFile = yes
+
+# Main window layoutis can be configured. You can change the position and the
+# size of the menus (directory and playlist). You have 3 layouts ant switch
+# between then using the 'l' key (standard mapping). By default only 2 layouts
+# are configured.
+#
+# The format is as folows:
+# Each menu is described in format NAME:POSITION_X,POSITION_Y,WIDTH,HEIGHT
+# NAME is directory or playlist
+# Other parameters define position and size of the menu. They can be absolute
+# numbers (like 10) or a percent value of the screen size (like 45%).
+# WIDTH and HEIGHT can have value of FILL which means fill the screen from
+# the menu's position to the border.
+# Separate menu descriptions using a space.
+# Menus may overlap.
+# You must describe at least one menu (default is to fill the whole window).
+# There must be at least one layout (Layout1) defined. Other can be empty ("").
+#
+# Examples:
+#
+# Just one layout, the directory will occupy the whole screen, the playlist
+# will have 1/4 of the screen size and be positioned at lower right corner.
+# Layout1 = "playlist:50%,50%,50%,50%"
+# Layout2 = ""
+# Layout3 = ""
+#
+# The scrren is split into two parts: playlist at the top and the directory
+# menu at the bottom. Playlist will occupy 10 lines and the directory menu
+# the rest.
+ Layout1 = "playlist:0,0,100%,15 directory:0,15,100%,FILL"
+#
+# Default configuration:
+# Layout1		= "directory:0,0,50%,100% playlist:50%,0,50%,100%"
+# Layout2		= "directory:0,0,100%,100% playlist:50%,0,100%,100%"
+# Layout3		= ""
+
+# When the song changes, should the menu be scrolled so that the currently
+# played file is visible?
+# FollowPlayedFile	= yes
+
+# What to do if the interface was started and something from the playlist is
+# playing? If CanStartInPlaylist is set to "yes", the interface will switch to
+# the playlist. When set to "no" it will start from the last directory.
+CanStartInPlaylist = yes
+
+# Set the terminal title when running under xterm.
+SetXtermTitle		= yes
+
+# Display full paths instead of just file names in the playlist.
+PlaylistFullPaths	= no
+
+# ----------------------------------------------------------------
+
+
+# ----------------------------------------------------------------
+
+# Default FormatString
+# %n - Track number
+# %a - Artist
+# %A - Album
+# %t - Title
+# %(X:TRUE:FALSE) - ternary expression - if X exists, do TRUE, otherwaise
+#                   FALSE. '\' - escape character (must be double, because of 
+#                   config interpreter). man zshmisc for more info.
+FormatString		= "%(n:%n :)%(a:%a - :)%(t:%t:)%(A: \(%A\):)"
+
+# ----------------------------------------------------------------
+
+# How to sort? FileName is the only option for now.
+Sort			= FileName
+
+# Show errors in the streams, for example CRC errors or broken frames in mp3
+# files
+ShowStreamErrors	= no
+
+# Ignore CRC errors in MP3 files. Most players do that, so the default value is
+# set to yes.
+Mp3IgnoreCRCErrors	= yes
+
+# Turn on repeat.
+Repeat			= no
+
+# Turn on shuffle.
+Shuffle			= no
+
+# Turn on AutoNext
+AutoNext = yes
+
+# ----------------------------------------------------------------
+
+# Directory in which you store music files, if you specify it, you will be able
+# to quickly go to this directory with the '-m' parameter or the 'm' command.
+# This can also point to a playlist.
+MusicDir		= "/Volumes/DZ-Appz&Audio-270GB/Music"
+
+keymap 			= /Users/robbie/.moc/keymap
+# FastDirs, these allow you jump directly to a directory, the key bindings are
+# in the keymap file.
+Fastdir1 = /Volumes/DZ-Audio-270GB/Music/
+Fastdir2 = /Volumes/DZ-Audio-270GB/Music-Uploads/
+Fastdir3 = /Users/robbie/Desktop/
+Fastdir4 = /Users/robbie/Downloads
+Fastdir5 = /Users/robbie/Downloads/00-Music
+Fastdir6 = /Volumes/DZ-Movies-250GB/kdxDownloads
+Fastdir7 = /Volumes/DZ-Games-60GB/Kdx-Dls/
+#Fastdir8 = 
+#Fastdir9 = 
+#Fastdir10 =
+
+#Fastdir3 = /Volumes/DZ-Games-60GB/Kdx-Dls/
+#Fastdir4 = /Volumes/DZ-Games-60GB/Torrents/---Torrent-Downloads/
+#Fastdir7 = /Volumes/DZ-Games-60GB/Kdx-Dls/
+
+ExecCommand1 = "cp %f /Users/robbie/Desktop/"
+#

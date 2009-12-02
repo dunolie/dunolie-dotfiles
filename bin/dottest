@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,12 December, 2008
+# Description: copies my dotfiles to a seperate dir for easy backups to ipods and flash drives
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+########################################################################
+# make dirs needed for backup
+if [ f = ~/tmp/robbie-dotfiles/dotfiles]; then
+ 	sleep 1
+else
+	mkdir -p ~/tmp/robbie-dotfiles/dotfiles
+fi
+if [ f = ~/tmp/robbie-dotfiles/html]; then
+	 sleep 1
+else
+	mkdir -p ~/tmp/robbie-dotfiles/html
+fi
+if [ f = ~/tmp/robbie-dotfiles/private]; then
+	 sleep 1
+else
+	mkdir -p ~/tmp/robbie-dotfiles/private
+fi
+
+# copy  ~/.dirs to ~/tmp/dots
+cp -R ~/.bash_completion.d ~/tmp/robbie-dotfiles/dotfiles
+cp -R ~/.screen ~/tmp/robbie-dotfiles/dotfiles
+cp -R ~/.vim ~/tmp/robbie-dotfiles/dotfiles
+
+# copy  ~/.files to ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.Xdefaults ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.aliases_bash ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.aliases_bash_osx ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.bash_functions ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.bash_logout ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.bash_profile ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.bashrc ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.dir_colors ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.dirs ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.fff ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.inputrc ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.profile ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.gvimrc ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.vimrc ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.viminfo ~/tmp/robbie-dotfiles/dotfiles
+cp ~/.xinitrc ~/tmp/dots
+cp ~/.mtailrc ~/tmp/robbie-dotfiles/dotfiles
+mkdir ~/tmp/robbie-dotfiles/dotfiles/.moc
+cp ~/.moc/config ~/tmp/robbie-dotfiles/dotfiles/.moc/config
+cp ~/.moc/keymap ~/tmp/robbie-dotfiles/dotfiles/.moc/keymap
+cp -R ~/.moc/themes ~/tmp/robbie-dotfiles/dotfiles/.moc
+
+# copy private dotfiles ~/tmp/private
+cp -R ~/.irssi ~/tmp/robbie-dotfiles/private
+cp ~/.bash_history ~/tmp/robbie-dotfiles/private
+cp ~/.aliases_bash_robbie ~/tmp/robbie-dotfiles/private
+touch ~/tmp/robbie-dotfiles/private/README
+echo -e "date of last backup ~ `date +%d-%m-%y %H:%M`" >> ~/tmp/robbie-dotfiles/private/README
+echo -e "private dotfiles in this folder - $(ls -all ~/tmp/robbie-dotfiles/private)" >> ~/tmp/robbie-dotfiles/private/README
+
+
+# encrypt my private dotfiles
+targpg () 
+{ 
+    for f in "$@";
+    do
+        dir=`dirname "${f}"`;
+        name=`basename "${f}"`;
+        cd "${dir}";
+        tar pcvf - "${name}" | gpg --encrypt --batch -z 6 -r robbie -o "${name}-dotfiles.tgz.gpg";
+    done
+}
+targpg ~/tmp/robbie-dotfiles/private
+rm -R ~/tmp/robbie-dotfiles/private
+
+# make html files with syntax for easy reading
+## {
+cd ~/tmp/robbie-dotfiles/dotfiles
+2html .Xdefaults
+2html .aliases_bash
+2html .aliases_bash_osx
+2html .bash_functions
+2html .fff
+2html .bash_logout
+2html .bash_profile
+2html .bashrc
+2html .dir_colors
+2html .dirs
+2html .inputrc
+2html .profile
+2html  .moc/moc-config #~/.moc/config
+2html .gvimrc 
+2html .vimrc
+2html .viminfo
+2html .xinitrc
+# rename files - to non-hidden files (move to ~/tmp/robbie-dotfiles/dotfiles/html )
+mv .Xdefaults.html html/Xdefaults.html
+mv .aliases_bash.html html/aliases_bash.html
+mv .aliases_bash_osx.html html/aliases_bash_osx.html
+mv .aliases_bash_robbie.html html/aliases_bash_robbie.html
+mv .bash_functions.html html/bash_functions.html
+mv .fff.html html/fff.html
+mv .bash_logout.html html/bash_logout.html
+mv .bash_profile.html html/bash_profile.html
+mv .bashrc.html html/bashrc.html
+mv .dir_colors.html html/dir_colors.html
+mv .dirs.html html/dirs.html
+mv .inputrc.html html/inputrc.html
+mv .profile.html html/profile.html
+mv .moc/config.html html/config.html
+mv .gvimrc.html html/gvimrc.html
+mv vimrc.html html/vimrc.html
+mv .viminfo.html html/viminfo.html
+mv .xinitrc.html html/xinitrc.html
+## }
+
+#set sanitized permissions on local machine and user for os x
+if [ "$sw_vers -productVersion" != "10.*" ]; then
+  chmod -R u=rwX,go=rX "~/tmp/robbie-dotfiles/dotfiles"
+  chown -R ${USER}:everyone "~/tmp/robbie-dotfiles/dotfiles"
+else
+chmod -R u=rwX,go=rX "~/tmp/robbie-dotfiles/dotfiles"
+chown -R ${USER}:users "~/tmp/robbie-dotfiles/dotfiles"
+fi
+#set sanitized permissions on local machine for html files
+chmod -R 644 ~/tmp/robbie-dotfiles/dotfiles/html/*.html
+chmod 755 ~/tmp/robbie-dotfiles/dotfiles/html
+

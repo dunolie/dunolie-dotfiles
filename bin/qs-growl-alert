@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,13 September, 2009
+# Description: qs-growl-alert
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://blogrium.wordpress.com/2009/06/13/reminders-with-quicksilver-and-growl/
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+growlnotify=/usr/local/bin/growlnotify
+normal=$(echo $1 | sed -e 's/ in / at /')
+what=${normal%% at*}
+when=${normal##*at }
+when=$(echo $when | sed -e 's/^\([0-9]*\)m$/now + \1 minutes/')
+when=$(echo $when | sed -e 's/^\([0-9]*\)h$/now + \1 hours/')
+result=$(echo "$growlnotify -s -m '$what' > /dev/null 2>&1" | at $when 2>&1)
+if [ $? -eq 0 ]; then
+    result=${result##*at }
+    result="Scheduled for $result"
+fi
+$growlnotify -m "$result"
+

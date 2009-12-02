@@ -1,0 +1,15 @@
+set show-rev-graph = yes
+color cursor white blue
+bind generic E !git format-patch -1 %(commit)
+# http://jonas.nitro.dk/tig/tigrc.5.html
+set show-date = yes
+set author-width=3
+
+#RT harmful specs - disable them
+#KN [defunkt/master] I shine the shoes around here
+#CW don't let daemon serving ruin the public / private flow
+#CW ensure the listeners are notified, just in case
+#CW add "open sourced" event
+#CW Turns out we're still stuck on 1.0
+#CW let's try this again
+#CW allow overriding of the queue during job creation

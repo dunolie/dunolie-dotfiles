@@ -1,0 +1,11 @@
+#!/bin/sh
+# count files and dirs
+# http://snipplr.com/view.php?codeview&id=1692
+
+F_CNT=0
+D_CNT=0
+for FILE in *; do
+  test -f "$FILE" && F_CNT=`expr $F_CNT + 1`
+  test -d "$FILE" && D_CNT=`expr $D_CNT + 1`
+done
+echo "$F_CNT files & $D_CNT dirs in current directory."

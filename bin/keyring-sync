@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Thursday,11 December, 2008
+# Description: ipod sync script
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+# run by LaunchD hook on mounting of podrock and syncs files, gives growl alert
+#########################################################################
+
+# Back up to folder on Volume (based on hostname)
+if [ ${HOSTNAME} = "ibook" ]; then
+	# Back up folders
+	folderToBackupOSX="$HOME/Sync"
+	folderToBackupXP="$HOME/Sync"
+	folderToBackupSLAX="$HOME/Sync"
+    # Back up to Volume 
+	backupVolumeOSX="/Volumes/Keyhub-OSX"
+	backupVolumeXP="/Volumes/KEYHUB-XP"
+	backupVolumeSLAX="/Volumes/KEYHUB-XP"
+	backupDateFile="/Volumes/Keyhub-OSX/BackUp-Sync/Backup-BookLep-Sync/lastbackup.txt"
+    backupToOSX="${backupVolumeOSX}/BackUp-Sync/Backup-BookLep-Sync"
+    backupToXP="${backupVolumeXP}/BackUp-Sync/Backup-BookLep-Sync"
+    backupToSLAX="${backupVolumeSLAX}/slax/changes/root/Backup-BookLep-Sync"
+fi
+if [ ${HOSTNAME} = "mini" ]; then
+	# Back up folders
+	folderToBackupOSX="$HOME/Sync"
+	folderToBackupXP="$HOME/Sync"
+	folderToBackupSLAX="$HOME/Sync"
+    # Back up to Volume 
+	backupVolumeOSX="/Volumes/Keyhub-OSX"
+	backupVolumeXP="/Volumes/KEYHUB-XP"
+	backupVolumeSLAX="/Volumes/KEYHUB-XP"
+	backupDateFile="/Volumes/Keyhub-OSX/BackUp-Sync/Backup-MiniLep-Sync/lastbackup.txt"
+	backupToOSX="${backupVolumeOSX}/BackUp-Sync/Backup-MiniLep-Sync"
+	backupToXP="${backupVolumeXP}/BackUp-Sync/Backup-MiniLep-Sync"
+	backupToSLAX="${backupVolumeSLAX}/slax/changes/root/Backup-MiniLep-Sync"
+fi
+
+#------------------------------------------------------------
+sleepFor=60
+
+
+echo -n "[*]-- Autobackup envoked at `date`" | logger
+echo -n "[*]-- Sleeping for ${sleepFor} seconds..." | logger
+sleep ${sleepFor}
+
+
+#If $backupVolume is not connected, exit
+if [ ! -e ${backupVolumeOSX} ]; then
+		echo -n "[*]-- BackupVolume NOT connected - Exiting" | logger
+ 		exit 0
+	else
+		echo -n "[*]-- BackupVolume Connected - Continuing" | logger
+fi
+#If $backupDateFile does not exist, set firsRun = 1
+if [ ! -e ${backupDateFile} ]; then
+	echo -n "[*]-- Last backup file not found - Assuming first run" | logger
+	firstRun=1
+	else
+	echo -n "[*]-- Last backup file found - Continuing" | logger
+fi
+
+#if this s not our first run, read the value of $lastBackup
+if [ ${firstRun} -eq "0" ] ; then
+# Find out the time now
+dateTimeNow=`date +%s`
+
+#Figure out how many seconds between now and last backup
+let timeSinceLastBackup=${dateTimeNow}-${lastBackup}
+
+# If last backup is less than 24 hours ago (86400 seconds) then exit.
+if [ "${timeSinceLastBackup}" -lt "86400" ]; then
+	echo -n "[*]-- Last backup was run less than 24 hours ago - Exiting" | logger
+	exit 0
+	else
+	echo -n "[*]-- Last backup was run more than 24 hours ago - Continuing" | logger
+fi
+
+#------------------------------------------------------------
+# SYNCING NOW
+#------------------------------------------------------------
+
+/usr/local/bin/growlnotify -I "/Volumes/Keyhub-OSX" -t "USB Keyring Sync" -m "Sync Starting"
+
+# /Volumes/Keyhub-OSX Backup
+if [ ! -e ${backupVolumeOSX} ]
+then
+echo -n "[*]-- BackupVolume NOT connected - Exiting" | logger
+exit 0
+else
+echo -n "[*]-- BackupVolume Connected - Continuing" | logger
+fi
+
+
+# Create the folder to back up the data to (defined above)
+
+if [ ! -e ${backupToOSX} ]
+then
+echo -n "[*]-- Backupdir does not exist... Creating...)" | logger
+mkdir -p ${backupToOSX}
+else
+echo -n "[*]-- Backupdir exists! - Continuing" | logger
+fi
+
+# Copy the files over. Here we are using rsync.
+for i in ${folderToBackupOSX}
+do
+echo -n "[*]-- Starting Rsync of ${i} to ${backupToOSX}" | logger
+rsync -aqE --delete ${i} ${backupToOSX}
+
+echo -n "[*]-- rsync of ${i} to ${backupToOSX} complete..."| logger
+done
+#rsync -aqE --delete $folderToBackup $backupTo
+
+# Optionally, once the rsync is done, unmount the drive.
+
+#hdiutil detach $backupVolume
+
+#------------------------------------------------------------
+# /Volumes/KEYHUB-XP Backup
+if [ ! -e ${backupVolumeXP} ]
+then
+echo -n "[*]-- BackupVolume NOT connected - Exiting" | logger
+exit 0
+else
+echo -n "[*]-- BackupVolume Connected - Continuing" | logger
+fi
+
+
+# Create the folder to back up the data to (defined above)
+
+if [ ! -e ${backupToXP} ]
+then
+echo -n "[*]-- Backupdir does not exist... Creating...)" | logger
+mkdir -p ${backupToXP}
+else
+echo -n "[*]-- Backupdir exists! - Continuing" | logger
+fi
+
+# Copy the files over. Here we are using rsync.
+for i in ${folderToBackupXP}
+do
+echo -n "[*]-- Starting Rsync of ${i} to ${backupToXP}" | logger
+rsync -aqE --delete ${i} ${backupToXP}
+
+echo -n "[*]-- rsync of ${i} to ${backupToXP} complete..."| logger
+done
+#rsync -aqE --delete $folderToBackup $backupTo
+
+# Optionally, once the rsync is done, unmount the drive.
+
+#hdiutil detach $backupVolume
+
+
+#------------------------------------------------------------
+# /Volumes/KEYHUB-XP (SLAX) Backup
+if [ ! -e ${backupVolumeSLAX} ]
+then
+echo -n "[*]-- BackupVolume NOT connected - Exiting" | logger
+exit 0
+else
+echo -n "[*]-- BackupVolume Connected - Continuing" | logger
+fi
+
+
+# Create the folder to back up the data to (defined above)
+
+if [ ! -e ${backupToSLAX} ]
+then
+echo -n "[*]-- Backupdir does not exist... Creating...)" | logger
+mkdir -p ${backupToSLAX}
+else
+echo -n "[*]-- Backupdir exists! - Continuing" | logger
+fi
+
+# Copy the files over. Here we are using rsync.
+for i in ${folderToBackupSLAX}
+do
+echo -n "[*]-- Starting Rsync of ${i} to ${backupToXP}" | logger
+rsync -aqE --delete ${i} ${backupToSLAX}
+
+echo -n "[*]-- rsync of ${i} to ${backupToXP} complete..."| logger
+done
+exit 0
+#rsync -aqE --delete $folderToBackup $backupTo
+
+# Optionally, once the rsync is done, unmount the drive.
+
+#hdiutil detach $backupVolume
+
+#-----------------------------------------------------------
+

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,11 March, 2009
+# Description: script to get iplayer listings (run with cron)
+#########################################################################
+# Script Comments if needed :
+# last 7 days of bbc and itv television programs
+#########################################################################
+iplayer -u
+mv /Volumes/DZ-Movies-250GB/TV-Info/Weekly/*.txt /Volumes/DZ-Movies-250GB/TV-Info/Old-Files/
+mv /Volumes/DZ-Movies-250GB/TV-Info/Weekly/*.html /Volumes/DZ-Movies-250GB/TV-Info/Old-Files/
+
+cd /Volumes/DZ-Movies-250GB/TV-Info/Old-Files; find . -type f -mtime +7 -exec rm * {} \;
+
+iplayer --since 168 --type tv,itv --html /Volumes/DZ-Movies-250GB/TV-Info/Weekly/`date +%d-%m-%Y`-bbc-itv_tv-listing.html --exclude-channel "CBeebies|CBBC|Parliament" --exclude-category "News|Child|Sport|Antiques|Sitcoms|5-11" > /Volumes/DZ-Movies-250GB/TV-Info/Weekly/`date +%d-%m-%Y`-bbc-itv_tv-listing.txt;
+

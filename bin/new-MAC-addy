@@ -1,0 +1,9 @@
+#!/opt/local/bin/ruby 
+#Turn off wireless, run this, then turn it back on. 
+# http://feeds.dzone.com/~r/dzone/snippets/~3/274859903/5417
+random_mac = "#{rand(255).to_s(16)}:#{rand(255).to_s(16)}:#{rand(255).to_s(16)}:\ 
+#{rand(255).to_s(16)}:#{rand(255).to_s(16)}#{rand(255).to_s(16)}" 
+puts "Old MAC address: #{`ifconfig en1 | grep ether`.match(/ether\s(.+)/)[1]}" 
+`sudo ifconfig en1 ether #{random_mac}` 
+puts "New MAC address: #{`ifconfig en1 | grep ether`.match(/ether\s(.+)/)[1]}" 
+puts "Let there be free wifi"

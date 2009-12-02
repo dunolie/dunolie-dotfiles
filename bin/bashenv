@@ -1,0 +1,4 @@
+#!/bin/sh
+# nice bash environment display 
+echo  "${COLOR_GREEN}Your Bash Environment is set from:${COLOR_NC}"
+echo "$BASH_ENV"

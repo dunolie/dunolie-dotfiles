@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Friday,20 March, 2009
+# Description: m4a 2 mp3 converter 
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+# 
+#####################################################################
+
+if [ "$1" == "" ] ; then
+        echo "usage: mp42mp3 [file.mp4]"
+elif [ "$1" == "-help" ] ; then
+        echo "usage: mp42mp3 [file.mp4]"
+else
+        OUT="${1%.mp4}.mp3"
+        ffmpeg -vn -y -i "$1" -ab 128k "$OUT"
+fi
+

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Wednesday,21 October, 2009
+# Description: OSX handbrake cli convert script
+# Snipped from IRC channel: ##mac (freenode) <catmistake> 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+
+handbrake="/Users/~/Applications/HandBrake.app/Contents/MacOS/HandBrakeCLI"  # make it the path to HandBrakeCLI
+
+
+vbitrate="624"	#-b $vbitrate video bitrate
+
+#fps="23.976"		#-r $fps Your options are 5, 10, 12, 15, 23.976, 24, 25, or 29.97, default to previous frame rate ( -r $fps )
+
+arate="48"	#Set audio samplerate(s) (22.05/24/32/44.1/48 kHz)
+
+ab="160"		#Set audio bitrate(s)  (32/40/48/56/64/80/96/112/128/default: 160)
+
+mixdown="dpl2"	#(mono/stereo/dpl1/dpl2/6ch, default: dpl2)
+
+maxwidth="640"
+
+		#output filenames appended with: ".x264.mp4"
+
+		#note: removed: -e x264 -a 1 -E faac -B $ab -R $arate -6 $mixdown -f mp4 -2 -T -d -O -m -x level=30:cabac=0:vbv-maxrate=1500:vbv-bufsize=2000:ref=2:mixed-refs:analyse=all:me=umh:subq=6:no-fast-pskip=1
+
+ 		#note: removed:  --preset="iPhone & iPod Touch"
+
+		#note: adjusted: -e x264 -q 0.589999973773956 -r $fps -a 1 -E faac -B $ab -R $arate -6 $mixdown -f mp4 -X $maxwidth -m -x level=30:cabac=0:ref=2:mixed-refs:analyse=all:me=umh:no-fast-pskip=1
+
+		#note: --crop 60:60:0:0   <--syntax T:B:L:R in pixels
+
+
+
+############################
+while [ "$1" != "" ]
+do
+        $handbrake -i "$1" -o "$1".x264.mp4 -e x264 -b $vbitrate -a 1 -E faac -B $ab -R $arate -6 $mixdown -f mp4 -2 -T -d -O -X $maxwidth -m -x level=30:cabac=0:ref=2:mixed-refs:analyse=all:me=umh:no-fast-pskip=1
+        shift
+done
+
+growlnotify -I "/Applications/HandBrake.app" -s -t "Handbrake encode done" -m "$PWD/'$1'.x264.mp4"

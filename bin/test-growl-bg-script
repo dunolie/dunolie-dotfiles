@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Runs script, and prints a notification with growl when it finishes
+#
+$*
+growlnotify -m "Script '$*' completed" -s "Background script notification" &

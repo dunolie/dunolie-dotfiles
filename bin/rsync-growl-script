@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,13 September, 2009
+# Description: Growling Mac backups with rsync script
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : http://blog.mackerron.com/2009/08/growling-backups/
+#########################################################################
+# Script Comments if needed :
+#
+#########################################################################
+# --- Set backup parameters ---
+ 
+# What local files/folders are we backing up?
+SRC="/Users/gjm06/Development /Users/gjm06/Documents /Users/gjm06/Sites"
+ 
+# What server are we backing up to?
+DESTSERVER="george.example.com"
+ 
+# What's our user name on the server?
+SSHUSER="george"
+ 
+# What's the remote shell command for this server 
+# (slight obscurity/security by avoiding port 22)
+RSH="ssh -p 2244"
+ 
+# What location on the server shall we back up to?
+DESTPATH="/home/george/backups"
+ 
+# Any non-valuable stuff to exclude by name/location?
+EXCLUDE=".DS_Store,.svn/,.Trash/,tmp/,log/,vendor/"
+ 
+# Exclude things that are *how* big? 
+# e.g. I don't want GBs of virtual machines going over the wire
+# (NB. this is in bytes)
+MAXFILESIZE=100000
+ 
+ 
+# --- Set Growl parameters ---
+ 
+# What will this script be called in the Growl prefpane?
+GROWLNAME="Remote backup script"
+ 
+# And what app's icon will appear in Growl notifications?
+APPICON="Time Machine"
+ 
+ 
+# --- Do it! ---
+ 
+echo Checking not already running 
+ 
+PROCS=`ps -A -o "pid=,command="`
+MYNAME="$0"
+MYBASENAME=`basename $MYNAME`
+MYPID=$$
+ 
+# The next line works like so:
+# * take the process list (for all users),
+# * filter *in* processes named like this script (making sure we're on word boundaries),
+# * filter *out* (-v) the one that *is* this script (by PID), and finally
+# * filter *out* the grep commands themselves.
+ 
+MERUNNING=`echo "$PROCS" | grep -E -e "\b$MYBASENAME\b" \
+  | grep -E -v "\b$MYPID\b" | grep -v grep`
+ 
+# Then, if anything's left (i.e. MERUNNING isn't a zero-length string...)
+ 
+if [ ! -z "$MERUNNING" ]; then
+  /usr/local/bin/growlnotify --name "$GROWLNAME" --appIcon "$APPICON" \
+    --message "Another backup seems to be in progress" \
+    "Ignoring scheduled backup"
+  exit 1
+fi
+ 
+ 
+echo Finding large files to exclude...
+ 
+OVERSIZELIST="/tmp/files_over_backup_limit"
+find $SRC -size +$MAXFILESIZE > $OVERSIZELIST
+ 
+# If you ever want to know what's excluded -- and you should! -- just do
+# a 'cat /tmp/files_over_backup_limit' in the Terminal
+ 
+# Next, 'wc -l' counts the *lines* in our oversize list, and we extract 
+# just the number from the output
+ 
+NUMOVERSIZE=`wc -l "$OVERSIZELIST" | grep -o -E [0123456789]+`
+ 
+ 
+echo Rsyncing...
+ 
+# date makes up the name for our archive folders, while
+# eval is used to invoke shell expansion on the list of file names to exclude,
+# turning them into a list of --exclude= statements
+ 
+BDATE=`date "+%y_%m_%d-%H.%M.%S"`
+EXPEXCLUDES=`eval "echo --exclude={$EXCLUDE} "`
+ERRORS="/tmp/rsync_backup_errors"
+ 
+# The && and || operators give us a simple way to respond to zero and 
+# non-zero (= error) rsync exit codes, thanks to lazy evaluation by the shell
+ 
+rsync --rsh="$RSH" \
+  --recursive --partial --delete --delete-excluded \
+  --links --times --relative --compress \
+  --backup --backup-dir="$DESTPATH/Archive/$BDATE/" \
+  --exclude-from="$OVERSIZELIST" \
+  $EXPEXCLUDES \
+  $SRC \
+  $SSHUSER@$DESTSERVER:"$DESTPATH/Current/" \
+  2>"$ERRORS" \
+&& 
+/usr/local/bin/growlnotify --name "$GROWLNAME" --appIcon "$APPICON" \
+  --message "Backed up to $DESTSERVER, $NUMOVERSIZE oversized files excluded" \
+  "Completed backup" \
+|| \
+/usr/local/bin/growlnotify --name "$GROWLNAME" --appIcon "$APPICON" -s \
+  --message "`cat "$ERRORS"`" \
+  "Failed backup"

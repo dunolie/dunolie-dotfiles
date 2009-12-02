@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,16 March, 2008
+# Description:
+
+# Draw tux with hostname, like this:
+#   .~.     
+#   /V\     
+#  //&\\    
+# /((@))\   
+#  ^`~'^
+
+if [ "${use_color}" == "true" ]; then
+	COL_BLACK="\033[0;30m"
+	COL_DARKGRAY="\033[1;30m"
+	COL_RED="\033[0;31m"
+	COL_LIGHTRED="\033[1;31m"
+	COL_GREEN="\033[0;32m"
+	COL_LIGHTGREEN="\033[1;32m"
+	COL_BROWN="\033[0;33m"
+	COL_YELLOW="\033[1;33m"
+	COL_BLUE="\033[0;34m"
+	COL_LIGHTBLUE="\033[1;34m"
+	COL_PURPLE="\033[0;35m"
+	COL_LIGHTPURPLE="\033[1;35m"
+	COL_CYAN="\033[0;36m"
+	COL_LIGHTCYAN="\033[1;36m"
+	COL_LIGHTGRAY="\033[0;37m"
+	COL_WHITE="\033[1;37m"
+	COL_RESET="\033[0;0m"
+else
+	COL_BLACK=""
+	COL_DARKGRAY=""
+	COL_RED=""
+	COL_LIGHTRED=""
+	COL_GREEN=""
+	COL_LIGHTGREEN=""
+	COL_BROWN=""
+	COL_YELLOW=""
+	COL_BLUE=""
+	COL_LIGHTBLUE=""
+	COL_PURPLE=""
+	COL_LIGHTPURPLE=""
+	COL_CYAN=""
+	COL_LIGHTCYAN=""
+	COL_LIGHTGRAY=""
+	COL_WHITE=""
+	COL_RESET=""
+fi
+
+echo ""
+echo -e   "    ${COL_WHITE}.${COL_DARKGRAY}~${COL_WHITE}.${COL_RESET}     "
+echo -en  "    ${COL_DARKGRAY}/${COL_YELLOW}V${COL_DARKGRAY}\\\\${COL_RESET}     "
+echo ""
+echo -en  "   ${COL_DARKGRAY}//${COL_WHITE}&${COL_DARKGRAY}\\\\\\\\${COL_RESET}    "
+echo ""
+echo -e   "  ${COL_DARKGRAY}/(${COL_WHITE}(@)${COL_DARKGRAY})\\\\${COL_RESET}   "
+echo -e   "   ${COL_YELLOW}^${COL_DARKGRAY}\`~'${COL_YELLOW}^${COL_RESET}    "
+

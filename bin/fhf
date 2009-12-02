@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Sunday,17 August, 2008
+# Description:
+# Snipped from website :
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed :
+# Toggle hidden files in Mac OS X Finder
+#########################################################################
+
+ 
+if [ `defaults read com.apple.finder AppleShowAllFiles` == 1 ]
+then 
+  echo "Hiding hidden files."
+  defaults write com.apple.finder AppleShowAllFiles -bool false
+else 
+   echo "Showing hidden files."
+   defaults write com.apple.finder AppleShowAllFiles -bool true
+fi   
+       
+KillAll Finder

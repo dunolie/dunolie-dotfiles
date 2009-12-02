@@ -1,0 +1,8 @@
+#!/bin/sh
+# http://www.unix.com/shell-programming-scripting/30770-how-find-duplicate-files-find.html
+# scriptname = find-dupes
+# use with find-dupes | uniq -d
+find -type f | while IFS= read vo
+do
+echo `basename "$vo"`
+done

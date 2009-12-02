@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com 
+# Created on: Saturday,12 April, 2008
+# Description: touch with -p option 
+# Snipped from website : http://marc-abramowitz.com/archives/2006/12/22/adding-a-p-option-to-touch/
+# Snipped from IRC channel : 
+# Snipped from : 
+#########################################################################
+# Script Comments if needed : recursive option for touch 
+#  eg :  /recursive/foo/bar/touched
+#########################################################################
+
+mkdir="/bin/mkdir"
+touch="/usr/bin/touch"
+
+for arg in $*; do
+    if [ "$arg" = "-p" ]; then
+        opt_p=true
+        continue
+    fi
+    if [ "$opt_p" = "true" ]; then
+        $mkdir -p $(dirname $arg) && $touch $arg
+    else
+        $touch $arg
+    fi
+done
