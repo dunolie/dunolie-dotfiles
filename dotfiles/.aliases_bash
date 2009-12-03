@@ -75,11 +75,11 @@ alias gconsync='/System/Library/PrivateFrameworks/GoogleContactSync.framework/Ve
 
 ## jhead image modify 
 alias jhead-NameByDate='jhead -exonly -nf%Y%m%d%H%M%S *.jpg'
-alias thumb-200='jhead -cmd "mogrify -resize 200x200 -quality 100 &" *.jpg'
-alias thumb-400='jhead -cmd "mogrify -resize 400x400 -quality 100 &" *.jpg'
-alias thumb-600='jhead -cmd "mogrify -resize 600x600 -quality 100 &" *.jpg'
-alias thumb-800='jhead -cmd "mogrify -resize 800x800 -quality 100 &" *.jpg'
-alias thumb-1000='jhead -cmd "mogrify -resize 1000x1000 -quality 100 &" *.jpg'
+alias thumb-200-jpg='jhead -cmd "mogrify -resize 200x200 -quality 100 &" *.jpg'
+alias thumb-400-jpg='jhead -cmd "mogrify -resize 400x400 -quality 100 &" *.jpg'
+alias thumb-600-jpg='jhead -cmd "mogrify -resize 600x600 -quality 100 &" *.jpg'
+alias thumb-800-jpg='jhead -cmd "mogrify -resize 800x800 -quality 100 &" *.jpg'
+alias thumb-1000-jpg='jhead -cmd "mogrify -resize 1000x1000 -quality 100 &" *.jpg'
 
 
 
@@ -721,6 +721,11 @@ alias irc256='screen -c ~/.screen/.screenrc.irc256'
 
 ##------------------------------------------------------------
 
+# http://bit.ly/6QuTrM
+alias thumb800='sips -Z 800 "$@" --out 800-resized.png png'
+alias thumb600='sips -Z 600 "$@" --out 600x-resized.png png'
+alias thumb400='sips -Z 400 "$@" --out 400-resized.png png'
+alias thumb200='sips -Z 200 "$@" --out 200-resized.png png'
 
 
 ##------------------------------------------------------------
