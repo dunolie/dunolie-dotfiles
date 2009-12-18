@@ -1,9 +1,11 @@
 # -------------------------------------------------------------------------------
-# Author: Robbie ( dunolie@gmail.com )
-# Created: 03/10/09 @ 07:07:20
-# Description: $(HOME)/.bash_profile
-# Last modified:
-# Comments: mac osx centred bash profile
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: my bashrc ($HOME/.bashrc)
+#        Created: Fri 11 Dec 2009 14:33:12 pm GMT
+#  Last Modified: Sat 12 Dec 2009 11:08:12 pm GMT
+# -------------------------------------------------------------------------------
+#       Comments:
+#    Description:
 #-------------------------------------------------------------------------------
 #                            NOTES
 # -------------------------------------------------------------------------------
@@ -36,34 +38,42 @@ fi
 #
 # source ~/.bashrc-dterm for the Dterm app
 if [[ $TERM_PROGRAM = "DTerm" ]]; then
-	source ~/.bashrc-dterm
+	source ~/.dunolie-dotfiles/dotfiles/.bashrc-dterm
 	return
 fi
+
+# so I get my xterm titles working in screen.
+if [ "$TERM" = "screen" ]; then
+	export TERM=xterm-color
+fi
+
+# so iTerm likes the dircolors output
+export TERM=xterm-color
+
 # -------------------------------------------------------------------------------
 #                         SHELL COLOURS
 # -------------------------------------------------------------------------------
 #
-# Setup some colors to use later in interactive shell or scripts
-# better to out this in your $HOME/.aliases_bash
-alias colorcodes="set | egrep 'COLOR_\w*'"  # Lists all the colors
-export COLOR_NC='\e[0m' # No Color
-export COLOR_WHITE='\e[1;37m'
-export COLOR_BLACK='\e[0;30m'
-export COLOR_BLUE='\e[0;34m'
-export COLOR_LIGHT_BLUE='\e[1;34m'
-export COLOR_GREEN='\e[0;32m'
-export COLOR_LIGHT_GREEN='\e[1;32m'
-export COLOR_CYAN='\e[0;36m'
-export COLOR_LIGHT_CYAN='\e[1;36m'
-export COLOR_RED='\e[0;31m'
-export COLOR_LIGHT_RED='\e[1;31m'
-export COLOR_PURPLE='\e[0;35m'
-export COLOR_LIGHT_PURPLE='\e[1;35m'
-export COLOR_BROWN='\e[0;33m'
-export COLOR_YELLOW='\e[1;33m'
-export COLOR_GRAY='\e[1;30m'
-export COLOR_LIGHT_GRAY='\e[0;37m'
+# fully escaped for use in prompts
+E_WHITE='\[\033[1;37m\]'
+E_BLACK='\[\033[0;30m\]'
+E_BLUE='\[\033[0;34m\]'
+E_L_BLUE='\[\033[1;34m\]'
+E_GREEN='\[\033[0;32m\]'
+E_L_GREEN='\[\033[1;32m\]'
+E_CYAN='\[\033[0;36m\]'
+E_L_CYAN='\[\033[1;36m\]'
+E_RED='\[\033[0;31m\]'
+E_L_RED='\[\033[1;31m\]'
+E_PURPLE='\[\033[0;35m\]'
+E_L_PURPLE='\[\033[1;35m\]'
+E_YELLOW='\[\033[1;33m\]'
+E_L_YELLOW='\[\033[0;33m\]'
+E_GRAY='\[\033[1;30m\]'
+E_L_GRAY='\[\033[0;37m\]'
+E_NC='\[\e[0m\]'
 #
+# colours for use in scripts and notices
 export NC='\e[0m' # No Color
 export WHITE='\e[1;37m'
 export BLACK='\e[0;30m'
@@ -82,22 +92,44 @@ export L_YELLOW='\e[0;33m'
 export GRAY='\e[1;30m'
 export L_GRAY='\e[0;37m'
 #
+
+KERNEL_NAME=`uname -s`
+KERNEL_VERSION=`uname -r`
+
+case $KERNEL_NAME in
+    Darwin)
+        SYSTEM='Mac'
+        case $KERNEL_VERSION in
+            8*) SYSTEM='Tiger' ;;
+            9*) SYSTEM='Leopard' ;;
+            10*) SYSTEM='Snow Leopard' ;;
+        esac;;
+    *) SYSTEM='Unknown' ;;
+esac
+
+export SYSTEM
+export OSX='OS X 10.*'
+export TIGER='OS X 10.4.*'
+export LEOPARD='OS X 10.5.*'
+export SNOW_LEOPARD='OS X 10.6.*'
 # -------------------------------------------------------------------------------
 #                       SCREEN SETTINGS
 # -------------------------------------------------------------------------------
 #
+# using my own build of screen
+alias screen='/usr/local/bin/screen'
+alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
+
 # Automatically reattach to a screen session after logging in via ssh - http://tlug.dnho.net/?q=node/239
 if [ $SSH_TTY ] && [ ! $WINDOW ]; then
 	SCREENLIST=`screen -ls | grep 'Attached'`
 	if [ $? -eq "0" ]; then
-		echo -e "Screen is already running and attached:\n ${SCREENLIST}"
+		echo -e "${CYAN}Screen is already running and attached:${GREEN}\n ${SCREENLIST}${NC}"
 	else
 		screen -U -R
 	fi
 fi
 #
-alias screen='/usr/local/bin/screen'
-alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
 # -------------------------------------------------------------------------------
 #                       PATH SETTINGS
 # -------------------------------------------------------------------------------
@@ -200,14 +232,28 @@ if [[ -d ~/.ruby-completion ]]; then
 	source ~/.ruby-completion/completion-rake
 	source ~/.ruby-completion/completion-ruby-all
 fi
+
+# complete macports commands
+#if [[ -f ~/.bash_completion.d/port ]]; then
+#	source ~/.bash_completion.d/port
+#fi
+
+# complete todo script commands
+if [[ -f ~/.bash_completion.d/todo_completer.sh ]]; then
+	source ~/.bash_completion.d/todo_completer.sh
+fi
+
+#if [ -x /usr/libexec/path_helper ]; then
+#	eval `/usr/libexec/path_helper -s`
+#fi
 # -------------------------------------------------------------------------------
 #                        HISTORY
 # -------------------------------------------------------------------------------
 #
 # my history settings
-export HISTIGNORE="&:[ ]*:exit:ll:cd:ls:bd:m:wr:soa:sof:sob:ea:eb:ebf:l:te:soar:soah:soax:"
-export HISTSIZE=999
-export HISTFILESIZE=999
+export HISTIGNORE="&:[ ]*:exit:ll:ls:bd:m:wr:soa:sof:sob:ea:eb:ebf:l:te:soar:soah:soax:"
+export HISTSIZE=9999
+export HISTFILESIZE=9999
 # export HISTTIMEFORMAT="%s "
 export HISTTIMEFORMAT='%a, %d %b %Y %l:%M:%S%p %z '
 #
@@ -217,7 +263,7 @@ export HISTTIMEFORMAT='%a, %d %b %Y %l:%M:%S%p %z '
 #
 # Safe rm, cause sometimes things fuxor up (moves things to the trash insted of rm'ing)
 # http://osxutils.sourceforge.net/http://osxutils.sourceforge.net/
-if [ "$sw_vers -productVersion" != "10.*" ] ; then
+if [[ "$sw_vers -productVersion" != "10.*" && -f /usr/local/bin/trash ]]; then
 		alias rm='/usr/local/bin/trash'
 	else
 		alias rm='rm -i'
@@ -226,36 +272,47 @@ fi
 #alias tclsh='/usr/bin/tclsh8.4'
 #export TCLSH='/usr/bin/tclsh8.4'
 #
-export EDITOR="vim"
+
+export EDITOR='mate -w'
 export GIT_EDITOR='vim'
 export VISUAL="vim"
-#export PAGER="less"
+export PAGER="vim"
 # export VISUAL="less"
 export LESS="-erX"
+export LESSCHARSET="UTF-8"
+#export LESS="-e -i -M -R -X -F -S"
+
 # Using my own colorscheme for vim. sometimes vim does not like to load it automatically
 export MANPAGER='col -bx | vim -c "colorscheme dunolie" -c ":set ft=man nonu nolist" -R -'
 # original version of vim man page viewer
 # export MANPAGER='col -bx | vim -c ":set ft=man nonu nolist" -R -'
 #
-#
 # --------------------------------------------------------------------------------
 #
 # set LC & LANG , iTerm does not handle UTF-8 fully otherwise :{
 # export LC_ALL=C
-export LC_CTYPE=en_GB.UTF-8
-export LC_ALL=en_GB.UTF-8
-export LANG=en_GB.UTF-8
+# export LC_ALL='en_GB.UTF-8'
+export LC_ALL=""
+export LANG="en_GB.UTF-8"
+export LC_COLLATE="en_GB.UTF-8"
+export LC_CTYPE="en_GB.UTF-8"
+export LC_MESSAGES="en_GB.UTF-8"
+export LC_MONETARY="en_GB.UTF-8"
+export LC_NUMERIC="en_GB.UTF-8"
+export LC_TIME="en_GB.UTF-8"
+#
 export INPUTRC="~/.inputrc"
 export EVENT_NOKQUEUE=1               # for memcached
-#export BASH_ENV=$HOME/.bashrc
-#export PATH BASH_ENV
 export FUNCTIONS=$HOME/.bash_functions
 export ALIASES=$HOME/.aliases_bash:$HOME/.aliases_bash_robbie:$HOME/.aliases_bash_osx:$HOME/.aliases_bash_osx_home
 export IFS=$' \t\n'
 export MYSQL_DEFAULT_DB=mysql
-export TZ='Europe/London'
-export HELP=`echo -e "There is a bash help file: ${COLOR_GREEN}~/.bash_help${COLOR_NC} - or $ help<tab> from the shell"`
+#export HELP=`echo -e "There is a bash help file: ${COLOR_GREEN}~/.bash_help${COLOR_NC} - or $ help<tab> from the shell"`
 #
+
+if [[ -z "${TZ}" ]] ; then
+    export TZ='Europe/London'
+fi
 # -------------------------------------------------------------------------------
 #                       COMPILING FLAGS
 # -------------------------------------------------------------------------------
@@ -275,39 +332,50 @@ if [[ $(uname -p) = "i386" ]]; then
 fi
 #
 # -------------------------------------------------------------------------------
-#                       COLOUR SETTINGS
+#                       COLOUR ~ LS -- SETTINGS
 # -------------------------------------------------------------------------------
 #
-export CLICOLOR="yes"
-#export CLICOLOR=1
-export GREP_OPTIONS='--color=auto' GREP_COLOR='1;32'
+#export CLICOLOR="yes"
+export CLICOLOR=1
+export GREP_OPTIONS='--color=auto' 
+export GREP_COLOR='1;32'
 #
-# If dircolors, part of the coreutils suite is installed via macports then use that, otherwise use default OSX colours
+# dircolors --print-database uses its own built-in database
+# instead of using /etc/DIR_COLORS.  Try to use the external file
+# first to take advantage of user additions.  Use internal bash
+# globbing instead of external grep binary.
+safe_term=${TERM//[^[:alnum:]]/?}   # sanitize TERM
+match_lhs=""
+[[ -f ~/.dir_colors   ]] && match_lhs="${match_lhs}$(<~/.dir_colors)"
+[[ -f /etc/DIR_COLORS ]] && match_lhs="${match_lhs}$(</etc/DIR_COLORS)"
+#
+# If dircolors, part of the coreutils suite is installed via macports then use that, 
+# otherwise use default OSX colours
 # $ sudo port install coreutils
 if [[ "$sw_vers -productVersion" != "10.*" ]]; then
 	if [[ -f /opt/local/bin/gls ]]; then
-		export LS_OPTIONS='--color=auto'
+		#export LS_OPTIONS='--color=auto'
 		eval `dircolors ~/.dir_colors`
 		#ls aliases for use with dircolors
-		alias l='gls $LS_OPTIONS -lAhF'
-		alias l.='gls $LS_OPTIONS -d .*'
-		alias ls='gls $LS_OPTIONS -hF'
-		alias la='gls $LS_OPTIONS -A'
-		alias lf='gls $LS_OPTION -Ff'
-		alias ll='gls $LS_OPTIONS -lhF'
-		alias ld='gls $LS_OPTIONS -daf'
-		alias lll='gls $LS_OPTIONS -all'
-		alias lsd='gls $LS_OPTIONS -d */'
-		alias lss='gls $LS_OPTIONS -Slh'                 #Size
-		alias lst='gls $LS_OPTIONS -altrhF'              #Time
-		alias lsx='gls $LS_OPTIONS -alh|sort'            #chmod
-		alias lsf='gls $LS_OPTIONS -lhF|grep -v /'       #Files
-		alias lle='gls $LS_OPTIONS -alhF| less'
+		alias l='gls --color=auto -lAhF'
+		alias l.='gls --color=auto -d .*'
+		alias ls='gls --color=auto -hF'
+		alias la='gls --color=auto -A'
+		alias lf='gls --color=auto -Ff'
+		alias ll='gls --color=auto -lhF'
+		alias ld='gls --color=auto -daf'
+		alias lll='gls --color=auto -all'
+		alias lsd='gls --color=auto -d */'
+		alias lss='gls --color=auto -Slh'                 #Size
+		alias lst='gls --color=auto -altrhF'              #Time
+		alias lsx='gls --color=auto -alh|sort'            #chmod
+		alias lsf='gls --color=auto -lhF|grep -v /'       #Files
+		alias lle='gls --color=auto -alhF| less'
 	else
 		# http://www.infinitered.com/blog/?p=19
-		#LS_COLORS=gxgxcxdxbxegedabagacad
-		LS_COLORS=cxfxcxdxBxegedabagacad
-		export LS_COLORS
+		#export LS_COLORS=gxgxcxdxbxegedabagacad
+		#export LS_COLORS=cxfxcxdxBxegedabagacad
+		export LSCOLORS=GxfxcxdxbxGgGdabagacad
 		#ls aliases for use with OS X default colours
 		alias l='ls -lAhF'
 		alias l.='ls -d .*'
@@ -326,17 +394,24 @@ if [[ "$sw_vers -productVersion" != "10.*" ]]; then
 	fi
 fi
 #
-# linux ls colors, see: http://www.linux-sxs.org/housekeeping/lscolors.html
-#
-# http://www.pixelbeat.org/scripts/l
-# Add a fancy symlink arrow
-#if echo "$LANG" | grep -i "utf-*8$" >/dev/null; then
-#	SYM_ARROW="▪▶"
-#else
-#
-#	SYM_ARROW="->"
-#fi
-# needs a fix :/
+if [[ $TERM = "Linux" ]]; then
+	eval `dircolors ~/.dir_colors`
+	# ls aliases
+	alias l='ls --color=auto -lAhF'
+	alias l.='ls --color=auto -d .*'
+	alias ls='ls --color=auto -hF'
+	alias la='ls --color=auto -A'
+	alias lf='ls --color=auto -Ff'
+	alias ll='ls --color=auto -lhF'
+	alias ld='ls --color=auto -daf'
+	alias lll='ls --color=auto -all'
+	alias lsd='ls --color=auto -d */'
+	alias lss='ls --color=auto -Slh'                 #Size
+	alias lst='ls --color=auto -altrhF'              #Time
+	alias lsx='ls --color=auto -alh|sort'            #chmod
+	alias lsf='ls --color=auto -lhF|grep -v /'       #Files
+	alias lle='ls --color=auto -alhF| less'
+fi
 #
 # -------------------------------------------------------------------------------
 #                        WATCH PROCESSES
@@ -404,19 +479,19 @@ fi
 if [ ! -d "${HOME}/bin" ]; then
 	mkdir ${HOME}/bin
 	chmod 700 ${HOME}/bin
-	echo "${HOME}/bin was missing.  I created it for you."
+	echo -e "${CYAN}${ARROW19} ${HOME}/bin${NC} was missing. I created it for you. ${CYAN}:)${NC}"
 fi
 if [ ! -d "${HOME}/Documents" ]; then
 	if ! [  -d "${HOME}/data" ]; then
 		mkdir ${HOME}/data
 		chmod 700 ${HOME}/data
-		echo "${HOME}/data was missing.  I created it for you."
+		echo -e "${CYAN}${ARROW19} ${HOME}/data${NC} was missing. I created it for you. ${CYAN}:)${NC}"
 	fi
 fi
 if [ ! -d "${HOME}/tmp" ]; then
 	mkdir ${HOME}/tmp
 	chmod 700 ${HOME}/tmp
-	echo "${HOME}/tmp was missing.  I created it for you."
+	echo -e "${CYAN}${ARROW19} ${HOME}/tmp${NC} was missing. I created it for you. ${CYAN}:)${NC}"
 fi
 #
 # -------------------------------------------------------------------------------
@@ -435,10 +510,10 @@ umask 077
 ulimit -c 0
 #
 # exclude resource forks when making tar|zip|gz files
-export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+#export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 
 # set UTF-8 encoding for pbcopy/pbpaste
-export __CF_USER_TEXT_ENCODING=0x1F5:0x8000100:0x8000100
+#export __CF_USER_TEXT_ENCODING=0x1F5:0x8000100:0x8000100
 #
 # -------------------------------------------------------------------------------
 #                        KEY BINDINGS
@@ -469,13 +544,10 @@ shopt -s expand_aliases
 shopt -s interactive_comments
 shopt -s histverify
 #
-# -------------------------------------------------------------------------------
-#                        TEXT HELPERS
-# -------------------------------------------------------------------------------
 # bash completion settings (actually, these are readline settings)
 bind "set completion-ignore-case on" # note: bind used instead of sticking these in .inputrc
 bind "set bell-style none"
-bind "set show-all-if-ambiguous On"
+bind "set show-all-if-ambiguous on"
 bind Space:magic-space
 #
 # -------------------------------------------------------------------------------
@@ -485,12 +557,14 @@ bind Space:magic-space
 # auto completion for sudo
 SUDO_COMPLETE=( $(echo $PATH | sed 's/:/\n/g' | xargs ls 2>/dev/null) )
 complete -o default -W "${SUDO_COMPLETE[*]}" sudo
+complete -F _sudo s
+complete -cf sudo
 #
 complete -A setopt set
 complete -A user groups id
 complete -A binding bind
 complete -A helptopic help
-complete -A alias {,un}alias}
+complete -A alias {,un}alias
 complete -A signal -P '-' kill
 complete -A stopped -P '%' fg bg
 complete -A job -P '%' jobs disown
@@ -504,15 +578,20 @@ complete -o default -W 'Makefile' -P '-o ' qmake
 complete -A command man which whatis whereis sudo info apropos
 complete -A file {,z}cat pico nano vi {,{,r}g,e,r}vi{m,ew} vimdiff elvis emacs {,r}ed e{,x} joe jstar jmacs rjoe jpico {,z}less {,z}more p{,g}
 #
-# -------------------------------------------------------------------------------
-#                        SHH - GNU SCREEN
-# -------------------------------------------------------------------------------
+# Todo scripts completion
+complete -F _todo_sh -o default todo
+complete -F _todo_sh -o default t
+complete -F _todo_sh -o default td
 #
-#if [ -n "$SSH_CONNECTION" ] && [ -z "$SCREEN_EXIST" ]; then
-#    export SCREEN_EXIST=1
-#    screen -DR
-#fi
-#
+complete -f -o default -X '*.+(zip|ZIP)'  zip
+complete -f -o default -X '!*.+(zip|ZIP)' unzip
+complete -f -o default -X '*.+(z|Z)'      compress
+complete -f -o default -X '!*.+(z|Z)'      uncompress
+complete -f -o default -X '*.+(gz|GZ)'      gzip
+complete -f -o default -X '!*.+(gz|GZ)'   gunzip
+complete -f -o default -X '*.+(bz2|BZ2)'  bzip2
+complete -f -o default -X '!*.+(bz2|BZ2)' bunzip2
+complete -f -o default -X '!*.+(zip|ZIP|z|Z|gz|GZ|bz2|BZ2)' extract
 # ----------------------------------------------------------------------------
 #                          SYMBOLS
 # ----------------------------------------------------------------------------
@@ -535,60 +614,8 @@ ARROW15="⇸"
 ARROW16="⇾"
 ARROW17="↳"
 ARROW18="↪"
+ARROW19="▪▶"
 YINYANG="☯"
-#
-# -------------------------------------------------------------------------------
-#                        MY WELCOME MESSAGE
-# -------------------------------------------------------------------------------
-# List screen sessions. Attached or dettached
-function screenON () {
-SERVICEUP="screen"
-if ps ax | grep -v grep | grep $SERVICEUP > /dev/null
-then
-	echo -e "=-=-=-=-= ${GREEN} $(scrl)${NC}"
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-else
-	echo -e "=-=-=-=-= ${L_RED} There are no screen sessions on.${NC}"
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-fi
-}
-# Shows what the name of the bootup disk is
-function bootdisk () {
-/usr/sbin/disktool -l | awk -F"'" '$4 == "/" {print $8}'
-}
-#
-#
-echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-echo -e   "    \033[1;37m.\033[1;30m~\033[1;37m.\033[0;0m        OS X:${L_CYAN} $(sw_vers -productVersion)${NC}"
-echo -en  "    \033[1;30m/\033[1;33mV\033[1;30m\\\\\033[0;0m    Computer:${L_CYAN} $(hostname) ${NC}"
-echo ""
-echo -en  "   \033[1;30m//\033[1;37m&\033[1;30m\\\\\\\\\033[0;0m   BootDisk:${L_CYAN} $(bootdisk)${NC}"
-echo ""
-echo -e   "  \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m      User:${L_GREEN} $USER ${NC}"
-echo -e   "   \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m       Time:${L_GREEN} $(date +%H:%M)${NC} on ${L_GREEN}$(date +%A) $(date +%d\ %B\,\ %G)${NC} "
-#
-# My welcome message with my @terminal todo's from my todo.txt, see lifehacker.com for more info on todo.txt
-if [  -f ~/Sync/ToDo/todo.txt ]; then
-	echo -e "=-=-=-=-=-=-=-=-=-=-${L_RED} todo's! ${NC}-=-=-=-=-=-=-=-=-=-==-=-=-=-="
-	echo -e "${L_RED}$(grep @term ~/Sync/ToDo/todo.txt)${NC}"
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-else
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-fi
-#if [[ -f ~/bin/weather-report ]]; then
-#	if [ "ping -c 2 www.google.com > /dev/null -eq 0" ]; then
-#		#echo -e "\033[1;32m The weather in Oban is currently, $(oban-forecast "EUR|UK|UK604|Oban")\033[0m"
-#		echo -e "${GREEN}$(weather-report)${NC}"
-#		echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#	else
-#		echo  -e "Internet connection is${RED} down${NC} ~ No weather report :("
-#		echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#	fi
-#else
-#	echo  -e "=-=-=-=-=${RED} No weather report file"${NC}
-#	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#fi
-echo -e "$(screenON)"
 #
 # -------------------------------------------------------------------------------
 #                         PROMPTS
@@ -596,37 +623,29 @@ echo -e "$(screenON)"
 # Xterm title bar
 case $TERM in
 	xterm*)
-		XTITLE='\[\e]0; (\!) (\#) [\u@\h] [\w] \@ \007\]';
+		XTITLE='\[\033k\033\\\]\[\e]0;`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \007\]';
 		;;
 	*)
 		XTITLE="";
 	;;
 esac
-
-# add the time to the prompt, useful to see how long commands are taking
-PTIME="`date +%H:%M`"
-
+#
 if [[ "$TERM" = "dumb" ]]; then
 	# Stripped the colour codes for terminals without colour
 	PS1="${XTITLE}[\!] (\#) \u@\h \W \$ "
 	PS2="${XTITLE}[\!][PS2] (\#) \u@\h \W > "
 fi
 
+
 if [[ -f ~/.bash_prompt ]]; then
 	. ~/.bash_prompt
 else
 	PS1='[http://bit.ly/4wngdq]\u@\h \W \$ '
 	PS2='[http://bit.ly/4wngdq]\u@\h \W » '
-	SUDO_PS1='SUDO!: \u@\h \W ☯ '
+	SUDO_PS1='SUDO - \u@\h \W ☯ '
 fi
 
-#. ~/.git_svn_bash_prompt
-# -------------------------------------------------------------------------------
-#         WINDOW TITLE SETTINGS
-# -------------------------------------------------------------------------------
 #
-# Prompt command for screenrc
-# PROMPT_COMMAND='echo -n -e "\033k\033\134"'
 # ----------------------------------------------------------------------------
 #                          FINAL-CLOSING STUFF
 # ----------------------------------------------------------------------------
@@ -634,5 +653,5 @@ fi
 # unset use_color safe_term match_lhs
 #
 # -------------------------------------------------------------------------------
-#               END OF BASHRC - Robbie - dunolie@gmail.com
+#               END OF BASHRC - Robbie - dunolie (at) gmail (dot) com
 # -------------------------------------------------------------------------------

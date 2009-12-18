@@ -7,87 +7,98 @@
 # #       Comments: osx based, should work with other terminals
 # #    Description: keybindings for terminal
 # # -------------------------------------------------------------------------------
-#
+
 # allow the use of the Home/End keys
 "\e[1~": beginning-of-line
 "\e[4~": end-of-line
-#
+
 # allow the use of the Delete/Insert keys
 "\e[3~": delete-char # Delete key
 "\e[2~": quoted-insert
-#
+
 # mappings for "page up" and "page down"
 # to step to the beginning/end of the history
 "\e[5~": beginning-of-history
 "\e[6~": end-of-history
-#
+
 # "\e[A" and "\e[B" being whatever your terminal uses for up & down.
 "\e[A": history-search-backward
 "\e[B": history-search-forward
-#
+
 # expand tilde
 set expand-tilde on
 #
 # Two escapes clear command line.
 "\e\e": "\C-a\C-k"
+
+# [esc-d]
+"\ed": kill-whole-line
+
+# op[esc-h] will show the last command that began with op
+"\eh": dynamic-complete-history
+
 #
 # Enable 8bit input
 set meta-flag on
 set input-meta on
-#
+
 # Turns off 8th bit stripping
 set convert-meta off
-#
+
 # Keep the 8th bit for display
 set output-meta on
-#
+
 # Will display all alternatives for completion after one tab keypress
 set show-all-if-ambiguous On
-#
+
 # From http://krau.se/kevin/changing-annoying-terminal-habits/
 "\\e[5C": forward-word
 "\\e[5D": backward-word
 "\\e[1~": beginning-of-line
 "\\e[4~": end-of-line
-#
+
 # http://anders.janmyr.com/2009/01/making-mac-os-x-terminal-hum.html
 # escape and number
-"\e1": "©"
-"\e2": "@"
-"\e3": "£"
-"\e4": "$"
-"\e5": "∞"
-"\e6": "§"
-"\e7": "|"
-"\e8": "["
-"\e9": "]"
-"\e0": "≈"
-"\e/": "\\"
-"\e(": "{"
-"\e)": "}"
+#"\e1": "©"
+#"\e2": "@"
+#"\e3": "£"
+#"\e4": "$"
+#"\e5": "∞"
+#"\e6": "§"
+#"\e7": "|"
+#"\e8": "["
+#"\e9": "]"
+#"\e0": "≈"
+#"\e/": "\\"
+#"\e(": "{"
+#"\e)": "}"
 
-"\e[1~": beginning-of-line    # Home key
-"\e[4~": end-of-line    # End key
-"\e[3~": delete-char    # Delete key
-"\e[5C": forward-word    # Ctrl+right
-"\e[5D": backward-word    # Ctrl+left
-#"\e\e[C": forward-word    # Alt+right
-#"\e\e[D": backward-word    # Alt+left
+"\e[1~": beginning-of-line       # Home key
+"\e[4~": end-of-line             # End key
+"\e[3~": delete-char             # Delete key
+"\e[5C": forward-word            # Ctrl+right
+"\e[5D": backward-word           # Ctrl+left
+#"\e\e[C": forward-word          # Alt+right
+#"\e\e[D": backward-word         # Alt+left
 
-"\e\e[C": end-of-line    # Alt+right
-"\e\e[D": beginning-of-line    # Alt+left
+"\e\e[C": end-of-line            # Alt+right
+"\e\e[D": beginning-of-line      # Alt+left
 
 
-"\C-K": unix-line-discard   # Ctrl+K
-"\e\"": "@{}\e[D"     # Insert @{} move cursor into braces
+"\C-K": unix-line-discard        # Ctrl+K
+
+# Insert @{} move cursor into braces
+"\e\"": "@{}\e[D"
 
 # show symlinked dirs in terminal
 set mark-symlinked-directories on
 
 # Shift-TAB to menu-complete backwards
 # cf. http://www.tikirobot.net/wp/2006/03/29/reverse-menu-complete-in-bash/
-\C-y: "\e--\C-i"
+“\e[Z”: "\e-1\C-i"
+#\C-y: "\e--\C-i"
 #\C-y:"\M--\C-i"
+
 
 # op[esc-h] will show the last command that began with op
 "\eh": dynamic-complete-history
@@ -98,8 +109,8 @@ set mark-symlinked-directories on
 
 # [esc-1] [space], [esc-2] [space], ...
 # cf. http://codesnippets.joyent.com/posts/show/1630
-
-# accessing elements of the previous command line
+# http://codesnippets.joyent.com/posts/show/1690
+# accessing elements of the previous command line  (escape + number)
 # cf. man bash 2>/dev/null | less -p 'Event Designators'
 "\e0": "!-1:0"
 "\e1": "!-1:1"
@@ -114,7 +125,7 @@ set mark-symlinked-directories on
 "\er": "!-1:1-$"
 #"\er": "!-1:1-"  # missing $ excludes last element
 
-# accessing elements of the current command line typed so far
+# accessing elements of the current command line typed so far (escape + escape + number)
 # cf. man bash 2>/dev/null | less -p 'Event Designators'
 "\e\e0": "!#:0"
 "\e\e1": "!#:1"
@@ -129,7 +140,6 @@ set mark-symlinked-directories on
 "\e\er": "!#:1-$"
 "\e\ea": "!#:1-$"
 "\e\el": "!#:$"
-
 
 
 # Functions keys
@@ -157,15 +167,14 @@ $endif
 # show a filetype indicator in tab completions
 set visible-stats on
 
-# $if Bash
+$if Bash
 # F10 toggles mc on and off
 # Note Ctrl-o toggles panes on and off in mc
-#  "\e[21~": "mc\C-M"
+"\e[21~": "mc\C-M"
 # do history expansion when space entered
-#   Space: magic-space
-# $endif
-#
-#
-# Include system wide settings which are ignore
+Space: magic-space
+$endif
+
+# Include system wide settings which are ignored
 # by default if one has their own .inputrc
-# $include /etc/inputrc
+$include /etc/inputrc

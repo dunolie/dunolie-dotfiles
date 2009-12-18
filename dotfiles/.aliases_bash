@@ -24,6 +24,9 @@
 ##------------------------------------------------------------
 ## Script Comments if needed : try and keep it clean & commented :)
 ##-----------------------------------------------------------
+alias rkhunter='rkhunter --versioncheck --update --propupd --check'
+alias e='$EDITOR'
+
 alias lu='stat -c %a\ %N\ %G\ %U "$@" | sort'
 
 alias clear-flash-cache='rm -rf ~/Library/Preferences/Macromedia/*'
@@ -56,15 +59,6 @@ alias cleangems="sudo gem clean"
 alias deletegem="sudo gem uninstall \$1"
 alias listgems="sudo gem list"
 
-# git helpers
-alias gu="git pull"
-alias gpom="git push origin master"
-alias ga="git add ."
-alias gc="git commit -m \$1"
-alias gs="git status"
-alias gi="vim .gitignore"
-alias gitrm="git stat | grep deleted | awk '{print $3}' | xargs git rm"
-
 
 # VLC aliases
 alias vlcc='/Applications/VLC.app/Contents/MacOS/VLC'
@@ -81,15 +75,13 @@ alias thumb-600-jpg='jhead -cmd "mogrify -resize 600x600 -quality 100 &" *.jpg'
 alias thumb-800-jpg='jhead -cmd "mogrify -resize 800x800 -quality 100 &" *.jpg'
 alias thumb-1000-jpg='jhead -cmd "mogrify -resize 1000x1000 -quality 100 &" *.jpg'
 
+alias reload='echo -e "${CYAN}Reloading your ~/.bashrc!${NC}" ;source ~/.bashrc'
 
-
-alias reload="source ~/.bashrc"
 alias cppwd='eval "echo `pwd` | tr -d \\\\n | pbcopy"'
 
 # burn to iso
 alias burn-iso='drutil burn'
 alias burn-dvd='drutil burn -noverify'
-
 
 
 ##-----------------------------------------------------------
@@ -104,6 +96,17 @@ alias git-unstaged="git diff"
 alias git-both="git diff HEAD"
 
 alias gitstat='git status | perl -pe "exit if(/Untracked files\:/)"'
+
+# git helpers
+alias gp="git pull"
+alias gpom="git push origin master"
+alias ga="git add ."
+alias gc="git commit -m \$1"
+alias gs="git status"
+alias gi="vim .gitignore"
+alias gitrm="git stat | grep deleted | awk '{print $3}' | xargs git rm"
+
+
 ##-----------------------------------------------------------
 
 # Dnuos music catalogue
@@ -148,6 +151,7 @@ alias osxhints='links -term=vt100 http://www.macosxhints.com'
 alias macfixit='links -term=vt100 http://www.macfixit.com'
 alias fireball='links -term=vt100 http://www.daringfireball.com'
 alias lhacker='links -term=vt100 http://www.lifehacker.com'
+
 alias lifehacker='links -term=vt100 http://www.lifehacker.com'
 alias web='/opt/local/bin/links http://www.scroogle.org/cgi-bin/scraper.htm'
 #alias goog='/opt/local/bin/links http://www.scroogle.org/cgi-bin/scraper.htm'
@@ -186,21 +190,17 @@ alias minic='echo -ne "\033]0;minicom\007" ; minicom -c on'
 
 ##-- IPLAYER  -----------
 
+alias iplay-film='iplayer --category=Film'
+
 alias iplayi='iplayer --nopurge --nocopyright -i $1'
 
 alias iplay='iplayer --nopurge --nocopyright --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
-
-alias iplay-24-itv='iplayer --nopurge --nocopyright --type=itv --since=24 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
 alias iplay-24='iplayer --nopurge --nocopyright --type=tv --since=24 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
 alias iplay-48='iplayer --nopurge --nocopyright --since=48 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
-alias iplay-48-itv='iplayer --nopurge --nocopyright --type=itv --since=48 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
-
 alias iplay-168='iplayer --nopurge --nocopyright --since=48 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
-
-alias iplay-168-itv='iplayer --nopurge --nocopyright --type=itv --since=48 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
 alias iplay-tv='iplayer --nopurge --nocopyright --type=livetv --pid "tv:$1" --stream | mplayer -cache 512 -'
 
@@ -219,7 +219,7 @@ alias iplay-slr='iplayer --pid radio:$1 --amode=flashaac --stdout --nowrite | mp
 alias scrabble='java -jar /Applications/WordBiz/wordbiz.jar'
 
 ##-----------------------------------------------------------
-##### RADIO 
+##### RADIO
 
 # save movie and audio files to your pwd (save-stream URL)
 alias save-stream='mplayer -dumpstream $1'
@@ -252,7 +252,7 @@ alias scrg='cd /private/tmp/uscreen/S-"$USER"'
 alias ghost-screens='cd /private/tmp/uscreen/S-"$USER"'
 
 ##-- GNU SCREEN  -----------
-# Attaches to a screen session. If the session is attached elsewhere, detaches that other display. 
+# Attaches to a screen session. If the session is attached elsewhere, detaches that other display.
 # If no session exists, creates one. If multiple sessions exist, uses the first one.
 # alias screen='screen -dRR'
 ##------------------------------------------------------------
@@ -292,7 +292,11 @@ alias vi='/opt/local/bin/vim -c "colorscheme dunolie"'
 
 # VIM FROM MACPORTS
 alias v='/opt/local/bin/vim -c "colorscheme dunolie"'
+
+alias vim='/opt/local/bin/vim -c "colorscheme dunolie"'
+
 ##------------------------------------------------------------
+
 
 # get to the rafb website to paste code .. shpost script does not like ( "'`; )
 alias rafbf='firefox http://rafb.net/paste/'
@@ -713,11 +717,13 @@ alias tip='links -dump "http://www.shell-fu.org/lister.php?random" | grep -A 100
 alias cups='open http://127.0.0.1:631/'
 ##------------------------------------------------------------
 
-alias irc='screen -c ~/.screen/.screenrc.irc'
-alias irc256='screen -c ~/.screen/.screenrc.irc256'
+alias irc='sc irc'
+alias irc256='sc irc256'
 
 ##------------------------------------------------------------
 
+# os x gnu plot 
+alias gnuplot='/Applications/Gnuplot.app/Contents/Resources/bin/gnuplot-4.2.3'
 
 ##------------------------------------------------------------
 
@@ -727,7 +733,22 @@ alias thumb600='sips -Z 600 "$@" --out 600x-resized.png png'
 alias thumb400='sips -Z 400 "$@" --out 400-resized.png png'
 alias thumb200='sips -Z 200 "$@" --out 200-resized.png png'
 
+##------------------------------------------------------------
 
+#Change file name from upper to lower case
+alias lcase='rename 'y/A-Z/a-z/' *'
+#Change file name from  lower to upper case
+alias ucase='rename 'y/a-z//A-Z' *'
+
+##------------------------------------------------------------
+
+# show a keyboard shortcut list
+alias bindlist="bind -p | grep -Ev '(do-lowercase-version|digit-argument|not bound|self-insert)'"
+
+alias goto="osascript -e 'open location \!'"
+
+alias term='echo -e "term: ${CYAN}$TERM${NC}"'
+ 
 ##------------------------------------------------------------
 # THE END
 ##------------------------------------------------------------

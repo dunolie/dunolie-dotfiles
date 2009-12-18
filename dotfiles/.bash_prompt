@@ -1,10 +1,8 @@
-#!/usr/bin/env bash
-#
 #        Author: Robbie - dunolie (at) gmail (dot) com
 #      Filename: bash_prompt  ($HOME/.bash_prompt)
-#       Created: TIMESTAMP         
-# Last Modified: TIMESTAMP
-#   Description: 
+#       Created: Fri 11 Dec 2009 14:31:39 pm GMT
+# Last Modified: Fri 11 Dec 2009 14:31:49 pm GMT
+#   Description: My bash prompt
 #      Comments: my fork of the prompt @  http://gist.github.com/31967
 ################################################################################
 #   DESCRIPTION:
@@ -27,26 +25,80 @@
 #   Based on work by halbtuerke and lakiolen.
 #
 #   http://gist.github.com/31967
-################################################################################
 # The various escape codes that we can use to color our prompt.
+# What I have in my ~/.bashrc to work with the prompt
+################################################################################
+# Xterm title bar
+#case $TERM in
+#	xterm*)
+#		XTITLE='\[\033k\033\\\]\[\e]0; (\!) (\#) [\u@\h] [\w] \@ \007\]';
+#		;;
+#	*)
+#		XTITLE="";
+#	;;
+#esac
 
-WHITE='\[\033[1;37m\]'
-BLACK='\[\033[0;30m\]'
-BLUE='\[\033[0;34m\]'
-L_BLUE='\[\033[1;34m\]'
-GREEN='\[\033[0;32m\]'
-L_GREEN='\[\033[1;32m\]'
-CYAN='\[\033[0;36m\]'
-L_CYAN='\[\033[1;36m\]'
-RED='\[\033[0;31m\]'
-L_RED='\[\033[1;31m\]'
-PURPLE='\[\033[0;35m\]'
-L_PURPLE='\[\033[1;35m\]'
-YELLOW='\[\033[1;33m\]'
-L_YELLOW='\[\033[0;33m\]'
-GRAY='\[\033[1;30m\]'
-L_GRAY='\[\033[0;37m\]'
-NC="\[\e[0m\]"
+#if [[ -f ~/.bash_prompt ]]; then
+#	. ~/.bash_prompt
+#else
+#	PS1='[http://bit.ly/4wngdq]\u@\h \W \$ '
+#	PS2='[http://bit.ly/4wngdq]\u@\h \W » '
+#	SUDO_PS1='SUDO - \u@\h \W ☯ '
+#fi
+
+# so I get my xterm titles working in screen.
+#if [ "$TERM" = "screen" ]; then
+#    export TERM=xterm
+#fi
+################################################################################
+# \a     an ASCII bell character (07)
+# \d     the date in "Weekday Month Date" format (e.g., "Tue May 26")
+# \D{format}  the format is passed to strftime(3) and the result is inserted into the prompt string;
+# \e     an ASCII escape character (033)
+# \h     the hostname up to the first `.'
+# \H     the hostname
+# \j     the number of jobs currently managed by the shell
+# \l     the basename of the shell's terminal device name
+# \n     newline
+# \r     carriage return
+# \s     the name of the shell, the basename of $0 (the portion following the final slash)
+# \t     the current time in 24-hour HH:MM:SS format
+# \T     the current time in 12-hour HH:MM:SS format
+# \@     the current time in 12-hour am/pm format
+# \A     the current time in 24-hour HH:MM format
+# \u     the username of the current user
+# \v     the version of bash (e.g., 2.00)
+# \V     the release of bash, version + patchelvel (e.g., 2.00.0)
+# \w     the current working directory
+# \W     the basename of the current working directory
+# \!     the history number of this command
+# \#     the command number of this command
+# \$     if the effective UID is 0, a #, otherwise a $
+# \nnn   the character corresponding to the octal number nnn
+# \\     a backslash
+# \[     begin a sequence of non-printing characters, which could be used to embed a terminal control sequence into the prompt
+# \]     end a sequence of non-printing characters
+################################################################################
+# fully escaped color values for use in prompts
+# color_name='\[\033[ color_code m\]'
+
+E_WHITE='\[\033[1;37m\]'
+E_BLACK='\[\033[0;30m\]'
+E_BLUE='\[\033[0;34m\]'
+E_L_BLUE='\[\033[1;34m\]'
+E_GREEN='\[\033[0;32m\]'
+E_L_GREEN='\[\033[1;32m\]'
+E_CYAN='\[\033[0;36m\]'
+E_L_CYAN='\[\033[1;36m\]'
+E_RED='\[\033[0;31m\]'
+E_L_RED='\[\033[1;31m\]'
+E_PURPLE='\[\033[0;35m\]'
+E_L_PURPLE='\[\033[1;35m\]'
+E_YELLOW='\[\033[1;33m\]'
+E_L_YELLOW='\[\033[0;33m\]'
+E_GRAY='\[\033[1;30m\]'
+E_L_GRAY='\[\033[0;37m\]'
+E_NC='\[\e[0m\]'
 
 # Detect whether the current directory is a git repository.
 function is_git_repository {
@@ -65,11 +117,11 @@ function set_git_branch {
 
   # Set color based on clean/staged/dirty.
   if [[ ${git_status} =~ "working directory clean" ]]; then
-    state="${GREEN}☯ "
+    state="${E_GREEN}☯ "
   elif [[ ${git_status} =~ "Changes to be committed" ]]; then
-    state="${YELLOW}♺ "
+    state="${E_YELLOW}♺ "
   else
-    state="${RED}♺ "
+    state="${E_RED}♺ "
   fi
 
   # Set arrow icon based on status against remote.
@@ -93,7 +145,7 @@ function set_git_branch {
   fi
 
   # Set the final branch string.
-  BRANCH="${state}(${branch})${remote}${NC} "
+  BRANCH="${state}(${branch})${remote}${E_NC} "
 }
 
 # Determine the branch information for this subversion repository. No support
@@ -119,9 +171,9 @@ function set_svn_branch {
 # previous command.
 function set_prompt_symbol () {
   if test $1 -eq 0 ; then
-      PROMPT_SYMBOL="\$"
+      PROMPT_SYMBOL="${E_CYAN}\$ ${E_NC}"
   else
-      PROMPT_SYMBOL="${RED}\$${NC}"
+      PROMPT_SYMBOL="${E_L_RED}\$ ${E_NC}"
   fi
 }
 
@@ -142,10 +194,10 @@ function set_bash_prompt () {
 
   # Set the bash prompt variable.
   #PS1="\u@\h \w ${BRANCH}${PROMPT_SYMBOL} "
-  #PS1='\[\033k\033\\\]'
-  PS1="${XTITLE}${PURPLE}[\!][${PTIME}]${GREEN}[\u@\h] \W ${BRANCH}${L_RED}\$ ${NC}"
-  PS2="${XTITLE}${PURPLE}[\!][${PTIME}]${GREEN}[\u@\h] \W ${BRANCH}${L_RED}» ${NC}"
-  SUDO_PS1="${XTITLE}${PURPLE}[\!][${PTIME}]${RED}[\u@\h] \W ${BRANCH}${L_RED}\$ ${NC}"
+  #PS1="${XTITLE}${E_PURPLE}[\!][\A][\u@\h]${E_GREEN} \W ${BRANCH}${E_L_RED}\$ ${E_NC}"
+  PS1="${XTITLE}${E_PURPLE}[\!][\A][\u@\h]${E_GREEN} \W ${BRANCH}${PROMPT_SYMBOL}"
+  PS2="${XTITLE}${E_PURPLE}[\!][\A][\u@\h]${E_GREEN} \W ${BRANCH}${E_L_RED}» ${E_NC}"
+  SUDO_PS1="${XTITLE}${E_PURPLE}[\!][\A]${E_RED}[\u@\h] \W ${BRANCH}${E_L_RED}\$ ${E_NC}"
 }
 
 # Tell bash to execute this function just before displaying its prompt.

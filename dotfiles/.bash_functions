@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------------------------------
-#   .~.    =
-#   /V\    =           Author: Robbie ( dunolie@gmail.com )
-#  //&\\   =          Created: 03/10/09 @ 04:30:05
-# /((@))\  =
-#  ^`~'^   =
-#= = = = = =
-# -------------------------------------------------------------------------------
-# Last modified:
-# Description: my bash functions ~/.bash_functions
-# -------------------------------------------------------------------------------
-# Snipped from: bit's from all over the place :)
-# -------------------------------------------------------------------------------
-# Comments:
-# also sourcing ~/.fff for more functions
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: .bash_functions  ($HOME/.bash_functions)
+#        Created: TIMESTAMP
+#  Last Modified: TIMESTAMP
+#    Description: my bash functions ~/.bash_functions
+#       Comments: also sourcing ~/.fff for more functions
 # -------------------------------------------------------------------------------
 # open app = $ oa textedit foo.txt
 function oa () {
-$app=`find /Applications/ -name “*.app” | grep $1`;
-shift;
-open -a “$app/” “$2″;
+if [[ -f ~/bin/launch ]]; then
+	launch -a "$@"
+else
+	$app=`find /Applications/ -name “*.app” | grep $1`;
+	shift;
+	open -a “$app/” “$2″;
+fi
 }
 
 # github clone  sorts close by /github-user/project
@@ -35,7 +31,12 @@ function ghclone {
   fi
 }
 
-
+function rename-ext() {
+   local filename
+   for filename in *."$1"; do
+     mv "$filename" "${filename%.*}"."$2"
+   done
+}
 
 
 function calculator () { awk "BEGIN{ print $* }" ;}
@@ -503,14 +504,31 @@ JFDI () {
 # ---------------------------------------------
 
 
-# resource forks goodness for osx rsync
-function rsync () {
-	if [[ "$sw_vers -productVersion" != "10.*"  ]]; then
-		alias rsync='rsync -E'
-	fi
+# resource forks goodness for osx 
+#function rsync () {
+#	if [[ "$sw_vers -productVersion" != "10.*"  ]]; then
+#		alias rsync='rsync -E'
+#	fi
+#}
+
+# quick lunching of different screen profiles
+# ~/.screen/screenrc.*foo*
+function sc () { 
+    RED='\e[0;31m'
+	NC='\e[0m'
+	CYAN='\e[1;36m'
+	SC_SESSION=$(screen -ls | egrep -e "\.$1.*Detached" | \
+	awk '{ print $1 }' | head -1);
+	if [ -n "$SC_SESSION" ]; then
+		xtitle $1;
+		screen -R $SC_SESSION;
+	elif [ -f ~/.screen/.screenrc.$1 ]; then
+    	xtitle $1;
+    	screen -S $1 -c ~/.screen/.screenrc.$1
+	else
+		echo -e "${RED}Unknown screen session:${CYAN} '$1'${NC}"
+fi
 }
-
-
 # ---------------------------------------------
 
 AddPath ()
@@ -1462,6 +1480,125 @@ function scd () {
  cd $cd
  shopt -u cdspell
 }
+
+
+# taken from http://github.com/bryanl/zshkit/
+function git-track () {
+    local BRANCH=`git branch 2> /dev/null | grep \* | sed 's/* //'`
+git config branch.$BRANCH.remote origin
+git config branch.$BRANCH.merge refs/heads/$BRANCH
+echo "tracking origin/$BRANCH"
+}
+function github-url () { git config remote.origin.url | sed -En 's/git(@|:\/\/)github.com(:|\/)(.+)\/(.+).git/https:\/\/github.com\/\3\/\4/p'; }
+function github-go () { open $(github-url); }
+function git-scoreboard () { git log | grep '^Author' | sort | uniq -ci | sort -r; }
+
+# http://www.guyslikedolls.com/git-on-macosx
+newgit()
+{
+if [ -z $1 ]; then
+echo "usage: $FUNCNAME project-name.git"
+else
+gitdir="/Library/WebServer/Documents/git/$1"
+mkdir $gitdir
+pushd $gitdir
+git --bare init
+git --bare update-server-info
+chmod a+x hooks/post-update
+touch git-daemon-export-ok
+popd
+fi
+}
+# ---------------------------------------------
+
+function mancomplete () {
+	ITEMS=$(man -W | sed -e 's/:/ /g')
+	for i in $ITEMS; do
+		HITS=$i/*/$2*
+		for j in $HITS; do
+			NAME=$(basename $j)	
+			echo $NAME
+		done
+	done
+}
+# ---------------------------------------------
+# Kill the line with the given number in the ssh known hosts file.
+# Useful after a host public key change.
+function kill-ssh-known-hosts-line () {
+	sed -ie "$1d" ~/.ssh/known_hosts
+}
+# ---------------------------------------------
+
+# fuzzy 'cd': cd into first directory matching the substring, case insensitive
+function cdfuz () {
+	shopt -q nocasematch || resetcase=1
+	shopt -s nocasematch
+	for i in *; do [ -d "$i" ] && [[ "$i" == *"$1"* ]] && cd "$i" && echo "$i" && break; done
+	[ $resetcase ] && shopt -u nocasematch
+}
+# ---------------------------------------------
+
+function mdlocate () {
+	echo mdfind "kMDItemFSName == '$1'"	
+	mdfind "kMDItemFSName == '$1'"	
+}
+
+function spot () { mdfind "kMDItemDisplayName == '$@'wc"; }
+
+function clearquarantine () {
+	[ "$1" -a -d "$1" ] || { echo need a directory argument; return 1; }
+	echo find "'$1'" -type f -print0 \| xargs -n 100 -0 sudo xattr -d com.apple.quarantine
+	find "$1" -type f -print0 | xargs -n 100 -0 sudo xattr -d com.apple.quarantine
+}
+
+# ---------------------------------------------
+# make back up of file , prepend '__' to the backup
+function __ () {
+  cp $1 __$1
+}
+
+function t256 () {
+  if [ "$TERM" != "xterm-256color" ]; then
+    echo "TERM: $TERM -> xterm-256color"
+    export TERM="xterm-256color"
+  fi
+}
+
+# ---------------------------------------------
+
+# fcd: cd's to frontmost window of Finder
+function fcd ()
+{
+    currFolderPath=$( /usr/bin/osascript <<"    EOT"
+        tell application "Finder"
+            try
+		set currFolder to (folder of the front window as alias)
+            on error
+		set currFolder to (path to desktop folder as alias)
+            end try
+            POSIX path of currFolder
+        end tell
+    EOT
+    )
+    echo "cd to \"$currFolderPath\""
+    cd "$currFolderPath"
+}
+
+# when i want to tail some out put to growl, ls | growl
+function growl () {
+if [[ $(hostname) = "server" ]]; then
+	growlnotify -s -H "mini.local" -t "growl: $USER @ $(hostname) `date +%H:%M`"
+else
+	growlnotify -s -t "growl: $USER @ $(hostname) `date +%H:%M`"
+fi
+}
+
+function spam-hosts-update () {
+	wget -q -O - http://someonewhocares.org/hosts/ | grep ^127 >> ~/Desktop/hosts;
+	sudo cat ~/Desktop/hosts >> /etc/hosts;
+	growlnotify -s -t "Spam list updated!" -m "new entries in /etc/hosts"
+}
+
 
 # ---------------------------------------------
 # KEEP AS LAST FUNCTION IT BREAKS THE SYNTAX COLOURING!!!
