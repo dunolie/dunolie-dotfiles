@@ -1,8 +1,8 @@
 # -------------------------------------------------------------------------------
-# Author: Robbie ( dunolie@gmail.com )
-# Created: 03/10/09 @ 07:07:20
+# Author: Robbie  --  dunolie (at) gmail (dot) com
+# Created: Fri 18 Dec 2009 20:20:35 pm GMT
 # Description: $(HOME)/.bash_profile
-# Last modified:
+# Last modified: Fri 18 Dec 2009 20:20:45 pm GMT
 # Comments: mac osx centred bash profile
 #-------------------------------------------------------------------------------
 #                            NOTES
@@ -25,7 +25,7 @@
 # -------------------------------------------------------------------------------
 #                         SHELL SETTINGS
 # -------------------------------------------------------------------------------
-# colour values for use in scripts. Usage:  text 
+# colour values for use in scripts. Usage:  text
 NC='\e[0m' # No Color
 WHITE='\e[1;37m'
 BLACK='\e[0;30m'
@@ -65,7 +65,6 @@ function bootdisk () {
 /usr/sbin/disktool -l | awk -F"'" '$4 == "/" {print $8}'
 }
 #
-#
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo -e   "    \033[1;37m.\033[1;30m~\033[1;37m.\033[0;0m        OS X:${L_CYAN} $(sw_vers -productVersion)${NC}"
 echo -en  "    \033[1;30m/\033[1;33mV\033[1;30m\\\\\033[0;0m    Computer:${L_CYAN} $(hostname) ${NC}"
@@ -75,7 +74,6 @@ echo ""
 echo -e   "  \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m      User:${L_GREEN} $USER ${NC}"
 echo -e   "   \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m       Time:${L_GREEN} $(date +%H:%M)${NC} on ${L_GREEN}$(date +%A) $(date +%d\ %B\,\ %G)${NC} "
 
-#
 # My welcome message with my @terminal todo's from my todo.txt, see lifehacker.com for more info on todo.txt
 if [  -f ~/Sync/ToDo/todo.txt ]; then
 	echo -e "=-=-=-=-=-=-=-=-=-=-${L_RED} todo's! ${NC}-=-=-=-=-=-=-=-=-=-==-=-=-=-="
@@ -117,15 +115,3 @@ else
 	echo -e "Using the global ${GREEN}bashrc${NC} file from ${GREEN}/etc/bashrc${NC}"
 fi
 
-# if ~/.bashrc then source it
-#if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "Apple_Terminal" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/Terminal/.bashrc-terminal
-#fi
-
-#if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "DTerm" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-dterm	
-#fi
-
-#if [[ $(uname) = "Darwin" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-iterm	
-#fi
