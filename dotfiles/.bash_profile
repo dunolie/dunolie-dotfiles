@@ -1,8 +1,8 @@
 # -------------------------------------------------------------------------------
-# Author: Robbie  --  dunolie (at) gmail (dot) com
-# Created: Fri 18 Dec 2009 20:20:35 pm GMT
+# Author: Robbie ( dunolie@gmail.com )
+# Created: 03/10/09 @ 07:07:20
 # Description: $(HOME)/.bash_profile
-# Last modified: Fri 18 Dec 2009 20:20:45 pm GMT
+# Last modified:
 # Comments: mac osx centred bash profile
 #-------------------------------------------------------------------------------
 #                            NOTES
@@ -25,24 +25,24 @@
 # -------------------------------------------------------------------------------
 #                         SHELL SETTINGS
 # -------------------------------------------------------------------------------
-# colour values for use in scripts. Usage:  text
-NC='\e[0m' # No Color
-WHITE='\e[1;37m'
-BLACK='\e[0;30m'
-BLUE='\e[0;34m'
-L_BLUE='\e[1;34m'
-GREEN='\e[0;32m'
-L_GREEN='\e[1;32m'
-CYAN='\e[0;36m'
-L_CYAN='\e[1;36m'
-RED='\e[0;31m'
-L_RED='\e[1;31m'
-PURPLE='\e[0;35m'
-L_PURPLE='\e[1;35m'
-YELLOW='\e[1;33m'
-L_YELLOW='\e[0;33m'
-GRAY='\e[1;30m'
-L_GRAY='\e[0;37m'
+# colour values for use in scripts. Usage:  text 
+NC='\033[0m' # No Color
+WHITE='\033[1;37m'
+BLACK='\033[0;30m'
+BLUE='\033[0;34m'
+L_BLUE='\033[1;34m'
+GREEN='\033[0;32m'
+L_GREEN='\033[1;32m'
+CYAN='\033[0;36m'
+L_CYAN='\033[1;36m'
+RED='\033[0;31m'
+L_RED='\033[1;31m'
+PURPLE='\033[0;35m'
+L_PURPLE='\033[1;35m'
+YELLOW='\033[1;33m'
+L_YELLOW='\033[0;33m'
+GRAY='\033[1;30m'
+L_GRAY='\033[0;37m'
 #
 
 # -------------------------------------------------------------------------------
@@ -65,6 +65,7 @@ function bootdisk () {
 /usr/sbin/disktool -l | awk -F"'" '$4 == "/" {print $8}'
 }
 #
+#
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo -e   "    \033[1;37m.\033[1;30m~\033[1;37m.\033[0;0m        OS X:${L_CYAN} $(sw_vers -productVersion)${NC}"
 echo -en  "    \033[1;30m/\033[1;33mV\033[1;30m\\\\\033[0;0m    Computer:${L_CYAN} $(hostname) ${NC}"
@@ -74,6 +75,7 @@ echo ""
 echo -e   "  \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m      User:${L_GREEN} $USER ${NC}"
 echo -e   "   \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m       Time:${L_GREEN} $(date +%H:%M)${NC} on ${L_GREEN}$(date +%A) $(date +%d\ %B\,\ %G)${NC} "
 
+#
 # My welcome message with my @terminal todo's from my todo.txt, see lifehacker.com for more info on todo.txt
 if [  -f ~/Sync/ToDo/todo.txt ]; then
 	echo -e "=-=-=-=-=-=-=-=-=-=-${L_RED} todo's! ${NC}-=-=-=-=-=-=-=-=-=-==-=-=-=-="
@@ -115,3 +117,15 @@ else
 	echo -e "Using the global ${GREEN}bashrc${NC} file from ${GREEN}/etc/bashrc${NC}"
 fi
 
+# if ~/.bashrc then source it
+#if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "Apple_Terminal" ]]; then
+#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/Terminal/.bashrc-terminal
+#fi
+
+#if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "DTerm" ]]; then
+#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-dterm	
+#fi
+
+#if [[ $(uname) = "Darwin" ]]; then
+#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-iterm	
+#fi

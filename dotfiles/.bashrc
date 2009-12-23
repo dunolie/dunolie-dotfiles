@@ -74,23 +74,23 @@ E_L_GRAY='\[\033[0;37m\]'
 E_NC='\[\e[0m\]'
 #
 # colours for use in scripts and notices
-export NC='\e[0m' # No Color
-export WHITE='\e[1;37m'
-export BLACK='\e[0;30m'
-export BLUE='\e[0;34m'
-export L_BLUE='\e[1;34m'
-export GREEN='\e[0;32m'
-export L_GREEN='\e[1;32m'
-export CYAN='\e[0;36m'
-export L_CYAN='\e[1;36m'
-export RED='\e[0;31m'
-export L_RED='\e[1;31m'
-export PURPLE='\e[0;35m'
-export L_PURPLE='\e[1;35m'
-export YELLOW='\e[1;33m'
-export L_YELLOW='\e[0;33m'
-export GRAY='\e[1;30m'
-export L_GRAY='\e[0;37m'
+export NC='\033[0m' # No Color
+export WHITE='\033[1;37m'
+export BLACK='\033[0;30m'
+export BLUE='\033[0;34m'
+export L_BLUE='\033[1;34m'
+export GREEN='\033[0;32m'
+export L_GREEN='\033[1;32m'
+export CYAN='\033[0;36m'
+export L_CYAN='\033[1;36m'
+export RED='\033[0;31m'
+export L_RED='\033[1;31m'
+export PURPLE='\033[0;35m'
+export L_PURPLE='\033[1;35m'
+export YELLOW='\033[1;33m'
+export L_YELLOW='\033[0;33m'
+export GRAY='\033[1;30m'
+export L_GRAY='\033[0;37m'
 #
 
 KERNEL_NAME=`uname -s`
@@ -632,7 +632,7 @@ esac
 #
 if [[ "$TERM" = "dumb" ]]; then
 	# Stripped the colour codes for terminals without colour
-	PS1="${XTITLE}[\!] (\#) \u@\h \W \$ "
+	PS1="\033${XTITLE}[\!] (\#) \u@\h \W \$ "
 	PS2="${XTITLE}[\!][PS2] (\#) \u@\h \W > "
 fi
 
