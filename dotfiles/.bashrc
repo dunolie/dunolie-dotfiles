@@ -2,9 +2,9 @@
 #         Author: Robbie -- dunolie (at) gmail (dot) com
 #      File name: my bashrc ($HOME/.bashrc)
 #        Created: Fri 11 Dec 2009 14:33:12 pm GMT
-#  Last Modified: Sat 12 Dec 2009 11:08:12 pm GMT
+#  Last Modified: Thu 24 Dec 2009 00:36:28 am GMT
 # -------------------------------------------------------------------------------
-#       Comments:
+#       Comments: my bashrc, mainly osx centric
 #    Description:
 #-------------------------------------------------------------------------------
 #                            NOTES
@@ -71,7 +71,7 @@ E_YELLOW='\[\033[1;33m\]'
 E_L_YELLOW='\[\033[0;33m\]'
 E_GRAY='\[\033[1;30m\]'
 E_L_GRAY='\[\033[0;37m\]'
-E_NC='\[\e[0m\]'
+E_NC='\[\033[0m\]'
 #
 # colours for use in scripts and notices
 export NC='\033[0m' # No Color
@@ -97,14 +97,14 @@ KERNEL_NAME=`uname -s`
 KERNEL_VERSION=`uname -r`
 
 case $KERNEL_NAME in
-    Darwin)
-        SYSTEM='Mac'
-        case $KERNEL_VERSION in
-            8*) SYSTEM='Tiger' ;;
-            9*) SYSTEM='Leopard' ;;
-            10*) SYSTEM='Snow Leopard' ;;
-        esac;;
-    *) SYSTEM='Unknown' ;;
+	Darwin)
+		SYSTEM='Mac'
+		case $KERNEL_VERSION in
+			8*) SYSTEM='Tiger' ;;
+			9*) SYSTEM='Leopard' ;;
+			10*) SYSTEM='Snow Leopard' ;;
+		esac;;
+	*) SYSTEM='Unknown' ;;
 esac
 
 export SYSTEM
@@ -141,7 +141,8 @@ export LD_LIBRARY_PATH
 # my paths
 export PATH=/opt/local/bin:/opt/local/sbin:/opt/local/lib/mysql5/bin:/usr/X11/bin:~/bin:~/pbin:$PATH
 export PATH=${PATH}:/bin:/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/games/:/usr/share/games
-export PATH=$PATH:/Developer/usr/bin:/Developer/usr/sbin:/usr/local/mysql/bin:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
+export PATH=$PATH:/Developer/usr/bin:/Developer/usr/sbin:/usr/local/mysql/bin
+export PATH=$PATH:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
 export PATH=$PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/
 export PATH=$PATH:/System/Library/Frameworks/Python.framework/Versions/Current/bin/
 #
@@ -203,12 +204,12 @@ esac
 HOSTFILE=~/.hosts
 
 function _ssh() {
-  local cur
-  cur=${COMP_WORDS[COMP_CWORD]}
-  if [ "${cur:0:1}" != "-" ]; then
-	COMPREPLY=( $(awk '/^Host '$2'/{print $2}' $HOME/.ssh/config) )
-  fi		
-  return 0
+	local cur
+	cur=${COMP_WORDS[COMP_CWORD]}
+	if [ "${cur:0:1}" != "-" ]; then
+		COMPREPLY=( $(awk '/^Host '$2'/{print $2}' $HOME/.ssh/config) )
+	fi
+	return 0
 }
 
 complete -F _ssh ssh sftp scp
@@ -315,7 +316,6 @@ export IFS=$' \t\n'
 export MYSQL_DEFAULT_DB=mysql
 #export HELP=`echo -e "There is a bash help file: ${COLOR_GREEN}~/.bash_help${COLOR_NC} - or $ help<tab> from the shell"`
 #
-
 if [[ -z "${TZ}" ]] ; then
     export TZ='Europe/London'
 fi
@@ -343,7 +343,7 @@ fi
 #
 #export CLICOLOR="yes"
 export CLICOLOR=1
-export GREP_OPTIONS='--color=auto' 
+export GREP_OPTIONS='--color=auto'
 export GREP_COLOR='1;32'
 #
 # dircolors --print-database uses its own built-in database
@@ -355,7 +355,7 @@ match_lhs=""
 [[ -f ~/.dir_colors   ]] && match_lhs="${match_lhs}$(<~/.dir_colors)"
 [[ -f /etc/DIR_COLORS ]] && match_lhs="${match_lhs}$(</etc/DIR_COLORS)"
 #
-# If dircolors, part of the coreutils suite is installed via macports then use that, 
+# If dircolors, part of the coreutils suite is installed via macports then use that,
 # otherwise use default OSX colours
 # $ sudo port install coreutils
 if [[ "$sw_vers -productVersion" != "10.*" ]]; then
@@ -641,8 +641,7 @@ if [[ "$TERM" = "dumb" ]]; then
 	PS1="\033${XTITLE}[\!] (\#) \u@\h \W \$ "
 	PS2="${XTITLE}[\!][PS2] (\#) \u@\h \W > "
 fi
-
-
+#
 if [[ -f ~/.bash_prompt ]]; then
 	. ~/.bash_prompt
 else
@@ -650,14 +649,12 @@ else
 	PS2='[http://bit.ly/4wngdq]\u@\h \W » '
 	SUDO_PS1='SUDO - \u@\h \W ☯ '
 fi
-
 #
 # ----------------------------------------------------------------------------
 #                          FINAL-CLOSING STUFF
 # ----------------------------------------------------------------------------
 # Try to keep environment pollution down, EPA loves us.
-# unset use_color safe_term match_lhs
-#
+unset use_color safe_term match_lhs
 # -------------------------------------------------------------------------------
 #               END OF BASHRC - Robbie - dunolie (at) gmail (dot) com
 # -------------------------------------------------------------------------------
