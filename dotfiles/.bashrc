@@ -117,8 +117,10 @@ export SNOW_LEOPARD='OS X 10.6.*'
 # -------------------------------------------------------------------------------
 #
 # using my own build of screen
-alias screen='/usr/local/bin/screen'
-alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
+if [[ -f /usr/local/bin/screen ]]; then
+	alias screen='/usr/local/bin/screen'
+	alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
+fi
 
 # Automatically reattach to a screen session after logging in via ssh - http://tlug.dnho.net/?q=node/239
 if [ $SSH_TTY ] && [ ! $WINDOW ]; then
@@ -272,21 +274,25 @@ fi
 #alias tclsh='/usr/bin/tclsh8.4'
 #export TCLSH='/usr/bin/tclsh8.4'
 #
-
 export EDITOR='mate -w'
 export GIT_EDITOR='vim'
 export VISUAL="vim"
-export PAGER="vim"
-# export VISUAL="less"
+export PAGER="less"
 export LESS="-erX"
-export LESSCHARSET="UTF-8"
 #export LESS="-e -i -M -R -X -F -S"
-
-# Using my own colorscheme for vim. sometimes vim does not like to load it automatically
-export MANPAGER='col -bx | vim -c "colorscheme dunolie" -c ":set ft=man nonu nolist" -R -'
+export LESSCHARSET="UTF-8"
+#
 # original version of vim man page viewer
 # export MANPAGER='col -bx | vim -c ":set ft=man nonu nolist" -R -'
 #
+# Less Colors for Man Pages
+export LESS_TERMCAP_mb=$'\E[01;31m'       # begin blinking
+export LESS_TERMCAP_md=$'\E[01;38;5;74m'  # begin bold
+export LESS_TERMCAP_me=$'\E[0m'           # end mode
+export LESS_TERMCAP_se=$'\E[0m'           # end standout-mode
+export LESS_TERMCAP_so=$'\E[38;5;246m'    # begin standout-mode - info box
+export LESS_TERMCAP_ue=$'\E[0m'           # end underline
+export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 # --------------------------------------------------------------------------------
 #
 # set LC & LANG , iTerm does not handle UTF-8 fully otherwise :{
