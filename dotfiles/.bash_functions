@@ -1360,10 +1360,12 @@ add-to-path ()
 
 # ---------------------------------------------
 function yt () {
-	if [ "$PWD" = ~/Desktop ]; then 
-    	youtube-dl.pl -t -b $1;
+	if [[ "$PWD" = ~/Desktop ]]; then 
+    	youtube-dl -t -b "$@"
+		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
 	else 
-    	cd ~/Desktop; youtube-dl.pl -t -b;
+    	cd ~/Desktop; youtube-dl -t -b "$@"
+		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
 	fi
 }
 
@@ -1373,6 +1375,11 @@ function gp () {
     local l=$1
     [ "$l" == "" ] && l=20 
     tr -dc A-Za-z0-9\-_~\!@#$%^\&*\(\)\\\`\+\[\{\]\}\|\;:\",\/?\= < /dev/urandom | head -c ${l} | xargs 
+}
+
+
+function JPG-2-jpg () {
+	find $PWD -name '*.JPG' -exec bash -c 'mv "$1" "${1/%.JPG/.jpg}"' -- {} \;
 }
 
 # ---------------------------------------------

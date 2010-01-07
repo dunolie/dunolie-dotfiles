@@ -83,6 +83,9 @@ alias cppwd='eval "echo `pwd` | tr -d \\\\n | pbcopy"'
 alias burn-iso='drutil burn'
 alias burn-dvd='drutil burn -noverify'
 
+# growl song change info for mocp
+alias gmoc='mocstat -f'
+
 
 ##-----------------------------------------------------------
 # GIT Stuff

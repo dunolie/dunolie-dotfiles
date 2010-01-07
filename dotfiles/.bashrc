@@ -2,7 +2,7 @@
 #         Author: Robbie -- dunolie (at) gmail (dot) com
 #      File name: my bashrc ($HOME/.bashrc)
 #        Created: Fri 11 Dec 2009 14:33:12 pm GMT
-#  Last Modified: Thu 24 Dec 2009 00:36:28 am GMT
+#  Last Modified: Wed 06 Jan 2010 14:32:36 pm GMT
 # -------------------------------------------------------------------------------
 #       Comments: my bashrc, mainly osx centric
 #    Description:
@@ -516,11 +516,13 @@ umask 077
 ulimit -c 0
 #
 # exclude resource forks when making tar|zip|gz files
-#export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 
 # set UTF-8 encoding for pbcopy/pbpaste
-#export __CF_USER_TEXT_ENCODING=0x1F5:0x8000100:0x8000100
+export __CF_USER_TEXT_ENCODING=0x1F5:0x8000100:0x8000100
 #
+# prevent creation of the ._filename files when using tar
+export COPYFILE_DISABLE=true
 # -------------------------------------------------------------------------------
 #                        KEY BINDINGS
 # -------------------------------------------------------------------------------
@@ -628,13 +630,17 @@ YINYANG="☯"
 # -------------------------------------------------------------------------------
 # Xterm title bar
 case $TERM in
-	xterm*)
+	xterm*|rxvt|Eterm|eterm)
 		XTITLE='\[\033k\033\\\]\[\e]0;`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \007\]';
+		;;
+	screen*)
+		XTITLE='\033_`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \033\\'
 		;;
 	*)
 		XTITLE="";
 	;;
 esac
+
 #
 if [[ "$TERM" = "dumb" ]]; then
 	# Stripped the colour codes for terminals without colour
