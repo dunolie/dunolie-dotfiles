@@ -18,9 +18,10 @@ else
 fi
 }
 
+
 # github clone  sorts close by /github-user/project
 # http://openmonkey.com/articles/2009/07/fast-github-clone-bash-function
-function ghclone {
+function ghclone () {
   gh_url=${1:-`pbpaste`}
   co_dir=${HOME}/Code/sources/$(echo $gh_url | sed -e 's/^git:\/\/github.com\///; s/\//-/; s/\.git$//')
 
@@ -31,7 +32,7 @@ function ghclone {
   fi
 }
 
-function rename-ext() {
+function rename-ext () {
    local filename
    for filename in *."$1"; do
      mv "$filename" "${filename%.*}"."$2"
@@ -43,7 +44,7 @@ function calculator () { awk "BEGIN{ print $* }" ;}
 
 # If you issue 'h' on its own, then it acts like the history command.
 # If you issue:h cdThen it will display all the history with the word 'cd'
-h() { if [ -z "$1" ]; then history; else history | grep "$@"; fi;}
+function :h () { if [ -z "$1" ]; then history; else history | grep "$@"; fi;}
 
 # view manpages with vim (manpageviewer vim script required)
 function vman () {
@@ -63,6 +64,7 @@ if [[ $(local-ip) = "192.168.2.10" ]]; then
 		git push origin master:dunolie-laptop
 fi
 }
+
 fpp () { osascript -e 'tell application "Finder" to get POSIX path of (target of window 1 as alias)' | pbcopy; }
 fpwd () { osascript -e 'tell application "Finder" to get POSIX path of (target of window 1 as alias)'; }
 md () { mkdir -p "$1" && cd "$1"; }
@@ -113,15 +115,13 @@ function    shells           { p /etc/shells; }
 function    lfstab           { p /etc/fstab; }
 function    lxconf           { p /etc/X11/xorg.conf; }
 
-if [ `id -u` -eq 0 ]
-then
+if [ `id -u` -eq 0 ]; then
 	function    efstab       { e /etc/fstab; }
 	function    exconf       { e /etc/X11/xorg.conf; }
 	function    txconf       { X -probeonly; }
 fi
 
 # ---------------------------------------------
-
 # sudo vim
 function svim {
 	sudo vim $@
@@ -255,21 +255,25 @@ function go {
 }
 
 # ---------------------------------------------
+#function pushd () {
+    #builtin pushd "$@" > /dev/null
+#}
+
 
 # Automatically do an ls after each cd
-cd() {
+function cd () {
 	if [ -n "$1" ]; then
-		builtin cd "$@" && ls
+		builtin cd "$@" && ls && pushd . > /dev/null
 	else
-		builtin cd ~ && ls
+		builtin cd ~ && ls && pushd . > /dev/null
 	fi
 }
 
 # ---------------------------------------------
 
 # Copy and paste from the command line
-ccopy(){
-	cp $1 /tmp/ccopy.$1; 
+function ccopy () {
+	cp $1 /tmp/ccopy.$1;
 }
 
 # cpaste is in ~/.aliases.bash
@@ -482,12 +486,11 @@ return 0
 
 }
 
-
 # ---------------------------------------------
 
 # Store a directory name to come back to
 
-sd(){
+function sd () {
 	export $1=$PWD;
 }
 
@@ -496,7 +499,7 @@ sd(){
 # Just #@$% do it!
 # Name means "JUST #@$% DO IT!"
 # Function to force a command to try until it works.
-JFDI () {
+function JFDI () {
 	COMMAND=$*
 	while ! $COMMAND ; do echo "Retrying..." ; done
 }
@@ -513,7 +516,7 @@ JFDI () {
 
 # quick lunching of different screen profiles
 # ~/.screen/screenrc.*foo*
-function sc () { 
+function sc () {
     RED='\e[0;31m'
 	NC='\e[0m'
 	CYAN='\e[1;36m'
@@ -531,7 +534,7 @@ fi
 }
 # ---------------------------------------------
 
-AddPath ()
+function addpath () {
 # Add argument to $PATH if:
 # - it is not already present
 # - it is a directory
@@ -540,7 +543,6 @@ AddPath ()
 # This snippet is public domain; you may use it freely.  Death to copyright, patents,
 # and all other forms of intellectual monopoly.
 #
-{
   _folder=$1
   echo " $PATH " | sed 's/:/ /g' | grep " $_folder " > /dev/null
   [ $? -ne 0 ] && [ -d $_folder ] && [ -x $_folder ] && PATH=$PATH:$_folder
@@ -548,10 +550,8 @@ AddPath ()
 }
 
 # ---------------------------------------------
-
 # random useful functions
-function ds()
-{
+function ds() {
     echo 'size of directories in MB'
     if [ $# -lt 1 ] || [ $# -gt 2 ]; then
         echo 'you did not specify a directy, using pwd'
@@ -564,8 +564,7 @@ function ds()
 
 # ---------------------------------------------
 
-function repeat()
-{
+function repeat () {
     local i max
     max=$1; shift;
     for ((i=1; i <= max ; i++)); do
@@ -575,8 +574,7 @@ function repeat()
 
 # ---------------------------------------------
 
-function psg()
-{
+function psg () {
     if [ $# -lt 1 ] || [ $# -gt 2 ]; then
         echo grep running processes
         echo usage: psg [process]
@@ -589,12 +587,11 @@ function psg()
 # ---------------------------------------------
 
 # useful for paging through long directories, mulitple directories, etc.
-function lsl() { ls $@ | less; }
+function lsl () { ls $@ | less; }
 
 # ---------------------------------------------
 
-function whoisg()
-{
+function whoisg () {
     if [ $# -lt 1 ] || [ $# -gt 2 ]; then
         echo grep whois lookups for status
         echo usage: whoisg [domain name]
@@ -605,20 +602,17 @@ function whoisg()
 
 # ---------------------------------------------
 
-function gg()
-{
+function gg () {
     echo "searching google for $*"
     SEARCH=$(echo $* | sed -e 's/ /\%20/g')
     echo "translating search to URL speak...  $SEARCH"
     www www.google.com/search?q="$SEARCH"
 }
 
-
 # ---------------------------------------------
 
 # 256-colors test
-256test()
-{
+function test256 () {
     echo -e "\e[38;5;196mred\e[38;5;46mgreen\e[38;5;21mblue\e[0m"
 }
 
@@ -627,8 +621,7 @@ function gg()
 # Converts a PDF to a fold-able booklet sized PDF
 # Print it double-sided and fold in the middle
 
-bookletize ()
-{
+function bookletize () {
     if which pdfinfo && which pdflatex; then
         pagecount=$(pdfinfo $1 | awk '/^Pages/{print $2+3 - ($2+3)%4;}')
 
@@ -642,72 +635,62 @@ bookletize ()
     fi
 }
 
-
 # ---------------------------------------------
 
-
 # smile :)
-smiley () { echo -e ":\\$(($??50:51))"; }
+function smiley () { echo -e ":\\$(($??50:51))"; }
 
 # ---------------------------------------------
 
 # cal with coloured day
 function month() {
-#/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1m&\e[m')/" 
-#/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1;31m&\e[m')/" 
-#/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1;32m&\e[m')/" 
-#/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1;33m&\e[m')/" 
-#/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1;34m&\e[m')/" 
-#/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1;35m&\e[m')/" 
-/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\e[1;36m&\e[m')/" 
+/usr/bin/cal | sed -E -e 's/^/ /' -e 's/$/ /' -e "s/ $(/bin/date +%e) /$(printf '\033[1;31m&\033[m')/"
 return 0
 }
 
 # ---------------------------------------------
 
 # download and untargz
-function dtgz {
+function dtgz () {
          if [ $# -gt 0 ]; then
                  for l in $@; do
                          curl $l | tar -xz
                  done
          else
                  echo "Usage: dtgz url [url2, url3, ...]" 1>&2
-         fi 
+         fi
 }
 
 # ---------------------------------------------
 
 # sudo vim
-function svim {
-        sudo vim $@
+function svim () {
+	sudo vim $@
 }
 
 # ---------------------------------------------
 
 # create a directory and make it the working directory
-function mkcdr {
+function mkcdr () {
 	mkdir -p $1
 	cd $1
 }
 
 # ---------------------------------------------
 # functions so you don't have to type '&' for graphical binaries
-function locategrep ()
-{
-  if [ "${#}" != 2 ] ; then
-    echo "Usage: locategrep [string to locate] [string to grep]";
-    return 1;
-  else
-    echo "locate -i '${1}' | grep -i '${2}'";
-    command locate -i '${1}' | grep -i '${2}';
-  fi;
+function locategrep () {
+	if [ "${#}" != 2 ] ; then
+		echo "Usage: locategrep [string to locate] [string to grep]";
+		return 1;
+	else
+		echo "locate -i '${1}' | grep -i '${2}'";
+		command locate -i '${1}' | grep -i '${2}';
+	fi;
 }
 
 # ---------------------------------------------
 # extract most file types
-function extract()
-{
+function extract () {
 		if [ -f $1 ] ; then
 			case $1 in
              *.tar.bz2)   tar xjf $1     ;;
@@ -728,13 +711,11 @@ function extract()
      fi
 }
 
-
 # ---------------------------------------------
 
 # roll - archive wrapper
 # usage: roll <foo.tar.gz> ./foo ./bar
-function roll ()
-{
+function roll () {
   FILE=$1
   case $FILE in
     *.tar.bz2) shift && tar cjf $FILE $* ;;
@@ -746,7 +727,7 @@ function roll ()
 }
 
 
-makepasswords() {
+function makepasswords () {
     # suggest a bunch of possible passwords. not suitable for really early perl
     # versions that don't do auto srand() things.
     perl <<EOPERL
@@ -758,126 +739,118 @@ makepasswords() {
 EOPERL
 }
 
-
 # ---------------------------------------------
 
+function vh () {
 # search the vim reference manual for a keyword
-# usage: :h <keyword>
-:h() {  vim --cmd ":silent help $@" --cmd "only"; }
+# usage: vh <keyword>
+	vim --cmd ":silent help $@" --cmd "only"; }
 
-# mkmine - recursively change ownership to $USER:$USER
-# usage:  mkmine, or
-#         mkmine <filename | dirname>
-function mkmine() { sudo chown -R ${USER}:${USER} ${1:-.}; }
-
-# sanitize - set file/directory owner and permissions to normal values (644/755)
-# usage: sanitize <file>
-sanitize()
-{
-  chmod -R u=rwX,go=rX "$@"
-  chown -R ${USER}:users "$@"
+function mkmine () {
+	# mkmine - recursively change ownership to $USER:$USER
+	# usage:  mkmine, or
+	#         mkmine <filename | dirname>
+	sudo chown -R ${USER}:${USER} ${1:-.};
 }
-sanitize-osx()
-{
-  chmod -R u=rwX,go=rX "$@"
-  chown -R ${USER}:everyone "$@"
+
+function sanitize () {
+	# sanitize - set file/directory owner and permissions to normal values (644/755)
+	# usage: sanitize <file>
+	chmod -R u=rwX,go=rX "$@"
+	chown -R ${USER}:users "$@"
+}
+function sanitize-osx () {
+	chmod -R u=rwX,go=rX "$@"
+	chown -R ${USER}:everyone "$@"
 }
 # ---------------------------------------------
-
+function bak () {
 # back up file as filename(time&date).bak
-function bak()
-{
-  for i in file; do
-    cp "$1" "$1"_`date +%H-%M%p_%d_%m_%y`.bak
+for i in file; do
+	cp "$1" "$1"_`date +%H-%M%p_%d_%m_%y`.bak
 done
 }
 
-
-
 # ---------------------------------------------
-
+function vimless () {
 # alias less=vimless (use this alias) ~/.aliases_bash
 # have a nice pager using vim as a replacement for less
-
-function vimless ()
-{
-   if test $# = 0; then
-        vim --cmd 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' -
-    else
-        vim --cmd 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' "$@"
-    fi
+if test $# = 0; then
+	vim --cmd 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' -
+else
+	vim --cmd 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' "$@"
+fi
 }
 # ---------------------------------------------
 
-mqusedatabase (){
-  export MYSQL_DEFAULT_DB=$@
+function mqusedatabase () {
+	export MYSQL_DEFAULT_DB=$@
 }
 
-mqrun (){
-  mysql -u root -t -D ${MYSQL_DEFAULT_DB} -vvv -e "$@" | highlight blue '[|+-]'
-}
-mqrunfile (){
-  mysql -u root -t -vvv ${MYSQL_DEFAULT_DB} < $@ | highlight blue '[|+-]'
-}
-mqrunfiletofile (){
-  mysql -u root -t -vvv ${MYSQL_DEFAULT_DB} < $1 >> $2
-}
-mqrunfiletoeditor (){
-  mysql -u root -t -vvv ${MYSQL_DEFAULT_DB} < $1 | vim - 
+function mqrun () {
+	mysql -u root -t -D ${MYSQL_DEFAULT_DB} -vvv -e "$@" | highlight blue '[|+-]'
 }
 
-alias mqlistdatabases='mqrun "show databases"' 
-alias mqlisttables='mqrun  "show tables"' 
-mqlistfields(){
-  mqrun "describe $@"
+function mqrunfile () {
+	mysql -u root -t -vvv ${MYSQL_DEFAULT_DB} < $@ | highlight blue '[|+-]'
 }
 
-mqcreatedatabase(){
-  mysqladmin -u root create $@
-  echo "$@ Created" | highlight blue '.*'
+function mqrunfiletofile () {
+	mysql -u root -t -vvv ${MYSQL_DEFAULT_DB} < $1 >> $2
 }
 
-mqdropdatabase(){
-  echo Warning | highlight red '.*'
-  mysqladmin -u root drop $@ 
+function mqrunfiletoeditor () {
+	mysql -u root -t -vvv ${MYSQL_DEFAULT_DB} < $1 | vim -
 }
 
+alias mqlistdatabases='mqrun "show databases"'
+alias mqlisttables='mqrun  "show tables"'
 
-# ---------------------------------------------
+function mqlistfields () {
+	mqrun "describe $@"
+}
 
-function start()
-{
-  for arg in $*; do
-    sudo /etc/rc.d/$arg start
-  done
+function mqcreatedatabase () {
+	mysqladmin -u root create $@
+	echo "$@ Created" | highlight blue '.*'
 }
-function stop()
-{
-  for arg in $*; do
-    sudo /etc/rc.d/$arg stop
-  done
-}
-function restart()
-{
-  for arg in $*; do
-    sudo /etc/rc.d/$arg restart
-  done
-}
-function reload()
-{
-  for arg in $*; do
-    sudo /etc/rc.d/$arg reload
-  done
+
+function mqdropdatabase () {
+	echo Warning | highlight red '.*'
+	mysqladmin -u root drop $@
 }
 
 # ---------------------------------------------
 
-# Shows the colors in a kewl way...party stolen from HH :)
-#
-function ansi()
-{
+function start () {
+for arg in $*; do
+	sudo /etc/rc.d/$arg start
+done
+}
+
+function stop () {
+for arg in $*; do
+	sudo /etc/rc.d/$arg stop
+done
+}
+
+function restart () {
+for arg in $*; do
+	sudo /etc/rc.d/$arg restart
+done
+}
+
+function reload () {
+for arg in $*; do
+	sudo /etc/rc.d/$arg reload
+done
+}
+
+# ---------------------------------------------
+
+function ansi () {
        # Display ANSI colours.
-       #
+       # Shows the colors in a kewl way...party stolen from HH :)
     esc="\033["
     echo -e "\t  40\t   41\t   42\t    43\t      44       45\t46\t 47"
     for fore in 30 31 32 33 34 35 36 37; do
@@ -911,8 +884,7 @@ function ansi()
 
 # Inspect a website like a string in Ruby
 unset -f inspect_url
-
-function inspect_url() {
+function inspect_url () {
    /usr/bin/curl -L -s --max-time 10 "${@}" | ruby -n -e 'p $_.to_s'
    return 0
 }
@@ -936,7 +908,6 @@ function inspect_url() {
 # ipfwfrom -n
 # ipfwfrom | grep allow
 #
-
 
 unset -f ipfwfrom
 function ipfwfrom() {
@@ -980,7 +951,6 @@ function ipfwfrom() {
    return 0
 }
 export -f ipfwfrom
-
 
 
 unset -f ipfwto
@@ -1059,16 +1029,16 @@ export -f ipfwdump
 
 # ---------------------------------------------
 
-# increase font size
-function ifont() {
+function ifont () {
+	# Increase the font size (OS X)
 	/usr/bin/osascript <<__END__
 	tell application "System Events" to tell process "Terminal" to keystroke "+" using command down
 __END__
 	return 0
 }
 
-# decrease font size
-function dfont() {
+function dfont () {
+	# Decrease the font size (OS X)
 	/usr/bin/osascript <<__END__
 	tell application "System Events" to tell process "Terminal" to keystroke "-" using command down
 __END__
@@ -1077,14 +1047,12 @@ __END__
 
 # ---------------------------------------------
 
-# what is a server running. Usage: whatserver (address, |http|ftp|)
-function whatserver()
-{
+function whatserver () {
+	# what is a server running. Usage: whatserver (address, |http|ftp|)
 	wget $1 –spider -d 2>&1 | grep Server:
 }
 
 # ---------------------------------------------
-
 #
 # Inspired by: http://codesnippets.joyent.com/posts/show/1516
 # - Re-size and Move with Escape Sequences, http://www.osxfaq.com/tips/unix-tricks/week99/monday.ws
@@ -1093,20 +1061,20 @@ function whatserver()
 # Author: Adrian Mayo, http://101.1dot1.com and http://www.peachpit.com/title/0321374118
 # also see: http://en.wikipedia.org/wiki/ANSI_escape_code
 
-function title() { if [[ $# -eq 1 && -n "$@" ]]; then printf "\e]0;${@}\a"; fi; return 0; }  
-function title() { if [[ -n "$@" ]]; then printf "\033]0;${1}\007"; fi; return 0; }
-function docktw() { printf "\e[2t"; return 0; }
-function docktw() { printf "\e[2t"; sleep 5; printf "\e[5t"; return 0; }
-function bgtw() { printf "\e[6t"; return 0; }
-function bgtw() { printf "\e[6t"; sleep 5; printf "\e[5t"; return 0; }    # background the Terminal window
+function title () { if [[ $# -eq 1 && -n "$@" ]]; then printf "\e]0;${@}\a"; fi; return 0; }  
+function title () { if [[ -n "$@" ]]; then printf "\033]0;${1}\007"; fi; return 0; }
+function docktw () { printf "\e[2t"; return 0; }
+function docktw () { printf "\e[2t"; sleep 5; printf "\e[5t"; return 0; }
+function bgtw () { printf "\e[6t"; return 0; }
+function bgtw () { printf "\e[6t"; sleep 5; printf "\e[5t"; return 0; }    # background the Terminal window
 
 
 
 # positive integer test (including zero)
-function positive_int() { return $(test "$@" -eq "$@" > /dev/null 2>&1 && test "$@" -ge 0 > /dev/null 2>&1); }
+function positive_int () { return $(test "$@" -eq "$@" > /dev/null 2>&1 && test "$@" -ge 0 > /dev/null 2>&1); }
 
 # move the Terminal window
-function mvtw() {
+function mvtw () {
 	if [[ $# -eq 2 ]] && $(positive_int "$1") && $(positive_int "$2"); then 
 		printf "\e[3;${1};${2};t"
 		return 0
@@ -1115,7 +1083,7 @@ function mvtw() {
 }
 
 # resize the Terminal window
-function sizetw() {
+function sizetw () {
    if [[ $# -eq 2 ]] && $(positive_int "$1") && $(positive_int "$2"); then 
       printf "\e[8;${1};${2};t"
       /usr/bin/clear
@@ -1125,22 +1093,22 @@ function sizetw() {
 }
 
 # full screen
-function fscreen() { printf "\e[3;0;0;t\e[8;0;0t"; /usr/bin/clear; return 0; }
+function fscreen () { printf "\e[3;0;0;t\e[8;0;0t"; /usr/bin/clear; return 0; }
 
 # default screen
-function dscreen() { printf "\e[8;35;150;t"; printf "\e[3;300;240;t"; /usr/bin/clear; return 0; }
+function dscreen () { printf "\e[8;35;150;t"; printf "\e[3;300;240;t"; /usr/bin/clear; return 0; }
 
 # max columns
-function maxc() { printf "\e[3;0;0;t\e[8;50;0t"; /usr/bin/clear; return 0; }
+function maxc () { printf "\e[3;0;0;t\e[8;50;0t"; /usr/bin/clear; return 0; }
 
 # max rows
-function maxr() { printf "\e[3;0;0;t\e[8;0;100t"; /usr/bin/clear; return 0; }
+function maxr () { printf "\e[3;0;0;t\e[8;0;100t"; /usr/bin/clear; return 0; }
 
 # show number of lines & columns
-function lc() { printf "lines: $(/usr/bin/tput lines)\ncolums: $(/usr/bin/tput cols)\n"; return 0; }
+function lc () { printf "lines: $(/usr/bin/tput lines)\ncolums: $(/usr/bin/tput cols)\n"; return 0; }
 
 # move cursor
-function mvc() {
+function mvc () {
    if [[ $# -eq 2 ]] && $(positive_int "$1") && $(positive_int "$2"); then 
       /usr/bin/tput cup "$1" "$2"
       /usr/bin/tput el  # clear to end of line
@@ -1151,7 +1119,7 @@ function mvc() {
 }
 
 # wrap lines according to the number of columns of the Terminal window
-function wraptw() {
+function wraptw () {
 	declare str var=$(/usr/bin/tput cols)
 	if [[ -s /dev/stdin ]]; then str="$(</dev/stdin)"; else str="$@"; fi 
 		printf "%s\n" "$str" | /usr/bin/fmt -w $var
@@ -1164,15 +1132,15 @@ function wraptw() {
 # Alias helpers !!
 # showa: to remind yourself of an alias (given some part of it)
 # these are functions and should be in ~/.bashrc
-aliases () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
-showalias () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
-salias () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
-showa () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
-showa1 () { /usr/bin/grep -i -a1 $@ ~/.bashrc | grep -v '^\s*$' ; }
-showa2 () { /usr/bin/grep -i -a1 $@ /etc/bashrc | grep -v '^\s*$' ; }
-showa3 () { /usr/bin/grep -i -a1 $@ ~/.aliasrc | grep -v '^\s*$' ; }
-showa4 () { /usr/bin/grep -i -a1 $@ /etc/aliases.bash | grep -v '^\s*$' ; }
-showa5 () { /usr/bin/grep -i -a1 $@ /etc/aliasrc | grep -v '^\s*$' ; }
+function aliases () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
+function showalias () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
+function salias () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
+function showa () { /usr/bin/grep -i -a1 $@ ~/.aliases_bash | grep -v '^\s*$' ; }
+function showa1 () { /usr/bin/grep -i -a1 $@ ~/.bashrc | grep -v '^\s*$' ; }
+function showa2 () { /usr/bin/grep -i -a1 $@ /etc/bashrc | grep -v '^\s*$' ; }
+function showa3 () { /usr/bin/grep -i -a1 $@ ~/.aliasrc | grep -v '^\s*$' ; }
+function showa4 () { /usr/bin/grep -i -a1 $@ /etc/aliases.bash | grep -v '^\s*$' ; }
+function showa5 () { /usr/bin/grep -i -a1 $@ /etc/aliasrc | grep -v '^\s*$' ; }
 
 # ----------------------------------
 
@@ -1201,17 +1169,17 @@ function pchmod () {
     echo -e "\e[0;32m 754 \e[0m = \e[0;32m rwxr-xr-- \e[0m owner can read, write and execute. group can read and execute, everyone can read";
     echo -e "\e[0;32m 754 \e[0m = \e[0;32m rwxr-xr-- \e[0m owner can read, write and execute, everyone can read and execute";
     echo -e "\e[0;32m 760 \e[0m = \e[0;32m rwxrw---- \e[0m owner and group can read, write and execute. group can read and write";
-    echo -e "\e[0;32m 764 \e[0m = \e[0;32m rwxrw-r-- \e[0m owner and group can read, write and execute. group can read and wtite. everyone can read"; 
+    echo -e "\e[0;32m 764 \e[0m = \e[0;32m rwxrw-r-- \e[0m owner and group can read, write and execute. group can read and wtite. everyone can read";
     echo -e "\e[0;32m 766 \e[0m = \e[0;32m rwxrwxrw- \e[0m owner and group can read, write and execute. everyone can read and write";
-    echo -e "\e[0;32m 770 \e[0m = \e[0;32m rwxrwx--- \e[0m owner and group can read, write and execute";  
-    echo -e "\e[0;32m 774 \e[0m = \e[0;32m rwxrwxr-- \e[0m owner and group can read, write and execute. everyone can read"; 
-    echo -e "\e[0;32m 776 \e[0m = \e[0;32m rwxrwxrw- \e[0m owner and group can read, write and execute. everyone can read and write"; 
-    echo -e "\e[0;32m 777 \e[0m = \e[0;32m rwxrwxrwx \e[0m everyone can read, write and execute"; 
+    echo -e "\e[0;32m 770 \e[0m = \e[0;32m rwxrwx--- \e[0m owner and group can read, write and execute";
+    echo -e "\e[0;32m 774 \e[0m = \e[0;32m rwxrwxr-- \e[0m owner and group can read, write and execute. everyone can read";
+    echo -e "\e[0;32m 776 \e[0m = \e[0;32m rwxrwxrw- \e[0m owner and group can read, write and execute. everyone can read and write";
+    echo -e "\e[0;32m 777 \e[0m = \e[0;32m rwxrwxrwx \e[0m everyone can read, write and execute";
     echo;
 }
 
 # ---------------------------------------------
-# using alias qlf='qlmanage -p "$@" >& /dev/null' 
+# using alias qlf='qlmanage -p "$@" >& /dev/null'
 #function ql () {
 #  (qlmanage -p “$@” > /dev/null 2>&1 &
 #  local ql_pid=$!
@@ -1229,12 +1197,12 @@ function qlt () {
 # ---------------------------------------------
 
 # http://codesnippets.joyent.com/posts/show/1715
-function machelp() { /usr/bin/open '/System/Library/CoreServices/Help Viewer.app'; return 0; } 
+function machelp() { /usr/bin/open '/System/Library/CoreServices/Help Viewer.app'; return 0; }
 
 # ---------------------------------------------
 
 # http://hayne.net/MacDev/Bash/aliases.bash
-cdf () 
+function cdf ()
 {
     currFolderPath=$( /usr/bin/osascript <<"    EOT"
         tell application "Finder"
@@ -1248,7 +1216,7 @@ cdf ()
     EOT
     )
     echo "cd to \"$currFolderPath\""
-    cd "$currFolderPath"; 
+    cd "$currFolderPath";
     count
 }
 # http://snipplr.com/view.php?codeview&id=1692
@@ -1264,7 +1232,7 @@ function finder-comment () { mdls "$1" | grep kMDItemFinderComment ; }
 
 # ---------------------------------------------
 # gnu screens rotated automatically
-function screen_rotate() {
+function screen_rotate () {
 		local session_name=${1:?"missing session name"}
 		local sleep_duration=${2:-5}
 	while true; do
@@ -1275,7 +1243,7 @@ function screen_rotate() {
 
 # ---------------------------------------------
 
-function bootdisk () { 
+function bootdisk () {
 	/usr/sbin/disktool -l | awk -F"'" '$4 == "/" {print $8}' ;
 }
 
@@ -1294,7 +1262,7 @@ function gitco () {
 }
 # ---------------------------------------------
 
-function newest () { 
+function newest () {
 	candidate='' ; for i in "$@"; do [[ -f $i ]] || continue ; [[ -n $candidate ]] || { candidate="$i" ; continue ;} ; [[ $i -nt $candidate ]] && candidate="$i" ; done ; echo "$candidate";
 }
 
@@ -1318,7 +1286,7 @@ function die () {
 }
 
 # ---------------------------------------------
-screen-2 () {
+function screen-2 () {
     [[ -f ~/.screenrc ]] && sed -i -e "s!hardstatus string \".*\"!hardstatus string \"%h - $(hostname)\"!" \
         ~/.screenrc
     $(which screen ) "$@"
@@ -1339,12 +1307,12 @@ done
 # ---------------------------------------------
 # mktar - tarball wrapper
 # usage: mktar <filename | dirname>
-mktar() {
+function mktar () {
     tar pcvf "${1%%/}.tgz" "${1%%/}/"
 }
 
 # ---------------------------------------------
-add-to-path ()
+function add-to-path ()
 {
     path_list=`echo $PATH | tr ':' ' '`
     new_dir=$1
@@ -1360,7 +1328,7 @@ add-to-path ()
 
 # ---------------------------------------------
 function yt () {
-	if [[ "$PWD" = ~/Desktop ]]; then 
+	if [[ "$PWD" = ~/Desktop ]]; then
     	youtube-dl -t -b "$@"
 		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
 	else 
@@ -1373,8 +1341,8 @@ function yt () {
 # generate a password. ie: $ gp 64
 function gp () {
     local l=$1
-    [ "$l" == "" ] && l=20 
-    tr -dc A-Za-z0-9\-_~\!@#$%^\&*\(\)\\\`\+\[\{\]\}\|\;:\",\/?\= < /dev/urandom | head -c ${l} | xargs 
+    [ "$l" == "" ] && l=20
+    tr -dc A-Za-z0-9\-_~\!@#$%^\&*\(\)\\\`\+\[\{\]\}\|\;:\",\/?\= < /dev/urandom | head -c ${l} | xargs
 }
 
 
@@ -1409,7 +1377,7 @@ function rept ()
 # RUBY #
 # use: cdgem <gem name>, cd's into your gems directory and opens gem that best
 # matches the gem name provided
-function cdgem {
+function cdgem () {
   cd $GEMDIR/gems
   cd `ls | grep $1 | sort | tail -1`
 }
@@ -1421,7 +1389,7 @@ function cdgemcomplete () {
 # use: gemdoc <gem name>, opens gem docs from the gem docs directory that best
 # matches the gem name provided
 # (hat tip: http://stephencelis.com/archive/2008/6/bashfully-yours-gem-shortcuts)
-gemdoc() {
+function gemdoc () {
 	open -a firefox $GEMDIR/doc/`ls $GEMDIR/doc | grep $1 | sort | tail -1`/rdoc/index.html
 }
 function gemdocomplete () {
@@ -1458,8 +1426,8 @@ function fpc () { readlink -f "$1" | pbcopy; }
 
 #If used without arguments, returns own IP info.
 #If used with argument, returns info about the parsed argument.
-function geoip() { 
-curl -s "http://www.geoiptool.com/?IP=$1" | html2text | egrep --color 'City:|IP Address:|Country:' 
+function geoip () {
+curl -s "http://www.geoiptool.com/?IP=$1" | html2text | egrep --color 'City:|IP Address:|Country:'
 }
 
 # show a growl message for completed commands, scripts. usage: command; gdone
@@ -1523,7 +1491,7 @@ function mancomplete () {
 	for i in $ITEMS; do
 		HITS=$i/*/$2*
 		for j in $HITS; do
-			NAME=$(basename $j)	
+			NAME=$(basename $j)
 			echo $NAME
 		done
 	done
@@ -1546,8 +1514,8 @@ function cdfuz () {
 # ---------------------------------------------
 
 function mdlocate () {
-	echo mdfind "kMDItemFSName == '$1'"	
-	mdfind "kMDItemFSName == '$1'"	
+	echo mdfind "kMDItemFSName == '$1'"
+	mdfind "kMDItemFSName == '$1'"
 }
 
 function spot () { mdfind "kMDItemDisplayName == '$@'wc"; }
@@ -1594,7 +1562,7 @@ function fcd ()
 # when i want to tail some out put to growl, ls | growl
 function growl () {
 if [[ $(hostname) = "server" ]]; then
-	growlnotify -s -H "mini.local" -t "growl: $USER @ $(hostname) `date +%H:%M`"
+	growlnotify -s -H "mini.local" -P "123" -t "growl: $USER @ $(hostname) `date +%H:%M`"
 else
 	growlnotify -s -t "growl: $USER @ $(hostname) `date +%H:%M`"
 fi
@@ -1605,6 +1573,7 @@ function spam-hosts-update () {
 	sudo cat ~/Desktop/hosts >> /etc/hosts;
 	growlnotify -s -t "Spam list updated!" -m "new entries in /etc/hosts"
 }
+
 
 
 # ---------------------------------------------

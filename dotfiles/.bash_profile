@@ -2,9 +2,9 @@
 # Author: Robbie ( dunolie@gmail.com )
 # Created: 03/10/09 @ 07:07:20
 # Description: $(HOME)/.bash_profile
-# Last modified:
+# Last modified: Sun 27 Dec 2009 22:26:06 pm GMT
 # Comments: mac osx centred bash profile
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 #                            NOTES
 # -------------------------------------------------------------------------------
 #
@@ -25,7 +25,7 @@
 # -------------------------------------------------------------------------------
 #                         SHELL SETTINGS
 # -------------------------------------------------------------------------------
-# colour values for use in scripts. Usage:  text 
+# colour values for use in scripts. Usage:  text
 NC='\033[0m' # No Color
 WHITE='\033[1;37m'
 BLACK='\033[0;30m'
@@ -44,6 +44,24 @@ L_YELLOW='\033[0;33m'
 GRAY='\033[1;30m'
 L_GRAY='\033[0;37m'
 #
+
+
+# source ~/.bashrc-dterm for the Dterm app
+if [[ $TERM_PROGRAM = "DTerm" ]]; then
+▷⋅⋅⋅source ~/.dunolie-dotfiles/dotfiles/.bashrc-dterm
+▷⋅⋅⋅return
+fi
+
+# so I get my xterm titles working in screen.
+if [ "$TERM" = "screen" ]; then
+▷⋅⋅⋅export TERM=xterm-color
+fi
+
+# so iTerm likes the dircolors output
+export TERM=xterm-color
+#if [[ $TERM_PROGRAM == "iTerm.app" ]]; then
+#▷⋅⋅⋅export TERM=xterm-color
+#fi
 
 # -------------------------------------------------------------------------------
 #                        MY WELCOME MESSAGE
@@ -84,6 +102,13 @@ if [  -f ~/Sync/ToDo/todo.txt ]; then
 else
 	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 fi
+
+# icalBuddy (ical upcoming events)
+if [[ -f /usr/local/bin/icalBuddy ]]; then
+	/usr/local/bin/icalBuddy -f -ec Weeknumbers eventsToday+1
+	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+fi
+
 #if [[ -f ~/bin/weather-report ]]; then
 #	if [ "ping -c 2 www.google.com > /dev/null -eq 0" ]; then
 #		#echo -e "\033[1;32m The weather in Oban is currently, $(oban-forecast "EUR|UK|UK604|Oban")\033[0m"
@@ -102,6 +127,10 @@ echo -e "Bash Version: ${L_CYAN}${BASH_VERSION%.*}${NC} ~ ${L_CYAN}`which bash`$
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 #
 
+# disable crashreporter. I find it hogs CPU usage
+#if [[ $(uname) = "Darwin" ]]; then
+#	launchctl unload /System/Library/LaunchDaemons/com.apple.ReportCrash.plist
+#fi
 
 # if ~/.bashrc then source it
 if [ -f ~/.bashrc ]; then
@@ -123,9 +152,9 @@ fi
 #fi
 
 #if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "DTerm" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-dterm	
+#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-dterm
 #fi
 
 #if [[ $(uname) = "Darwin" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-iterm	
+#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-iterm
 #fi

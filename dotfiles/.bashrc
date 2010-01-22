@@ -2,7 +2,7 @@
 #         Author: Robbie -- dunolie (at) gmail (dot) com
 #      File name: my bashrc ($HOME/.bashrc)
 #        Created: Fri 11 Dec 2009 14:33:12 pm GMT
-#  Last Modified: Wed 06 Jan 2010 14:32:36 pm GMT
+#  Last Modified: Mon 18 Jan 2010 06:12:10 am GMT
 # -------------------------------------------------------------------------------
 #       Comments: my bashrc, mainly osx centric
 #    Description:
@@ -36,19 +36,8 @@ if [[ $- != *i* ]] ; then
 	return
 fi
 #
-# source ~/.bashrc-dterm for the Dterm app
-if [[ $TERM_PROGRAM = "DTerm" ]]; then
-	source ~/.dunolie-dotfiles/dotfiles/.bashrc-dterm
-	return
-fi
 
-# so I get my xterm titles working in screen.
-if [ "$TERM" = "screen" ]; then
-	export TERM=xterm-color
-fi
-
-# so iTerm likes the dircolors output
-export TERM=xterm-color
+# $TERM Settings in ~/.bash_profile
 
 # -------------------------------------------------------------------------------
 #                         SHELL COLOURS
@@ -634,7 +623,9 @@ case $TERM in
 		XTITLE='\[\033k\033\\\]\[\e]0;`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \007\]';
 		;;
 	screen*)
-		XTITLE='\033_`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \033\\'
+		#XTITLE='\033_`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \033\\'
+		XTITLE='\033]0;`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \007'
+		
 		;;
 	*)
 		XTITLE="";
