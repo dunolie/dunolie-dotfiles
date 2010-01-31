@@ -124,7 +124,7 @@ alias top-to-file='top -b -n 1 > ~/Desktop/top.out.$(date +%s)'
 
 alias addb='open addressbook://$(addy-id $1)'
 
-# markdown 
+# markdown
 alias markdown='perl /Users/$USER/bin/Markdown.pl --html4tags'
 
 #instiki wiki
@@ -145,7 +145,7 @@ alias tiga='tig --all'
 ##-----------------------------------------------------------
 # NEW ALIASES
 # CHECK THE BOTTOM OF THIS FILE FOR ALIASES ADDED WITH +alias
-alias +alias="echo alias $1 >> ~/.aliases_bash"
+alias mkalias='echo alias "$@" >> ~/.aliases_bash'
 
 ##------------------------------------------------------------
 ##-- web browsing -----------
@@ -193,7 +193,15 @@ alias minic='echo -ne "\033]0;minicom\007" ; minicom -c on'
 
 ##-- IPLAYER  -----------
 
-alias iplay-film='iplayer --category=Film'
+alias iplayh='iplay --long-help > ~/Desktop/iplay-help.txt; vim ~/Desktop/iplay-help.txt'
+
+alias iplayu='iplay --update; iplay --manpage=/usr/local/share/man/man1/iplayer.1'
+
+alias iplay-film='iplayer --nocopyright --category=Film'
+
+alias iplay-drama='iplayer --nocopyright --category=Drama --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+
+alias iplay-history='iplayer --nocopyright --category=History --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
 alias iplayi='iplayer --nopurge --nocopyright -i $1'
 
@@ -241,6 +249,8 @@ alias vlc='open -a vlc $1'
 # hint from  --  https://w3.linux-magazine.com/issue/64/Text-based_Chat_With_Irssi.pdf
 # alias sirc='if pgrep irssi;then screen -raAd irssi;else screen -S irssi irc-irssi;fi'
 
+# launch my default screen session via my screen (scr) function
+alias scr='sc rob'
 # reatch the previously detached screen session
 alias scrr='screen raAd'
 
@@ -251,8 +261,11 @@ alias scrl='screen -list'
 alias scrk='screen -X -S ID kill'
 
 # see what ghost sreens are still lurking on the system
-alias scrg='cd /private/tmp/uscreen/S-"$USER"'
-alias ghost-screens='cd /private/tmp/uscreen/S-"$USER"'
+alias scrg='cd /private/tmp/screen/S-"$USER"'
+alias ghost-screens='cd /private/tmp/screen/S-"$USER"'
+
+alias scrgu='cd /private/tmp/uscreen/S-"$USER"'
+alias ghost-screensu='cd /private/tmp/uscreen/S-"$USER"'
 
 ##-- GNU SCREEN  -----------
 # Attaches to a screen session. If the session is attached elsewhere, detaches that other display.
@@ -273,7 +286,6 @@ alias irssi-scr='cd ~/.irssi/scripts'
 # start irssi client
 # alias irc='irssi; sleep 20; growlnotify -t "Screen session" -m "$(screen -ls)F'  #using the screen alias instead
 
-
 # edit irssi config file (with mate)
 alias ircc='mate ~/.irssi/config'
 
@@ -282,11 +294,6 @@ alias ircs='cd ~/.irssi/scripts'
 
 # go to irssi autocomplete scripts folder ( for checking start up script symlinks)
 alias irca='cd ~/.irssi/scripts/autorun'
-
-## Q: How do I run scripts automatically at startup?
-
-## A: Put them into ~/.irssi/scripts/autorun/ directory. Or better would be if you placed them
-## in ~/.irssi/scripts/ and created symlinks to autorun directory (eg. cd ~/.irssi/scripts/autorun/ ; ln -s ../script.pl .)
 
 ##------------------------------------------------------------
 # fix the colorscheme this way, it doesn't want to load in in the .vimrc file
@@ -299,7 +306,6 @@ alias v='/opt/local/bin/vim -c "colorscheme dunolie"'
 alias vim='/opt/local/bin/vim -c "colorscheme dunolie"'
 
 ##------------------------------------------------------------
-
 
 # get to the rafb website to paste code .. shpost script does not like ( "'`; )
 alias rafbf='firefox http://rafb.net/paste/'
@@ -340,11 +346,6 @@ alias tgz='gnutar zxf'
 alias untar='tar xvf'
 
 alias detar='tar xvf'
-##------------------------------------------------------------
-
-# list colours and codes
-# ~/.bash_profile ir_black style
-#alias colslist="set | egrep 'COLOR_w*'"  # lists all the colors
 
 ##------------------------------------------------------------
 
@@ -448,9 +449,9 @@ alias mounted='df -hT'
 
 # Various alias's
 
-alias da='date "%A +%d-%m-%Y   %T %Z"'
+alias da='echo `date "%A +%d-%m-%Y   %T %Z"`'
 
-alias pgrep="pgrep -l" 
+alias pgrep="pgrep -l"
 alias path='echo $PATH'
 alias dirsize='du -skh | cut -f1'
 alias du1='du -h --max-depth=1'
@@ -463,6 +464,20 @@ alias du='du -h -c'
 alias s='sudo'
 alias se='sudoedit'
 alias root='sudo su'
+
+# some pushd popd
+# http://www.softpanorama.org/Scripting/Shellorama/pushd_and_popd.shtml
+alias +='pushd .'
+alias _='popd'
+alias +1='popd -2'
+alias +2='popd -3'
+alias b='pushd +1'
+alias d='dirs -v'
+
+alias 1='popd +2'
+alias 2='popd +3'
+alias 3='popd +4'
+
 
 ##------------------------------------------------------------
 ##-- count files, sort files  -----------
@@ -513,7 +528,7 @@ alias ping='ping -c 10'
 alias nstat='netstat -alnp --protocol=inet | grep -v CLOSE_WAIT | cut -c-6,21-94 | tail +2'
 
 ##------------------------------------------------------------
-# MY LOCAL COMPUTER ALIASES 
+# MY LOCAL COMPUTER ALIASES
 ##------------------------------------------------------------
 
 # Alias's for Scripts
@@ -593,7 +608,7 @@ alias cut80='/usr/bin/cut -c 1-80'
 # fix_stty: restore terminal settings when they get completely screwed up
 alias fixstty='stty sane'
 
-# I often can't recall what I named this alias, so make it work either way: 
+# I often can't recall what I named this alias, so make it work either way:
 alias findgrep='grepfind'
 
 ##------------------------------------------------------------
@@ -628,7 +643,8 @@ alias bd='cd "$OLDPWD"'
 
 alias back='cd "$OLDPWD"'
 
-alias ff='find . -iname'
+alias epwd='echo $PWD'
+alias cpwd='echo $PWD | pbcopy; echo -e "${CYAN} $PWD ${NC}copied to the clipboard"'
 
 # top 20 used commands via history
 alias profileme="history | awk '{print \$2}' | awk 'BEGIN{FS=\"|\"}{print \$1}' | sort | uniq -c | sort -n | tail -n 20 | sort -nr"
@@ -660,7 +676,7 @@ alias lh='fc -l'
 #alias bmysql='cd /opt/local/lib/mysql5/bin'
 
 alias mycnf-g='m /etc/my.cnf'
-alias mycnf-h='m ~/.my.cnf' 
+alias mycnf-h='m ~/.my.cnf'
 #alias mycnf-p='m /opt/local/etc/mysql5/my.cnf'
 
 ##------------------------------------------------------------
@@ -725,7 +741,7 @@ alias irc256='sc irc256'
 
 ##------------------------------------------------------------
 
-# os x gnu plot 
+# os x gnu plot
 alias gnuplot='/Applications/Gnuplot.app/Contents/Resources/bin/gnuplot-4.2.3'
 
 ##------------------------------------------------------------
@@ -745,16 +761,16 @@ alias ucase='rename 'y/a-z//A-Z' *'
 
 ##------------------------------------------------------------
 
+# Merge dirs (OSX) mgdir dir1 dir2
+alias mgdir='ditto -V "$1" "$2"'
 # show a keyboard shortcut list
 alias bindlist="bind -p | grep -Ev '(do-lowercase-version|digit-argument|not bound|self-insert)'"
 
 alias goto="osascript -e 'open location \!'"
 
 alias term='echo -e "term: ${CYAN}$TERM${NC}"'
- 
+
+alias week='month; icalBuddy -f -ec Weeknumbers eventsToday+7'
 ##------------------------------------------------------------
 # THE END
 ##------------------------------------------------------------
-
-
-

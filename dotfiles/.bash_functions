@@ -321,7 +321,7 @@ lynx -dump "http://www.google.com/search?hl=en&q=define%3A+${1}&btnG=Google+Sear
 				else
 					echo "Sorry $USER, I can't find the term \"${1} \""				
 			fi	
-rm -f /tmp/templookup.txt
+rm /tmp/templookup.txt
 }
 
 # ---------------------------------------------
