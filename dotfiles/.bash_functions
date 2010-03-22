@@ -18,6 +18,18 @@ else
 fi
 }
 
+function mp3-add-cover () {
+	eyeD3 --add-image=$1:FRONT_COVER $2 >/dev/null 2>&1
+	HAS_APIC=`id3v2 -l *.mp3 | grep APIC` 
+	if [ -n "$HAS_APIC" ]
+	then
+	  echo "Cover images have been successfully added."
+		growlnotify -s -t "Album art added" -m "$(echo $PWD)"
+	else
+	  echo "Adding cover images has failed."
+	fi
+}
+
 
 # github clone  sorts close by /github-user/project
 # http://openmonkey.com/articles/2009/07/fast-github-clone-bash-function
