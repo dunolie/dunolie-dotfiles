@@ -24,6 +24,9 @@
 ##------------------------------------------------------------
 ## Script Comments if needed : try and keep it clean & commented :)
 ##-----------------------------------------------------------
+
+alias RM='/bin/rm'
+
 alias rkhunter='rkhunter --versioncheck --update --propupd --check'
 alias e='$EDITOR'
 
@@ -112,8 +115,14 @@ alias gitrm="git stat | grep deleted | awk '{print $3}' | xargs git rm"
 
 ##-----------------------------------------------------------
 
+alias nfo='eyeD3 --nfo .'
+
+alias nfo-make='eyeD3 --nfo . >> Album-Info.nfo'
+
 # Dnuos music catalogue
-alias dnuos='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos -DSt --file=~/Desktop/music-info-`date %d_%m_%y`.txt $1'
+alias music-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info6.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=/Users/robbie/Desktop/music-info-`date +%d_%m_%y-%H:%M`.txt "$@"'
+
+alias music-dir-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info6.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=Album-Info.txt "$@"'
 
 alias scpresume="rsync --partial --progress --rsh=ssh"
 alias qlf='qlmanage -p  >& /dev/null'
