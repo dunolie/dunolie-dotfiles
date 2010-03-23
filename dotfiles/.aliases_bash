@@ -112,7 +112,8 @@ alias gs="git status"
 alias gi="vim .gitignore"
 alias gitrm="git stat | grep deleted | awk '{print $3}' | xargs git rm"
 
-
+alias add-dotfiles-git='cp $@ /Users/robbie/git/projects/dunolie-dotfiles/dotfiles'
+alias commit-dotfiles='dotgit; git add .; git commit -m "$@"'
 ##-----------------------------------------------------------
 
 alias nfo='eyeD3 --nfo .'
