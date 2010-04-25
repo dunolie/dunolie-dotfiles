@@ -18,16 +18,20 @@ else
 fi
 }
 
+function wiki-search () { dig +short txt "$*".wp.dg.cx; }
+
 function mp3-add-cover () {
-	eyeD3 --add-image=$1:FRONT_COVER $2 >/dev/null 2>&1
-	HAS_APIC=`id3v2 -l *.mp3 | grep APIC` 
-	if [ -n "$HAS_APIC" ]
-	then
-	  echo "Cover images have been successfully added."
+	cp "$@" tmpCover.jpg 
+	eyeD3 --add-image=tmpCover.jpg:FRONT_COVER *.mp3 >/dev/null 2>&1
+	#HAS_APIC=`id3v2 -l *.mp3 | grep APIC` 
+	#if [ -n "$HAS_APIC" ]
+	#then
+		echo "Cover images have been successfully added."
 		growlnotify -s -t "Album art added" -m "$(echo $PWD)"
-	else
-	  echo "Adding cover images has failed."
-	fi
+	#else
+	  #echo "Adding cover images has failed."
+	#fi
+	rm tmpCover.jpg
 }
 
 
@@ -1567,14 +1571,20 @@ function fcd ()
         end tell
     EOT
     )
-    echo "cd to \"$currFolderPath\""
+    # echo "cd to \"$currFolderPath\""
     cd "$currFolderPath"
+}
+
+# locateql: search using Spotlight and show a "Quick Look" of matching files
+locateql ()
+{
+    locatemd "$@" | enquote | xargs qlmanage -p >& /dev/null &
 }
 
 # when i want to tail some out put to growl, ls | growl
 function growl () {
 if [[ $(hostname) = "server" ]]; then
-	growlnotify -s -H "mini.local" -P "123" -t "growl: $USER @ $(hostname) `date +%H:%M`"
+	growlnotify -s -H "mbook.local" -P "123" -t "growl: $USER @ $(hostname) `date +%H:%M`"
 else
 	growlnotify -s -t "growl: $USER @ $(hostname) `date +%H:%M`"
 fi
@@ -1586,6 +1596,10 @@ function spam-hosts-update () {
 	growlnotify -s -t "Spam list updated!" -m "new entries in /etc/hosts"
 }
 
+function gdot () {
+	cp "$@" /Users/robbie/git/projects/dunolie-dotfiles/dotfiles/
+	growlnotify -t "+ dunolie-dotfiles/dotfiles" -m "copied, git add later"
+}
 
 
 # ---------------------------------------------

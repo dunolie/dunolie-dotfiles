@@ -286,9 +286,9 @@ export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 # --------------------------------------------------------------------------------
 #
 # set LC & LANG , iTerm does not handle UTF-8 fully otherwise :{
-# export LC_ALL=C
-# export LC_ALL='en_GB.UTF-8'
-export LC_ALL=""
+export LC_ALL="C"
+export LC_ALL='en_GB.UTF-8'
+#export LC_ALL=""
 export LANG="en_GB.UTF-8"
 export LC_COLLATE="en_GB.UTF-8"
 export LC_CTYPE="en_GB.UTF-8"
@@ -296,6 +296,14 @@ export LC_MESSAGES="en_GB.UTF-8"
 export LC_MONETARY="en_GB.UTF-8"
 export LC_NUMERIC="en_GB.UTF-8"
 export LC_TIME="en_GB.UTF-8"
+export LANG="en_GB.UTF-8"
+export LC_PAPER="en_GB.UTF-8"
+export LC_NAME="en_GB.UTF-8"
+export LC_ADDRESS="en_GB.UTF-8"
+export LC_TELEPHONE="en_GB.UTF-8"
+export LC_MEASUREMENT="en_GB.UTF-8"
+export LC_IDENTIFICATION="C"
+
 #
 export INPUTRC="~/.inputrc"
 export EVENT_NOKQUEUE=1               # for memcached
@@ -370,6 +378,25 @@ if [[ "$sw_vers -productVersion" != "10.*" ]]; then
 		# http://www.infinitered.com/blog/?p=19
 		#export LS_COLORS=gxgxcxdxbxegedabagacad
 		#export LS_COLORS=cxfxcxdxBxegedabagacad
+		# a black
+		# b red
+		# c green
+		# d brown
+		# e blue
+		# f magenta
+		# g cyan
+		# h light grey
+		# A bold black, usually shows up as dark grey
+		# B bold red
+		# C bold green
+		# D bold brown, usually shows up as yellow
+		# E bold blue
+		# F bold magenta
+		# G bold cyan
+		# H bold light grey; looks like bright white
+		# x default foreground or background
+		# Order: dir - symlink - socket - pipe - exec - block special - char special - exec
+		# setuid - exec setgid - public dir sticky bit - public dir no sticky bit
 		export LSCOLORS=GxfxcxdxbxGgGdabagacad
 		#ls aliases for use with OS X default colours
 		alias l='ls -lAhF'

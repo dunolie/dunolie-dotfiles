@@ -112,18 +112,26 @@ alias gs="git status"
 alias gi="vim .gitignore"
 alias gitrm="git stat | grep deleted | awk '{print $3}' | xargs git rm"
 
-alias add-dotfiles-git='cp $@ /Users/robbie/git/projects/dunolie-dotfiles/dotfiles'
+alias add-dotfiles-git='cp "$@" /Users/robbie/git/projects/dunolie-dotfiles/dotfiles'
 alias commit-dotfiles='dotgit; git add .; git commit -m "$@"'
 ##-----------------------------------------------------------
+
+
+# webkit2png (website screengrabs) http://www.paulhammond.org/2009/03/webkit2png-0.5
+alias webgrab='webkit2png --dir=~/Documents/WebGrabs/ --datestamp -W 1000 -H 1000 -F "$@"'
+
+alias network='ping -c2 192.168.1.255 >/dev/null; arp -a'
+
+alias lman='man "$1" | less -p "$2"'
 
 alias nfo='eyeD3 --nfo .'
 
 alias nfo-make='eyeD3 --nfo . >> Album-Info.nfo'
 
 # Dnuos music catalogue
-alias music-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info6.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=/Users/robbie/Desktop/music-info-`date +%d_%m_%y-%H:%M`.txt "$@"'
+alias music-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=/Users/robbie/Desktop/music-info-`date +%d_%m_%y-%H:%M`.txt "$@"'
 
-alias music-dir-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info6.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=Album-Info.txt "$@"'
+alias music-dir-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=Album-Info.txt "$@"'
 
 alias scpresume="rsync --partial --progress --rsh=ssh"
 alias qlf='qlmanage -p  >& /dev/null'
