@@ -27,11 +27,27 @@ function mp3-add-cover () {
 	#if [ -n "$HAS_APIC" ]
 	#then
 		echo "Cover images have been successfully added."
-		growlnotify -s -t "Album art added" -m "$(echo $PWD)"
+		growlnotify --image=tmpCover.jpg -s -t "Album art added" -m "$(echo $PWD)"
 	#else
 	  #echo "Adding cover images has failed."
 	#fi
 	rm tmpCover.jpg
+}
+
+function cover-grab () {
+	mkdir Art
+	eyeD3 --write-images="`pwd`/Art/" "$@"
+	if [[ -f "`pwd`/Art/FRONT_COVER.*" ]]; then
+		cp `pwd`/Art/FRONT_COVER.* ../Cover.jpg
+	fi
+	if [[ -f "`pwd`/Art/OTHER.*" ]]; then
+		cp `pwd`/Art/OTHER.* ../Cover.jpg
+	fi
+	growlnotify --image=Cover.jpg -t "Album art grabbed" -m "$(echo $PWD)"
+}
+
+function genre () {
+	eyeD3 -G "$@" *.mp3
 }
 
 

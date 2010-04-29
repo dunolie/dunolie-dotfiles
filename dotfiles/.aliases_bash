@@ -116,7 +116,6 @@ alias add-dotfiles-git='cp "$@" /Users/robbie/git/projects/dunolie-dotfiles/dotf
 alias commit-dotfiles='dotgit; git add .; git commit -m "$@"'
 ##-----------------------------------------------------------
 
-
 # webkit2png (website screengrabs) http://www.paulhammond.org/2009/03/webkit2png-0.5
 alias webgrab='webkit2png --dir=~/Documents/WebGrabs/ --datestamp -W 1000 -H 1000 -F "$@"'
 
@@ -133,6 +132,14 @@ alias music-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2
 
 alias music-dir-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=Album-Info.txt "$@"'
 
+alias v24='eyeD3 --to-v2.4 *.mp3; eyeD3 --set-encoding=utf8 *.mp3; nfo'
+
+alias lametag='eyeD3 --lametag'
+
+alias tag-update='eyeD3 --force-update --set-encoding=utf8'
+
+alias gim='gimage "$@"; ql *jpg; l *.jpg'
+##-----------------------------------------------------------
 alias scpresume="rsync --partial --progress --rsh=ssh"
 alias qlf='qlmanage -p  >& /dev/null'
 
@@ -770,6 +777,8 @@ alias thumb600='sips -Z 600 "$@" --out 600x-resized.png png'
 alias thumb400='sips -Z 400 "$@" --out 400-resized.png png'
 alias thumb200='sips -Z 200 "$@" --out 200-resized.png png'
 
+alias png2jpg='mogrify -format jpg *.png'
+alias jpg2png='mogrify -format png *.jpg'
 ##------------------------------------------------------------
 
 #Change file name from upper to lower case
