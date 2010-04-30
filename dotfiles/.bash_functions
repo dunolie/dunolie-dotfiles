@@ -50,6 +50,8 @@ function genre () {
 	eyeD3 -G "$@" *.mp3
 }
 
+# usage: helpme <program>
+function helpme () { "$@" --help 2>&1 |less -S;}
 
 # github clone  sorts close by /github-user/project
 # http://openmonkey.com/articles/2009/07/fast-github-clone-bash-function
