@@ -116,6 +116,8 @@ alias add-dotfiles-git='cp "$@" /Users/robbie/git/projects/dunolie-dotfiles/dotf
 alias commit-dotfiles='dotgit; git add .; git commit -m "$@"'
 ##-----------------------------------------------------------
 
+alias airport='/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport'
+
 # webkit2png (website screengrabs) http://www.paulhammond.org/2009/03/webkit2png-0.5
 alias webgrab='webkit2png --dir=~/Documents/WebGrabs/ --datestamp -W 1000 -H 1000 -F "$@"'
 
@@ -138,7 +140,14 @@ alias lametag='eyeD3 --lametag'
 
 alias tag-update='eyeD3 --force-update --set-encoding=utf8'
 
-alias gim='gimage "$@"; ql *jpg; l *.jpg'
+alias rm-comments-mp3='eyeD3 --remove-comments *.mp3'
+
+# http://hans.fugal.net/src/creme/
+alias timer='/opt/local/bin/creme'
+
+alias termsize='echo $COLUMNS x $LINES'
+
+alias low-q-image='sips --setProperty formatOptions low "$@"'
 ##-----------------------------------------------------------
 alias scpresume="rsync --partial --progress --rsh=ssh"
 alias qlf='qlmanage -p  >& /dev/null'
@@ -197,6 +206,10 @@ alias wmv2avi='for i in *.wmv; do mencoder -ovc lavc -oac mp3lame -o "$i.avi" "$
 
 ##-----------------------------------------------------------
 ### MEDIA ALIASES
+alias mp4-cover-add='atomicparsley "$@" --artwork Cover.jpg'
+
+alias flactag-show='metaflac --list --block-type=VORBIS_COMMENT "$@"'
+alias cap-mp3-tags='id3 -t %+t *.mp3'
 
 # drm protected wma & wmv files in mplayer
 alias drmwma='mplayer -demuxer lavf -lavfdopts cryptokey=drm_sid_in_hex_format'
@@ -222,13 +235,15 @@ alias iplayh='iplay --long-help > ~/Desktop/iplay-help.txt; vim ~/Desktop/iplay-
 
 alias iplayu='iplay --update; iplay --manpage=/usr/local/share/man/man1/iplayer.1'
 
-alias iplay-film='iplayer --nocopyright --category=Film'
+alias iplay-film='iplay  --nocopyright --nopurge --category=Film'
 
-alias iplay-drama='iplayer --nocopyright --category=Drama --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-drama='iplayer --nocopyright --nopurge --category=Drama --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
-alias iplay-history='iplayer --nocopyright --category=History --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-history='iplayer --nocopyright --nopurge --category=History --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
 alias iplayi='iplayer --nopurge --nocopyright -i $1'
+
+alias iplayd='iplayer --nopurge --nocopyright --fields=desc -i $1'
 
 alias iplay='iplayer --nopurge --nocopyright --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
@@ -249,7 +264,6 @@ alias iplay-r='iplayer --nopurge --nocopyright --type=radio'
 alias iplay-lr='iplayer --nopurge --nocopyright --type=liveradio'
 
 alias iplay-slr='iplayer --pid radio:$1 --amode=flashaac --stdout --nowrite | mplayer -cache 128 -'
-
 ##-----------------------------------------------------------
 
 alias scrabble='java -jar /Applications/WordBiz/wordbiz.jar'
@@ -776,6 +790,8 @@ alias thumb800='sips -Z 800 "$@" --out 800-resized.png png'
 alias thumb600='sips -Z 600 "$@" --out 600x-resized.png png'
 alias thumb400='sips -Z 400 "$@" --out 400-resized.png png'
 alias thumb200='sips -Z 200 "$@" --out 200-resized.png png'
+
+alias isize='sips -g pixelWidth -g pixelHeight "$@"'
 
 alias png2jpg='mogrify -format jpg *.png'
 alias jpg2png='mogrify -format png *.jpg'

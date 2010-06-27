@@ -134,13 +134,14 @@ export PATH=$PATH:/Developer/usr/bin:/Developer/usr/sbin:/usr/local/mysql/bin
 export PATH=$PATH:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
 export PATH=$PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/
 export PATH=$PATH:/System/Library/Frameworks/Python.framework/Versions/Current/bin/
+export PATH=$PATH:~/.gem/ruby/1.8/bin
 #
 # my manual (man pages) paths
 export MANPATH=/opt/local/share/man:/usr/local/man:/usr/local/share/man:/usr/share/man:$MANPATH
 export MANPATH=$MANPATH:/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11/man:~/Sync/Bash/man
 #
 # perl paths
-PERL5LIB="/opt/local/lib/perl5/5.8.8:/usr/bin/perl5.8.8"
+PERL5LIB="/opt/local/lib/perl5/5.8.9:/opt/local/lib/perl5/5.8.8:/usr/bin/perl5.8.8:/Library/Perl/Updates/5.10.0:/opt/local/lib/perl5/site_perl/5.8.9/:/opt/local/lib/perl5/vendor_perl/5.8.9"
 export PERL5LIB
 #
 # Setting PATH for MacPython 2.5
@@ -153,8 +154,8 @@ export PYTHONPATH=$PYTHONPATH":/System/Library/Frameworks/Python.framework/Versi
 # unset RUBYOPT
 # export GEM_HOME=/usr/local/lib/ruby/gems/1.8:/Library/Ruby/Gems/1.8
 # export RUBYLIB=/usr/local/lib/ruby:/usr/local/lib/ruby/site_ruby/1.8
-#export GEMDIR=`gem env gemdir`
-export GEMDIR=/opt/local/lib/ruby/gems/1.8
+# export GEMDIR=`gem env gemdir`
+# export GEMDIR=/opt/local/lib/ruby/gems/1.8
 # -------------------------------------------------------------------------------
 #                        AUTO COMPLETION
 # -------------------------------------------------------------------------------
@@ -286,23 +287,22 @@ export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 # --------------------------------------------------------------------------------
 #
 # set LC & LANG , iTerm does not handle UTF-8 fully otherwise :{
-export LC_ALL="C"
-export LC_ALL='en_GB.UTF-8'
+#export LC_ALL="C"
+#export LC_ALL='en_GB.UTF-8'
 #export LC_ALL=""
-export LANG="en_GB.UTF-8"
+#export LANG="en_GB.UTF-8"
 export LC_COLLATE="en_GB.UTF-8"
-export LC_CTYPE="en_GB.UTF-8"
+#export LC_CTYPE="en_GB.UTF-8"
 export LC_MESSAGES="en_GB.UTF-8"
 export LC_MONETARY="en_GB.UTF-8"
 export LC_NUMERIC="en_GB.UTF-8"
 export LC_TIME="en_GB.UTF-8"
-export LANG="en_GB.UTF-8"
 export LC_PAPER="en_GB.UTF-8"
 export LC_NAME="en_GB.UTF-8"
 export LC_ADDRESS="en_GB.UTF-8"
 export LC_TELEPHONE="en_GB.UTF-8"
 export LC_MEASUREMENT="en_GB.UTF-8"
-export LC_IDENTIFICATION="C"
+#export LC_IDENTIFICATION="C"
 
 #
 export INPUTRC="~/.inputrc"
@@ -374,6 +374,7 @@ if [[ "$sw_vers -productVersion" != "10.*" ]]; then
 		alias lsx='gls --color=auto -alh|sort'            #chmod
 		alias lsf='gls --color=auto -lhF|grep -v /'       #Files
 		alias lle='gls --color=auto -alhF| less'
+		alias acl='/bin/ls -le' # View and validate the ACL modifications with the ls command
 	else
 		# http://www.infinitered.com/blog/?p=19
 		#export LS_COLORS=gxgxcxdxbxegedabagacad
@@ -413,6 +414,7 @@ if [[ "$sw_vers -productVersion" != "10.*" ]]; then
 		alias lsx='ls -alh|sort'                     #chmod
 		alias lsf='ls -lhF|grep -v /'                #Files
 		alias lle='ls -alhF| less'
+		alias acl='/bin/ls -le' # View and validate the ACL modifications with the ls command
 	fi
 fi
 #
@@ -642,16 +644,23 @@ ARROW19="▪▶"
 YINYANG="☯"
 #
 # -------------------------------------------------------------------------------
+#                         AtomicParsley
+# -------------------------------------------------------------------------------
+# AtomicParsley options for mp4 art
+export PIC_OPTIONS="MaxDimensions=500:DPI=72:MaxKBytes=150:AddBothPix=true:AllPixJPEG=true"
+export PIC_OPTIONS="SquareUp:removeTempPix"
+export PIC_OPTIONS="ForceHeight=999:ForceWidth=333:removeTempPix"
+# -------------------------------------------------------------------------------
 #                         PROMPTS
 # -------------------------------------------------------------------------------
 # Xterm title bar
 case $TERM in
 	xterm*|rxvt|Eterm|eterm)
-		XTITLE='\[\033k\033\\\]\[\e]0;`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \007\]';
+		XTITLE='\[\033k\033\\\]\[\e]0;`echo $STY` [\u@\h] (\!) (\#) [\w] \@ \007\]';
 		;;
 	screen*)
 		#XTITLE='\033_`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \033\\'
-		XTITLE='\033]0;`echo $STY` (\!) (\#) [\u@\h] [\w] \@ \007'
+		XTITLE='\033]0;`echo $STY` [\u@\h] (\!) (\#) [\w] \@ \007'
 		
 		;;
 	*)

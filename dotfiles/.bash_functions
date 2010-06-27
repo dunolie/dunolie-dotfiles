@@ -2,8 +2,8 @@
 # -------------------------------------------------------------------------------
 #         Author: Robbie -- dunolie (at) gmail (dot) com
 #      File name: .bash_functions  ($HOME/.bash_functions)
-#        Created: TIMESTAMP
-#  Last Modified: TIMESTAMP
+#        Created: Fri 11 Jun 2010 03:05:37 am BST
+#  Last Modified: Fri 11 Jun 2010 03:05:25 am BST
 #    Description: my bash functions ~/.bash_functions
 #       Comments: also sourcing ~/.fff for more functions
 # -------------------------------------------------------------------------------
@@ -18,19 +18,38 @@ else
 fi
 }
 
+# http://code.google.com/p/wkhtmltopdf
+function web2pdf {
+	wkhtmltopdf -q --ignore-load-errors "$1" "$2"
+}
+
 function wiki-search () { dig +short txt "$*".wp.dg.cx; }
 
+function 500-500 () {
+	sips -z 500 500 "$@" > /dev/null 2>&1
+}
+
+function 200-200 () {
+	sips -z 200 200 "$@" > /dev/null 2>&1
+}
+
+function mirror () {
+	rsync -avh "$1" "$2"
+}
+
+function mk-dir-date () {
+	mkdir "$@"\ `date +%Y-%m-%d`
+}
+
 function mp3-add-cover () {
+	eyeD3 --remove-images "$@" *.mp3 >/dev/null 2>&1
 	cp "$@" tmpCover.jpg 
+	#eyeD3 --add-image :FRONT_COVER *.mp3 >/dev/null 2>&1
 	eyeD3 --add-image=tmpCover.jpg:FRONT_COVER *.mp3 >/dev/null 2>&1
-	#HAS_APIC=`id3v2 -l *.mp3 | grep APIC` 
-	#if [ -n "$HAS_APIC" ]
-	#then
-		echo "Cover images have been successfully added."
-		growlnotify --image=tmpCover.jpg -s -t "Album art added" -m "$(echo $PWD)"
-	#else
-	  #echo "Adding cover images has failed."
-	#fi
+	#
+	echo "Cover images have been successfully added."
+	growlnotify --image=tmpCover.jpg -s -t "Album art added" -m "$(echo $PWD)"
+	#
 	rm tmpCover.jpg
 }
 
@@ -46,9 +65,37 @@ function cover-grab () {
 	growlnotify --image=Cover.jpg -t "Album art grabbed" -m "$(echo $PWD)"
 }
 
-function genre () {
+function genre-mp3 () {
 	eyeD3 -G "$@" *.mp3
 }
+
+function year-mp3 () {
+	eyeD3 -Y "$@" *.mp3
+}
+
+function rm-images-mp3 () {
+	eyeD3 --remove-images "$@" *.mp3
+}
+
+function rm-comments-mp3 () {
+	eyeD3 --remove-comments "$@" *.mp3
+}
+
+# use the gimage script to download images from google to the $PWD
+function gim () {
+	gimage "$@"
+	#ql *jpg
+	#l *.jpg
+}
+
+function paste () {
+	cat "$@" | pastebinit | pbcopy && echo "Link is in the clipboard"
+}
+
+function pasteclip () {
+	pbpaste | pastebinit | pbcopy && echo "Link is in the clipboard"
+}
+
 
 # usage: helpme <program>
 function helpme () { "$@" --help 2>&1 |less -S;}
@@ -57,8 +104,8 @@ function helpme () { "$@" --help 2>&1 |less -S;}
 # http://openmonkey.com/articles/2009/07/fast-github-clone-bash-function
 function ghclone () {
   gh_url=${1:-`pbpaste`}
-  co_dir=${HOME}/Code/sources/$(echo $gh_url | sed -e 's/^git:\/\/github.com\///; s/\//-/; s/\.git$//')
-
+  #co_dir=${HOME}/Code/sources/$(echo $gh_url | sed -e 's/^git:\/\/github.com\///; s/\//-/; s/\.git$//')
+  co_dir=${HOME}/Code/sources/$(echo $gh_url | sed -e 's/^http:\/\/github.com\///; s/\//-/; s/\.git$//')
   if [ -d $co_dir ]; then
     cd $co_dir && git pull origin master
   else
@@ -332,13 +379,8 @@ echo ${WEATHERARRAY[@]}
 # ---------------------------------------------
 
 #Translate a Word  - USAGE: translate house spanish  # See dictionary.com for available languages (there are many).
-translate () {
-TRANSLATED=`lynx -dump "http://dictionary.reference.com/browse/${1}" | grep -i -m 1 -w "${2}:" | sed 's/^[ \t]*//;s/[ \t]*$//'`
-if [[ ${#TRANSLATED} != 0 ]] ;then
-		echo "\"${1}\" in ${TRANSLATED}"
-	else
-		echo "Sorry, I can not translate \"${1}\" to ${2}"
-fi
+translate () { 
+	lng1="$1";lng2="$2";shift;shift; wget -qO- "http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=${@// /+}&langpair=$lng1|$lng2" | sed 's/.*"translatedText":"\([^"]*\)".*}/\1\n/';
 }
 
 # ---------------------------------------------
