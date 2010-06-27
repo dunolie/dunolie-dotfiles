@@ -10,13 +10,17 @@
 # http://tbn0.google.com/images?q=tbn:4M-cRWWBvy2nJM:http://www.markbrake.com/images/CMS/UserFiles/Image/radio4_logo.jpg
 # thanks to http://www.markbrake.com for the icon ;)
 #########################################################################
-
+# don't need it to run on my laptop @ home
+lanip="ifconfig | awk '/broadcast/ {print $2}'"
+if [[ "$lanip" = "192.168.2.11" ]]; then
+	return
+fi
 
 # growl notification for start of recording
 growlnotify -s -n "World At One Recorder" -I "~/Radio-Recordings/BBC-Radio4/Radio4.jpg" -t "Recording BBC Radio 4" -m "$USER, The time is now $(date +%H:%M).
 
-BBC Radio 4, The World at One programme is being recorded for the next half hour.  
-     
+BBC Radio 4, The World at One programme is being recorded for the next half hour.
+
 The *.mp3 file is being saved in: ~/Radio-Recordings/BBC-Radio4/World-at-One/";
 # recording for 30 mins
 radio.py BBC Radio4 --record ~/Radio-Recordings/BBC-Radio4/World-at-One/tmp/world_at_one.mp3 --sleep 30;
@@ -46,7 +50,7 @@ cp $LATEST ~/Sync/World-at-One-Latest
 # growl notification for end of recording
 growlnotify -s -n "World at One Recorder" -I "~/Radio-Recordings/BBC-Radio4/Radio4.jpg" -t "Recording BBC Radio 4" -m "$USER, The time is now $(date +%H:%M).
 
-BBC Radio 4, The World at One programme is finished recording.       
+BBC Radio 4, The World at One programme is finished recording.
 
 $DONE in:
 ~/Radio-Recordings/BBC-Radio4/World-at-One/

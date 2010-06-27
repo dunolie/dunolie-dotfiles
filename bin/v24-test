@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: 
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: 
+#      Comments: 
+################################################################################
+#MP3="*.mp3"
+#find . -name '*.mp3' -type f -print0 | while read -d $'\0' MP3; do echo | (
+#    eyeD3 --set-encoding=utf8 --to-v2.4 .
+#); done
+
+find . -name '*.mp3' -type f | while read MP3; do
+    eyeD3 --set-encoding=utf8 --to-v2.4 `pwd`
+done

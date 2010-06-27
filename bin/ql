@@ -6,6 +6,8 @@
 # Quick Look command for terminal use
 #
 
+#qlmanage -p “$@” >& /dev/null &
+
 if [[ ${#} -lt 1 || ${1} == "-h" || ${1} == "--help" ]]; then
     echo -e "Usage: ql [options] <file>"
     echo -e "\t-t\tForce text mode"

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: trash-busy-processes
+#        Created: Wed 06 Jan 2010 13:13:40 pm GMT
+#  Last Modified: Wed 06 Jan 2010 13:13:40 pm GMT
+# -------------------------------------------------------------------------------
+#       Comments: find what processes are being used by things in the trash so it
+#                 cant be emptied
+#    Description:
+# ------------------------------------------------------------------------------
+echo "Looking for busy proceess in trash"
+lsof | grep Trash

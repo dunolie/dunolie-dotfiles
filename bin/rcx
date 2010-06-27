@@ -1,0 +1,14 @@
+#!/bin/bash
+#Make file non-executable
+if [[ $# < 1 ]]
+then
+	echo "You must specify a file!"
+else
+	if [[ ! -e $1 ]]
+	then
+		echo $1 "does not exist, or you didn't type the correct path."
+	else
+		chmod ugo-x $1
+		echo $1 "is now non-executable."
+	fi
+fi

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #########################################################################
-# By Robbie -- dunolie@gmail.com 
+# By Robbie -- dunolie@gmail.com
 # Created on: Tuesday,19 August, 2008
 # Description: converts *.flv files to *.avi files
 # Snipped from website :
-# Snipped from IRC channel : 
-# Snipped from : 
+# Snipped from IRC channel :
+# Snipped from :
 #########################################################################
 # Script Comments if needed : converts all *.flv files in folder , moves
-# them to a done`date` folder , strips the .flv.avi file names down to 
+# them to a done`date` folder , strips the .flv.avi file names down to
 # .avi and gives a growl notification on startup and finish.
 #########################################################################
 
-growlnotify -I "/Users/robbie/RobbieGrowl/Icons/YouTube" -t "Converting *.flv to *.avi" -m "converting all in:
+growlnotify -I "/Users/robbie/bin/growl-icons" -t "Converting *.flv to *.avi" -m "converting all in:
 $(PWD)
 
 files found:
@@ -37,8 +37,8 @@ for i in *.flv.avi ; do
 done
 
 
-growlnotify -s -I "/Users/robbie/RobbieGrowl/Icons/Video" -t "Converted *.flv to *.avi" -m "converted files in:
+growlnotify -s -I "/Users/robbie/bin/growl-icons" -t "Converted *.flv to *.avi" -m "converted files in:
 $(PWD)
 
 converted files:
-$(ls *.avi)"	
+$(ls *.avi)"

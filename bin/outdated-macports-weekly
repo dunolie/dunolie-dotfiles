@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: outdated-macports-weekly
+#      Comments: check for outdated ports from macports
+################################################################################
+
+/opt/local/bin/port sync
+
+/opt/local/bin/port outdated > ~/Desktop/`date "+%Y-%m-%d-%H_%M_%S"`-outdated_macports.txt
+

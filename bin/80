@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: /Users/robbie/bin/80
+#        Created: Fri 07 May 2010 02:36:35 am BST
+#  Last Modified: Fri 07 May 2010 02:36:35 am BST
+# -------------------------------------------------------------------------------
+#       Comments:
+#    Description:
+# -------------------------------------------------------------------------------
+awk '{ll=int(length($0)/70) ; i=1 ; \
+if (length($0)>72) { \
+{ print substr($0,0,70) } \
+while (i<=ll) { { print " " substr($0,i*70+1,70) } i=i+1} \
+} else { \
+{ print ($0) } } }' "$1" > "$2"

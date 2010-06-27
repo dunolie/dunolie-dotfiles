@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: flac-tags
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: http://www.macosxhints.com/article.php?story=20040323004759816
+#      Comments: 
+################################################################################
+# vctool - set vorbis comments in flac files
+#
+if [ "$1" ]
+then
+  while getopts t:a:r:y:g:c:h option
+  do
+    case "$option" in
+      t) TITLE="--set-vc-field=TITLE="$OPTARG"";; 
+      a) ALBUM="--set-vc-field=ALBUM="$OPTARG"";;
+      r) ARTIST="--set-vc-field=ARTIST="$OPTARG"";;
+      y) DATE="--set-vc-field=DATE="$OPTARG"";;
+      g) GENRE="--set-vc-field=GENRE="$OPTARG"";;
+      c) TRACKNUMBER="--set-vc-field=TRACKNUMBER="$OPTARG"";;
+      h) echo ""$(basename "$0")" <options> <filename>"
+         echo "  -t WORD    Sets the title to WORD"
+         echo "  -a WORD    Sets the album to WORD"
+         echo "  -r WORD    Sets the artist to WORD"
+         echo "  -y WORD    Sets the date to WORD"
+         echo "  -g WORD    Sets the genre to WORD"
+         echo "  -c WORD    Sets the track number to WORD";;
+    esac
+  done
+  shift $((OPTIND - 1))
+  for file
+  do
+    if [ -e "$file" ]
+    then
+      for var in "$TITLE" "$ALBUM" "$ARTIST" "$DATE" "$GENRE" "$TRACKNUMBER"
+      do
+        if [ "$var" ]
+        then
+          metaflac "$var" "$file"
+        fi
+      done
+    else
+      echo >&2 "No such file: "$file""
+      exit 1
+    fi
+  done
+else
+  echo >&2 "Type "$(basename "$0")" -h for help."
+  exit 1
+fi

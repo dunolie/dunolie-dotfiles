@@ -1,0 +1,11 @@
+#!/bin/bash
+# AUTOMATOR SCRIPT: Find artist from MP3 scene file name.
+# DESCRIPTION: -"-
+# SYNOPSIS: To be used with the Display Webpages action.
+# VERSION: 0.0.1
+# AUTHOR: (c) 2006 Ask Solem Hoel [asksol@gmail.com]
+# http://0x61736b.net/osx/Automator/
+################################
+ARTIST=$(echo "$1" | perl -pe's/^(.*?)\-.*/$1/;s/_/ /g')
+URL="http://www.discogs.com/search?type=all&btn=Search&q=${ARTIST##*/}"
+echo $URL

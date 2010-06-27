@@ -17,6 +17,6 @@ elif [ "$1" == "-help" ] ; then
         echo "usage: mp42mp3 [file.mp4]"
 else
         OUT="${1%.mp4}.mp3"
-        ffmpeg -vn -y -i "$1" -ab 128k "$OUT"
+        ffmpeg -vn -y -i "$1" -ab 320k "$OUT"
 fi
 

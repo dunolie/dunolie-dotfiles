@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: convert-wav2flac
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: 
+#      Comments: 
+################################################################################
+for i in *.wav; do
+  if [ -e "$i" ]; then
+    file=`basename "$i" .wav`
+    flac --silent -8 --channels= "$i" "$file.flac"
+  fi
+done

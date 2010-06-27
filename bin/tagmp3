@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: tagmp3
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: 
+#      Comments: http://gimpel.gi.funpic.de/wiki/index.php?title=Howto:convert_aac/mp4_to_wav/mp3/ogg_on_Linux
+################################################################################
+# tagmp3
+# Tags every .mp3 in the directory with the band and
+# album names, and creates a song title by stripping
+# the .mp3 extension from the file name.
+# Call like this:
+# tagmp3 artist album
+
+usage(){
+	echo "Usage: tagmp3 artist album"
+	exit 1
+}
+
+[[ $# -eq 0 ]] && usage
+
+for i in *.mp3; do
+    SONG=`basename "$i" .mp3`
+    id3v2 --artist "$1"  --album "$2" --song "$SONG" "$i"
+done
+
+growlnotify -t "Tagged mp3's" -m "'$1' - '$2'"

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: no-smoking
+#        Created: Mon 03 May 2010 02:15:53 am BST
+#  Last Modified: Mon 03 May 2010 02:15:53 am BST
+# -------------------------------------------------------------------------------
+#       Comments:
+#    Description:
+# -------------------------------------------------------------------------------
+
+growlnotify  -I /Users/robbie/bin/growl-icons/Lungs -t "You don't need to smoke!!" -m "
+Do 15 press-ups!
+
+Chew Some Gum!
+
+Have a walk!"

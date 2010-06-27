@@ -1,0 +1,49 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import pywapi
+
+# Get the current conditions for the given station. (Oban & Islay)
+noaa = pywapi.get_weather_from_noaa('EGPI')
+yahoo = pywapi.get_weather_from_yahoo('30828', '')
+
+# The Yahoo pressure dictionary.
+ypressure = {'0': 'steady', '1': 'rising', '2': 'falling'}
+
+# This is the list of output lines.
+out = []
+
+# Go through the dictionaries and construct a list of the desired output lines.
+# out.append('Last update:' + noaa['observation_time'].split(',')[1])
+out.append(u'Temperature: %.0f°' % float(noaa['temp_c']))
+out.append(yahoo['condition']['text'])
+try:
+  gust = ', gusting to %s mph' % noaa['wind_gust_mph']
+except KeyError:
+  gust = ''
+out.append('Wind: %s at %s mph%s' % ( noaa['wind_dir'], noaa['wind_mph'], gust))
+try:
+  out.append(u'Wind Chill: %s°' % noaa['windchill_c'])
+except KeyError:
+  pass
+out.append('Relative Humidity: %s%%' % noaa['relative_humidity'])
+try:
+  out.append(u'Heat Index: %s°' % noaa['heat_index_c'])
+except KeyError:
+  pass
+out.append('Pressure: %2.2f and %s' % (float(yahoo['atmosphere']['pressure']), ypressure[yahoo['atmosphere']['rising']]))
+out.append('Sunlight: %s to %s' % (yahoo['astronomy']['sunrise'], yahoo['astronomy']['sunset']))
+#today = yahoo['forecasts'][0]
+#tomorrow = yahoo['forecasts'][1]
+#out.append(u'''
+#Today:
+#- High: %3d°
+#- Low:  %3d°
+#- %s''' % (int(today['high']), int(today['low']), today['text']))
+#out.append(u'''
+#Tomorrow:
+#- High: %3d°
+#- Low:  %3d°
+#- %s''' % (int(tomorrow['high']), int(tomorrow['low']), tomorrow['text']))
+
+print '\n'.join(out).encode('utf8')

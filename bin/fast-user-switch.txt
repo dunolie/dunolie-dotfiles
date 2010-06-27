@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: fast-user-switch
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: fast user switch from the command line ( OSX )
+#      Comments: 
+################################################################################
+
+MENUEXTRAS="/System/Library/CoreServices/Menu Extras"
+CGSESSION="$MENUEXTRAS/User.menu/Contents/Resources/CGSession"
+if [[ -z $1 ]]; then
+    "$CGSESSION" -suspend
+else  
+    USERID=`id -u $1`;
+    if [[ -z $USERID ]]; then
+        exit -1;
+    fi;
+    "$CGSESSION" -switchToUserID $USERID
+fi;

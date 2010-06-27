@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# -------------------------------------------------------------------------------
+#         Author: Robbie -- dunolie (at) gmail (dot) com
+#      File name: water-plants
+#        Created: Mon 03 May 2010 02:15:53 am BST
+#  Last Modified: Mon 03 May 2010 02:15:53 am BST
+# -------------------------------------------------------------------------------
+#       Comments:
+#    Description:
+# -------------------------------------------------------------------------------
+
+growlnotify  -I /Users/robbie/bin/growl-icons/Plants -s -t "The plants need drinks :)" -m "
+Water the plants!
+all the plants :)"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: 
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: 
+#      Comments: 
+################################################################################
+
+
+for dir in $(find ./ -type d); do
+cd; /opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt "$@"
+done
+	

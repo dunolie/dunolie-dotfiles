@@ -25,6 +25,6 @@ if [ "$INFO" == "State: STOP" ];
  then  
    echo -n ""  
  else
-   echo -e "♫ I'm listening to on MOC:$TITLE". by:$ARTIST", on album:$ALBUM. ♫"
-   echo -e "♫ I'm listening to on MOC:$TITLE". by:$ARTIST", on album:$ALBUM. ♫" | pbcopy
+   echo -e "♫ I'm listening to:$TITLE". By:$ARTIST", on the album:$ALBUM. ♫"
+   echo -e "♫ I'm listening to:$TITLE". By:$ARTIST", on the album:$ALBUM. ♫" | pbcopy
 fi

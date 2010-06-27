@@ -15,7 +15,7 @@
 # growl notification for start of recording
 growlnotify -s -n "BBC Radio 4 Recorder" -I "~/Radio-Recordings/BBC-Radio4/Radio4.jpg" -t "Recording BBC Radio 4" -m "$USER, The time is now $(date +%H:%M).    BBC Radio 4 is being recorded for the next half hour.               The *.mp3 file is being saved in: ~/Radio-Recordings/BBC-Radio4/";
 # recording for 30 mins
-radio.py BBC4 --record ~/Radio-Recordings/BBC-Radio4/BBC-Radio4-Recording.mp3 --sleep 30;
+radio.py BBC Radio4 --record ~/Radio-Recordings/BBC-Radio4/BBC-Radio4-Recording.mp3 --sleep 30;
 # growl notification for end of recording
 growlnotify -s -n "BBC Radio 4 Recorder" -I "~/Radio-Recordings/BBC-Radio4/Radio4.jpg" -t "Recording BBC Radio 4" -m "$USER, The time is now $(date +%H:%M).    BBC Radio 4 is finished recording.       You can find the *.mp3 file in ~/Radio-Recordings/BBC-Radio4/"; 
 # change the name of the finished recording so it is timed dated correctly and wont be writen over by the next recording

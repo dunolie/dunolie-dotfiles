@@ -1,0 +1,58 @@
+#!/bin/bash  
+# Small script to echo 
+# Stop | Pause | and What MOC is playing Artist - Song CT/TT
+# Colors
+# Forground
+W='\x0300' # White
+K='\x0301' # Black
+B='\x0302' # Blue (Navy)
+G='\x0303' # Green
+R='\x0304' # Red
+BN='\x0305' # Brown (Maroon)
+P='\x0306' # Purple
+O='\x0307' # Orange
+Y='\x0308' # Yellow
+LG='\x0309' # Lt. Green
+T='\x0310' # Teal
+LC='\x0311' # Lt. Cyan
+LB='\x0312' # Lt. Blue
+PN='\x0313' # Pink
+GY='\x0314' # Grey
+LGY='\x0315' # Lt. Grey
+# Background
+BW=',00' # Background White
+BK=',01' # Background Black
+BB=',02' # Background Blue
+BG=',03' # Background Green
+BR=',04' # Background Red
+BBN=',05' # Background Brown (Maroon)
+BP=',06' # Background Purple
+BO=',07' # Background Orange
+BY=',08' # Background Yellow
+BLG=',09' # Background Lt. Green
+BT=',10' # Background Teal
+BLC=',11' # Background Lt. Cyan
+BLC=',12' # Background Lt. Blue
+BPN=',13' # Background Pink
+BGY=',14' # Background Grey
+BLGY=',15' # Background Lt. Grey
+# Various
+BLD='\x02' # Bold
+UL='\x1f' # Underlined
+FL='\x06' # Flashing
+RT='\x03\x02\x02' # Reset Text
+# Variables
+INFO=`mocp -i`
+STATE=`mocp -i | grep State`
+ARTIST=`mocp -i | grep Artist | cut -f2 -d ":"`
+TITLE=`mocp -i | grep SongTitle | cut -f2 -d ":"`
+ALBUM=`mocp -i | grep Album | cut -f2 -d ":"`
+CT=`mocp -i | grep 'CurrentTime' | awk '{print $2}'`
+TT=`mocp -i | grep 'TotalTime' | awk '{print $2}'`
+BITRATE=`mocp -i | grep Bitrate | cut -f2 -d ":"`  
+
+if [ "$INFO" == "State: STOP" ];then echo -ne "${K}MOC${O}: ${P}[${K}stop${P}] "
+elif [ "$STATE" == "State: PAUSE" ];then echo -ne "${K}MOC${R}:${LGY} |${GY}pause${LGY}| "
+else 
+echo -ne "${W}np${K}:${BN}$ARTIST ${P}-${LC}$TITLE ${P}|${BN}$ALBUM "${R}["${LC}$CT${R}/${P}$TT"${R}]""
+fi

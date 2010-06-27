@@ -1,0 +1,195 @@
+(*
+ * Author : Eni BUNDO
+ * Mlpaste 10 March 2010
+ * compilation : ocamlc -I +curl curl.cma str.cma mlpaste.ml -o mlpaste
+ *)
+
+type extension_info = { ext : string; format : string; aux : string };;
+
+exception Break;;
+
+
+(* to do more *)
+let possible_extensions = 
+[
+  {ext="sh"; format="bash"; aux="Bash"};
+  {ext="c"; format="c"; aux="C"};
+  {ext="cpp"; format="cpp"; aux="C++"};
+  {ext="html"; format="html4strict"; aux="HTML"};
+  {ext="java"; format="java"; aux="Java"};
+  {ext="js"; format="javascript"; aux="Javascript"};
+  {ext=""; format="lua"; aux="Lua"};
+  {ext="pl"; format="perl"; aux="Perl"};
+  {ext="php"; format="php"; aux="PHP"};
+  {ext="py"; format="python"; aux="Python"};
+  {ext="rb"; format="ruby"; aux="Ruby"};
+  {ext="txt"; format="text"; aux="None"};
+  {ext="as"; format="actionscript"; aux="ActionScript"};
+  {ext=""; format="ada"; aux="Ada"};
+  {ext=""; format="apache"; aux="Apache Log File"};
+  {ext=""; format="applescript"; aux="AppleScript"};
+  {ext=""; format="asm"; aux="ASM (NASM based)"};
+  {ext=""; format="asp"; aux="ASP"};
+  {ext="sh"; format="bash"; aux="Bash"};
+  {ext="c"; format="c"; aux="C"};
+  {ext=""; format="c_mac"; aux="C for Macs"};
+  {ext=""; format="caddcl"; aux="CAD DCL"};
+  {ext=""; format="cadlisp"; aux="CAD Lisp"};
+  {ext="cpp"; format="cpp"; aux="C++"};
+  {ext="cs"; format="csharp"; aux="C#"};
+  {ext=""; format="cfm"; aux="ColdFusion"};
+  {ext="css"; format="css"; aux="CSS"};
+  {ext=""; format="d"; aux="D"};
+  {ext=""; format="delphi"; aux="Delphi"};
+  {ext=""; format="diff"; aux="Diff"};
+  {ext=""; format="dos"; aux="DOS"};
+  {ext=""; format="eiffel"; aux="Eiffel"};
+  {ext=""; format="fortran"; aux="Fortran"};
+  {ext=""; format="freebasic"; aux="FreeBasic"};
+  {ext=""; format="gml"; aux="Game Maker"};
+  {ext="html"; format="html4strict"; aux="HTML"};
+  {ext=""; format="ini"; aux="INI file"};
+  {ext="java"; format="java"; aux="Java"};
+  {ext="js"; format="javascript"; aux="Javascript"};
+  {ext=""; format="lisp"; aux="Lisp"};
+  {ext=""; format="lua"; aux="Lua"};
+  {ext=""; format="matlab"; aux="MatLab"};
+  {ext=""; format="mpasm"; aux="MPASM"};
+  {ext="sql"; format="mysql"; aux="MySQL"};
+  {ext=""; format="nsis"; aux="NullSoft Installer"};
+  {ext=""; format="objc"; aux="Objective C"};
+  {ext="ml"; format="ocaml"; aux="OCaml"};
+  {ext=""; format="oobas"; aux="Openoffice.org BASIC"};
+  {ext=""; format="oracle8"; aux="Oracle 8"};
+  {ext=""; format="pascal"; aux="Pascal"};
+  {ext=""; format="perl"; aux="Perl"};
+  {ext=""; format="php"; aux="PHP"};
+  {ext=""; format="python"; aux="Python"};
+  {ext=""; format="qbasic"; aux="QBasic/QuickBASIC"};
+  {ext=""; format="robots"; aux="Robots"};
+  {ext=""; format="ruby"; aux="Ruby"};
+  {ext=""; format="scheme"; aux="Scheme"};
+  {ext=""; format="smarty"; aux="Smarty"};
+  {ext="sql"; format="sql"; aux="SQL"};
+  {ext=""; format="tcl"; aux="TCL"};
+  {ext=""; format="vb"; aux="VisualBasic"};
+  {ext=""; format="vbnet"; aux="VB.NET"};
+  {ext=""; format="visualfoxpro"; aux="VisualFoxPro"};
+  {ext="xml"; format="xml"; aux="XML"}];;
+
+(* gets an extension from a string, ex: "something.here.ext" returns ext *)
+(* val get_extension : string -> string = <fun> *) 
+let get_extension filename = 
+  let length = String.length filename in 
+  let dotIndex = String.rindex filename '.' in
+    String.sub filename (dotIndex + 1) (length - dotIndex-1);;
+
+(* gets name (second field of extension_info) from possible_extensions *)
+(* val get_name : string -> string = <fun> *)
+let get_format ext = 
+  try
+    let res =  (List.find (fun e-> e.ext=ext) possible_extensions) in
+      res.format
+  with
+      Not_found -> "text"
+;;
+
+
+(* creates a string containing only one char passed as parameter *)
+(* val string_of_char : char -> string = <fun> *)
+let string_of_char = String.make 1;;
+
+(* gets the hex value of a char *)
+(* val gethex : char -> string = <fun> *)
+let gethex ch = 
+  try
+    let symbols =" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" in
+    let hexchars = "0123456789abcdef" in
+    let asciivalue = (String.index symbols ch) + 32 in 
+    let index1 = asciivalue mod 16 in
+    let index2 = (asciivalue - index1) / 16 in
+    let hex = (string_of_char hexchars.[index2]) ^ (string_of_char hexchars.[index1]) in 
+      hex
+  with
+      Not_found -> string_of_char ch
+;;
+
+(* returns a string with everything inside the file *)
+(* val to_str : string -> string = <fun> *)
+let to_str filename = 
+  let inch = open_in filename in
+  let res = Buffer.create 10 in
+    try    
+      while true do
+	let cur = input_char inch in
+	  if cur = '\n' or cur = '\t' then
+	    Buffer.add_string res (string_of_char cur)
+	  else
+	    Buffer.add_string res ("%" ^ (gethex cur))
+      done; Buffer.contents res
+    with  
+	End_of_file -> Buffer.contents res
+;;
+
+(* gets the url where the file has been pasted *)
+(* val get_url : string -> () = <fun> *)
+let get_url filename name filetype =
+  let s = to_str filename in 
+  let h = Curl.init () in 
+  let format = if (filetype="") then (get_format (get_extension filename)) else filetype in
+  let to_find = Str.regexp ".*http.*" in
+    begin
+      Curl.set_post h true;
+      Curl.set_url h "http://pastebin.org/pastebin.php";
+      Curl.set_postfields h ("code2="^s^"&format="^format^"&poster="^name^"&paste=Send");
+      Curl.set_maxredirs h 0;
+      Curl.set_headerfunction h (fun s -> if (Str.string_match to_find s 0) then print_string s; String.length s );
+      Curl.perform h
+    end
+;;
+
+(* prints help *)
+(* val print_help : unit -> unit *)
+let print_help () = 
+  print_endline "mlpaste : a tool to paste in pastebin.org";
+  print_endline "usage : mlpaste [OPTIONS] [FILE]"; 
+  print_endline "";
+  print_endline "  -h, --help\tprint this help";
+  print_endline "  -n, --name\tname of the poster";
+  print_endline "  -t, --type\ttype of the file";
+  print_endline "";
+  print_endline "if type is not specified";
+  print_endline "it will be found automatically according to its extension";
+;;
+
+
+let _ = 
+  let length = (Array.length (Sys.argv)) in 
+  let filename = Sys.argv.(length-1) in 
+  let name = ref "" in 
+  let filetype = ref "" in 
+    try
+      match length with
+	  1 -> print_help ()
+	| 2 -> 
+	    if Sys.argv.(1)="-h" or Sys.argv.(1)="--help" then print_help () 
+	    else get_url filename !name !filetype
+	| _ -> 
+	    if length mod 2 = 1 then print_help () 
+	    else
+	      let i = ref 1 in 
+		while !i < length-1 do
+		  let cur = Sys.argv.(!i) in 
+		    match cur with
+		      | "-n"|"--name" -> name:=Sys.argv.(!i+1)
+		      | "-t"|"--type" -> filetype:=Sys.argv.(!i+1)
+		      | "-h"|"--help"|_ -> raise Break			  
+			  ; ;			  
+			  i:= !i+2
+		done; 
+		get_url filename !name !filetype
+    with 
+	Break -> print_help () 
+      | Sys_error(e) -> print_endline ("filename "^filename^" cannot be opened")
+	  
+;;

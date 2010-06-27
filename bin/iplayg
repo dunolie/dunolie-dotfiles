@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #########################################################################
-# By Robbie -- dunolie@gmail.com 
+# By Robbie -- dunolie@gmail.com
 # Created on: Monday,09 March, 2009
 # Description: download files with iplayer (get_iplayer.pl)
 # Snipped from website :
-# Snipped from IRC channel : 
-# Snipped from : 
+# Snipped from IRC channel :
+# Snipped from :
 #########################################################################
 # Script Comments if needed :
 #
@@ -17,6 +17,7 @@
 #
 #<filename>"'
 #else
-iplayer -g $1 --rtmp-tv-opts --hashes,--quiet --raw --modes iphone,flashhd,flashhd1 --liveradiomode flashaac,realaudio --nopurge --nocopyright --type tv,podcast,radio --file-prefix '<name>-<episode>' --output /Volumes/DZ-Movies-250GB/TV-UK-Downloaded --subdir --command 'growlnotify -s -I "~/Sync/Bash/bin/growl-icons/iplayer" -t "iPlayer download finished" -m "<name> - <channel>
+# --rtmp-tv-opts --hashes,--quiet --raw --modes
+iplayer -g $1 --rtmp-tv-opts --modes iphone,flashstd1,flashhd,flashhd1,flashhigh1,flashhigh2 --liveradiomode flashaac,realaudio --nopurge --nocopyright --type tv,podcast,radio --file-prefix '<name>-<episode>' --output /Volumes/Visual/TV-UK-Downloaded --subdir --command 'growlnotify -s -I "~/Sync/Bash/bin/growl-icons/iplayer" -t "iPlayer download finished" -m "<name> - <channel>
 
 <filename>"'

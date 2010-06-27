@@ -1,0 +1,32 @@
+#!/usr/bin/env perl -w
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: gimage
+#       Created:         
+# Last Modified: 
+#   Description: Downloads images from Google Images (5)
+#      Comments: Taken from O’Reilly - Google Hacks, Third Edition
+################################################################################
+
+use strict; 
+use WWW::Google::Images;
+# Take the query from the command line. 
+my $query = join(' ',@ARGV) or die "Usage: perl spell.pl <query>\n";
+# Create a new WWW::Google::Images instance.
+my $agent = WWW::Google::Images->new( 
+			server => 'images.google.com');
+# Query Google Images. 
+# my $result = $agent->search($query . "inurl:large",
+my $result = $agent->search($query ,
+							limit => 5,
+							iregex => 'jpg'
+);
+
+# Save each image in the result locally, with 
+# the format [query][count].[extension]. 
+my $count;
+while (my $image = $result->next()) {
+	$count++; 
+	print $image->content_url() . "\n"; 
+	print $image->save_content(base => $query . $count) . "\n\n";
+}

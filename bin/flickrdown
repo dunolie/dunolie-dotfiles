@@ -1,0 +1,282 @@
+#!/usr/bin/perl -w
+# Copyright © 2006, 2007 Jamie Zawinski <jwz@jwz.org>
+#
+# Permission to use, copy, modify, distribute, and sell this software and its
+# documentation for any purpose is hereby granted without fee, provided that
+# the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation.  No representations are made about the suitability of this
+# software for any purpose.  It is provided "as is" without express or 
+# implied warranty.
+#
+# Downloads the large images from a Flickr gallery.
+# This is necessary because the "file" structure they use is stupid and
+# non-hierarchical, meaning there's no "wget" incantation that can mirror
+# it without mirroring the entire site.
+#
+# It will create files prepended with the EXIF creation date, so that the
+# file names sort by creation date instead of by the order in which they
+# occurred in the Flickr gallery.
+#
+# Created: 29-Dec-2006.
+
+require 5;
+use diagnostics;
+use strict;
+
+my $progname = $0; $progname =~ s@.*/@@g;
+my $version = q{ $Revision: 1.16 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+
+my $verbose = 1;
+my $debug_p = 0;
+
+# like system() but checks errors.
+#
+sub safe_system {
+  my (@cmd) = @_;
+
+  print STDOUT "$progname: executing " . join(' ', @cmd) . "\n"
+    if ($verbose > 3);
+
+  system @cmd;
+  my $exit_value  = $? >> 8;
+  my $signal_num  = $? & 127;
+  my $dumped_core = $? & 128;
+  error ("$cmd[0]: core dumped!") if ($dumped_core);
+  error ("$cmd[0]: signal $signal_num!") if ($signal_num);
+  error ("$cmd[0]: exited with $exit_value!") if ($exit_value);
+}
+
+
+sub parse_images($$$) {
+  my ($base_url, $url, $body) = @_;
+
+  my @imgs = ();
+
+  error ("must be signed in for $url")
+    if ($body =~ m/You must be signed in to see this content/i);
+
+  $body =~ s/\s+/ /gs;
+  $body =~ s/</\n</gs;
+
+  foreach (split (/\n/, $body)) {
+    my ($url2) = m@<IMG\b[^<>]*SRC=\"([^<>\"]+)\"@si;
+    next unless $url2;
+    next unless ($url2 =~ s/_s(\.jpg)$/$1/);
+    next if (m/<IMG\b[^<>]*CLASS=\"setThumb\"/si); # bottom of page
+    push @imgs, $url2;
+    print STDERR "$progname: queue: $url2\n" if ($verbose > 2);
+  }
+
+  error ("no images on $url") unless ($#imgs >= 0);
+  return @imgs;
+}
+
+
+sub bogus_image_p($) {
+  my ($img) = @_;
+  local *IN;
+  open (IN, "<$img") || error ("$img: $!");
+  my $head = <IN>;
+  close IN;
+  $head = substr($head, 0, 6);
+  if ($head =~ m/GIF8[7,9]a/) {
+    print STDERR "$progname: $img is a GIF...\n" if ($verbose > 1);
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
+# Flickr changes the URL of "_o" images now, bastards.
+# http://tech.groups.yahoo.com/group/yws-flickr/message/2709
+#
+sub crack_secret($$) {
+  my ($url, $file) = @_;
+
+  my ($head, $id, $osecret, $tail) = 
+    ($url =~ m@^(.*/)([^/_]+)_([^/_]+)(.*)$@);
+  error ("unparsable: $url") unless ($osecret);
+
+  my $surl = 'http://www.flickr.com/photo_zoom.gne?size=o&id=' . $id;
+
+  print STDERR "$progname: parsing $surl\n" if ($verbose > 1);
+  my $body = `wget -qO- "$surl"`;
+
+  # some users don't allow large-sized images to be viewed at all.
+  return ($url, $file) if ($body =~ m/^\s*$/s);
+
+  my $re = qr/$head$id/;
+  my ($nurl, $nsecret) = ($body =~ m@\"(${re}_([^/_\"]+)(_[^/_\"]+))\"@);
+
+  error ("no match for secret in $surl") unless $nsecret;
+
+  my $nfile = $file;
+  $nfile =~ s@$osecret@$nsecret@s;
+  error ("unparsable: $file") if ($nfile eq $file);
+
+  print STDERR "$progname: secret $osecret -> $nsecret\n" if ($verbose > 1);
+
+  return  ($nurl, $nfile);
+}
+
+
+sub download_image($$$) {
+  my ($url, $dir, $file) = @_;
+
+  # Instead of returning an error code when you ask for an image size that
+  # doesn't exist, Flickr gives you a GIF that says "Image Unavailable".
+  # So try them all until we get a non-GIF...
+  #
+  my @suffixes = ("_o",  # original size, > 1024
+                  "_b",  # large size, 1024 max
+                  "",    # medium, 500 max
+                  "m",   # small, 240 max
+                # "t",   # thumb, 100 max
+                # "s",   # square, 75x75
+                  );
+  unlink ($file);
+  my ($urlA,  $urlB)  = ($url  =~ m@^(.*)(\.[^/.]+)$@);
+  my ($fileA, $fileB) = ($file =~ m@^(.*)(\.[^/.]+)$@);
+  foreach my $suf (@suffixes) {
+    $url  = $urlA  . $suf . $urlB;
+    $file = $fileA . $suf . $fileB;
+    unlink ($file);
+
+    # Flickr changes the URL of "_o" images now, bastards.
+    # http://tech.groups.yahoo.com/group/yws-flickr/message/2709
+    if ($suf eq "_o") {
+      ($url, $file) = crack_secret ($url, $file);
+    }
+
+    $file = "$dir/$file";
+
+    if ($debug_p) {
+      print STDERR "$progname: debug: $file\n";
+      return;
+    } else {
+      safe_system ("wget", "-q", $url, "-O", $file);
+      if (! bogus_image_p ($file)) {
+        print STDERR "$progname: img: $url\n" if ($verbose);
+        rename_by_date ($file);
+        return;
+      } else {
+        print STDERR "$progname: bogus: $url\n" if ($verbose > 1);
+        unlink $file;
+      }
+    }
+  }
+  error ("no images: $urlA$urlB");
+}
+
+sub rename_by_date ($) {
+  my ($file) = @_;
+  my $date = `exiftool -DateTimeOriginal '$file'`;
+  if (! $date) {
+    print STDERR "$progname: $file: no DateTimeOriginal\n" 
+      if ($verbose > 2);
+    return;
+  }
+
+  my ($yyyy, $mon, $dd, $hh, $mm, $ss) =   # 2007:08:12 23:29:25-07:00
+    ($date =~ m/^.*:\s+(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)\b/s);
+
+  if (! $yyyy) {
+    $ss = 0;
+    ($yyyy, $mon, $dd, $hh, $mm) =         # 2007-08-12T22:55-07:00
+    ($date =~ m/^.*:\s+(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)\b/s);
+  }
+
+  error ("unparsable: $date") unless ($yyyy);
+  $date = sprintf("%04d%02d%02d-%02d%02d%02d", 
+                  $yyyy, $mon, $dd, $hh, $mm, $ss);
+  my $f2 = $file;
+  $f2 =~ s@^(.*?)([^/]+)$@$1$date-$2@;
+  print STDERR "$progname: mv $file $f2\n" if ($verbose > 2);
+  rename ($file, $f2);
+}
+
+
+sub download_images($$@) {
+  my ($i, $dir, @imgs) = @_;
+  foreach my $img (@imgs) {
+    my ($target) = ($img =~ m@/([^/]+)$@);
+    $target = sprintf("%03d-%s", ++$i, $target);
+    download_image ($img, $dir, $target);
+  }
+}
+
+
+sub download_gallery($$);
+sub download_gallery($$) {
+  my ($base_url, $i) = @_;
+  my $url = $base_url;
+
+  my @imgs = ();
+
+  $url =~ m@/(sets|date-taken)/@ ||
+    error ("this only works on \"/sets/\" or \"/date-taken/\" URLs: $url");
+
+  my ($dir) = ($url =~ m@/([^/]+/sets/[^/]+)/?(\?[^/]+)?$@);
+     ($dir) = ($url =~ m@/([^/]+/archives/date-taken/\d+/\d+)/@) unless $dir;
+  error ("unparsable directory: $url") unless $dir;
+  $dir =~ s@(/sets|/archives/date-taken)/@_@s;
+  $dir =~ s@/@_@gs;
+  $dir =~ s@\?.*$@@s;
+
+  mkdir ($dir) unless (-d $dir);
+
+  print STDERR "$progname: parsing $url\n" if ($verbose);
+  my $body = `wget -qO- "$url"`;
+
+  @imgs = parse_images ($base_url, $url, $body);
+  download_images ($i, $dir, @imgs);
+
+  # Get the next page too.
+  #
+  if ($body =~ m@<A HREF=\"[^\"\'<>?]+(\?page=\d+)\"\s+class=\"Next\"@si) {
+    my $p = $1;
+    my $u2 = $url;
+    $u2 =~ s/\?.*$//s;
+    $u2 .= $p;
+    return download_gallery ($u2, $i + $#imgs+1);
+
+  } elsif ($body =~ m@<A HREF=\"[^\"\'<>?]+(/page\d+/?)\"\s+class=\"Next\"@si){
+    my $p = $1;
+    my $u2 = $url;
+    $u2 =~ s@/?(page\d+/?)?$@$p@s || error ("unparsable next: $url");
+    return download_gallery ($u2, $i + $#imgs+1);
+  }
+}
+
+
+sub error($) {
+  my ($err) = @_;
+  print STDERR "$progname: $err\n";
+  exit 1;
+}
+
+sub usage() {
+  print STDERR "usage: $progname [--verbose] gallery-url ...\n";
+  exit 1;
+}
+
+sub main() {
+  my @urls;
+  while ($#ARGV >= 0) {
+    $_ = shift @ARGV;
+    if (m/^--?verbose$/) { $verbose++; }
+    elsif (m/^-v+$/) { $verbose += length($_)-1; }
+    elsif (m/^--?debug$/) { $debug_p++; }
+    elsif (m/^-./) { usage; }
+    else { push @urls, $_; }
+  }
+  usage unless ($#urls >= 0);
+  foreach my $url (@urls) { 
+    download_gallery ($url, 0);
+  }
+}
+
+main();
+exit 0;

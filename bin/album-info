@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: album-info
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: create info files for music albums with eyeD3 & dnuos
+#      Comments: 
+################################################################################
+
+# dnuos -S
+/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos -q --indent=1 --list-files --file=Album-Info.txt --output="[n,-55]|[f,5]|[l,6]|[s,7]|[t,-4]|[b,4]|[q]" --file=Album-Info.txt .;
+
+# eyeD3
+#eyeD3 --set-encoding=utf8 --force-update --nfo . >> Album-Info.nfo
+echo -e "\n " >> Album-Info.txt
+#echo -e "\n " >> Album-Info.txt
+
+eyeD3 --nfo . >> Album-Info.txt 

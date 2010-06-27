@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: 
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: 
+#      Comments: 
+################################################################################
+
+# use for loop read all filenames
+> for (( i=0; i do
+> echo “${fileArray[$i]}”
+> done
+
+for i in "${fileArray[@]}"
+do
+: ... album-info
+done
