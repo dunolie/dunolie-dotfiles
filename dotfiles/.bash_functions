@@ -18,6 +18,14 @@ else
 fi
 }
 
+# fuzzy 'cd': cd into first directory matching the substring, case insensitive
+function cf {
+	shopt -q nocasematch || resetcase=1
+	shopt -s nocasematch
+	for i in *; do [ -d "$i" ] && [[ "$i" == *"$1"* ]] && cd "$i" && echo "$i" && break; done
+	[ $resetcase ] && shopt -u nocasematch
+}
+
 # http://code.google.com/p/wkhtmltopdf
 function web2pdf {
 	wkhtmltopdf -q --ignore-load-errors "$1" "$2"
