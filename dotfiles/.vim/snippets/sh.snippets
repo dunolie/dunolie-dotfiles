@@ -48,7 +48,37 @@ snippet colors
 	
 snippet growl
 	growlnotify -s -a "Terminal" -t "${1:Title}" -m "${2:Message}"
+
 snippet var
 	${1:VARIABLE}="${2:Something}"
+
+# ifroot - if root
+snippet ir
+	# testa se está logado como root
+	if [ "$(id -u)" != "0" ]; then
+		echo "  Need be root"
+		sleep 2
+		exit  1
+	fi
+
+snippet lock
+	LOCK_FILE=/tmp/.lock
+	(set -C; :  > $LOCK_FILE) 2> /dev/null
+	if [  $? != "0" ];  then
+	  echo "Lock File exists - exiting"
+	   sleep 1
+	   exit 1
+	fi
+
+snippet usage
+	usage()
+	{
+		echo "Usage: $(basename $${1:0}) ${2:argument}"
+		echo "${3:explanation}"
+	}
+
+snippet date
+	`system("date +%m-%d-%Y")`
+
 
 
