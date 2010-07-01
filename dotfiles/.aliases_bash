@@ -25,6 +25,7 @@
 ## Script Comments if needed : try and keep it clean & commented :)
 ##-----------------------------------------------------------
 
+alias dsync='rsync -avzq "$1" "$2"'
 alias RM='/bin/rm'
 
 alias rkhunter='rkhunter --versioncheck --update --propupd --check'
