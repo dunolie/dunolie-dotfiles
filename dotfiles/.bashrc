@@ -106,10 +106,10 @@ export SNOW_LEOPARD='OS X 10.6.*'
 # -------------------------------------------------------------------------------
 #
 # using my own build of screen
-if [[ -f /usr/local/bin/screen ]]; then
-	alias screen='/usr/local/bin/screen'
-	alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
-fi
+#if [[ -f /usr/local/bin/screen ]]; then
+#	alias screen='/usr/local/bin/screen'
+#	alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
+#fi
 
 # Automatically reattach to a screen session after logging in via ssh - http://tlug.dnho.net/?q=node/239
 if [ $SSH_TTY ] && [ ! $WINDOW ]; then
