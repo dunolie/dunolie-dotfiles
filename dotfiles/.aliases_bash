@@ -42,18 +42,15 @@ alias epc='echo $PWD | pbcopy'
 
 alias imginfo="identify -format '-- %f -- \nType: %m\nSize: %b bytes\nResolution: %wpx x %hpx\nColors: %k'"
 alias vv='vim ~/.vimrc'
-alias torrent='open -a Transmission $1'
+alias torrent-add='open -a Transmission $1'
 alias rd='rmdir $1'
 alias rmd='rmdir $1'
-alias slink="ln -s"
+alias slink='link -s "$1" "$2"'
 #alias sed='sed -E'
 #because i prefer this to the /opt one
 #alias screen='/usr/bin/screen'
 #alias tclsh='/usr/bin/tclsh8.4'
 #alias ruby="/usr/bin/ruby"
-alias gemin='sudo gem install'
-alias gems='gem search'
-alias gemsr='gem search --remote'
 
 # gems
 alias addgem="sudo gem install \$1"
@@ -62,7 +59,9 @@ alias updategem="sudo gem update --system"
 alias cleangems="sudo gem clean"
 alias deletegem="sudo gem uninstall \$1"
 alias listgems="sudo gem list"
-
+alias gemin='sudo gem install'
+alias gems='gem search'
+alias gemsr='gem search --remote'
 
 # VLC aliases
 alias vlcc='/Applications/VLC.app/Contents/MacOS/VLC'
@@ -126,11 +125,7 @@ alias network='ping -c2 192.168.1.255 >/dev/null; arp -a'
 
 alias lman='man "$1" | less -p "$2"'
 
-alias nfo='eyeD3 --nfo .'
-
-alias nfo-make='eyeD3 --nfo . >> Album-Info.nfo'
-
-# Dnuos music catalogue
+# Media aliases
 alias music-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=/Users/robbie/Desktop/music-info-`date +%d_%m_%y-%H:%M`.txt "$@"'
 
 alias music-dir-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=Album-Info.txt "$@"'
@@ -143,7 +138,11 @@ alias tag-update='eyeD3 --force-update --set-encoding=utf8'
 
 alias rm-comments-mp3='eyeD3 --remove-comments *.mp3'
 
-# http://hans.fugal.net/src/creme/
+alias rename-mp3s='eyeD3 --rename="%n - %t" *.mp3'
+
+alias nfo='eyeD3 --nfo .'
+
+# http://hans.fugal.net/src/creme/ #timer with growl
 alias timer='/opt/local/bin/creme'
 
 alias termsize='echo $COLUMNS x $LINES'
@@ -586,7 +585,7 @@ alias pics='cd /Pictures'
 ##------------------------------------------------------------
 
 # Alias's for bins!
-alias rbin='cd ~/Sync/Bash/bin'
+alias rbin='cd ~/bin'
 alias bin='cd /bin'
 alias bins='cd /bins'
 alias ubin='cd /usr/bin'
@@ -670,7 +669,7 @@ alias scanlan="ping -c 6 192.168.2.255 | awk '{ print  }' | grep ':' | cut -f 1 
 ##------------------------------------------------------------
 # Some more alias to avoid making mistakes:
 
-alias ppwd='cd -'
+#alias ppwd='cd -'
 alias copy='cp'
 alias up="cd .."
 
