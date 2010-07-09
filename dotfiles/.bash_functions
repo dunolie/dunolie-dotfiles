@@ -163,7 +163,7 @@ function    hc               { history -c; }
 function    hcc              { hc;c; }
 
 function    z                { suspend $@; }
-function    j                { jobs -l $@; }
+function    jl                { jobs -l $@; }
 function    rmd              { rm -fr $@; }
 
 function    mfloppy          { mount /dev/fd0 /mnt/floppy; }
@@ -780,7 +780,7 @@ function extract () {
              *.tar.bz2)   tar xjf $1     ;;
              *.tar.gz)    tar xzf $1     ;;
              *.bz2)       bunzip2 $1     ;;
-             *.rar)       unrar e $1     ;;
+             *.rar)       unrar e -ad $1 ;;
              *.gz)        gunzip $1      ;;
              *.tar)       tar xf $1      ;;
              *.tbz2)      tar xjf $1     ;;
