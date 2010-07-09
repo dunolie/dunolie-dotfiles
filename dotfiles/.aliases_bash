@@ -459,10 +459,12 @@ alias 775='chmod 775'
 alias 777='chmod 777'
 
 alias 755d='find . -type d -exec chmod 755 {} \;'
+alias 777d='find . -type d -exec chmod 777 {} \;'
 alias 644f='find . -type f -exec chmod 644 {} \;'
 alias 664f='find . -type f -exec chmod 664 {} \;'
 alias 775f='find . -type f -exec chmod 775 {} \;'
 alias 744f='find . -type f -exec chmod 644 {} \;'
+
 
 ##------------------------------------------------------------
 
