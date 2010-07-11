@@ -71,7 +71,7 @@ function screenON () {
 SERVICEUP="screen"
 if ps ax | grep -v grep | grep $SERVICEUP > /dev/null
 then
-	echo -e "=-=-=-=-= ${GREEN} $(screen -list)${NC}"
+	echo -e "=-=-=-=-= ${GREEN} $(screen -ls)${NC}"
 	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 else
 	echo -e "=-=-=-=-= ${L_RED} There are no screen sessions on.${NC}"
@@ -92,16 +92,16 @@ echo -en  "   \033[1;30m//\033[1;37m&\033[1;30m\\\\\\\\\033[0;0m   BootDisk:${L_
 echo ""
 echo -e   "  \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m      User:${L_GREEN} $USER ${NC}"
 echo -e   "   \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m       Time:${L_GREEN} $(date +%H:%M)${NC} on ${L_GREEN}$(date +%A) $(date +%d\ %B\,\ %G)${NC} "
-
+echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 #
 # My welcome message with my @terminal todo's from my todo.txt, see lifehacker.com for more info on todo.txt
-if [  -f ~/Sync/ToDo/todo.txt ]; then
-	echo -e "=-=-=-=-=-=-=-=-=-=-${L_RED} todo's! ${NC}-=-=-=-=-=-=-=-=-=-==-=-=-=-="
-	echo -e "${L_RED}$(grep @term ~/Sync/ToDo/todo.txt)${NC}"
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-else
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-fi
+# if [  -f ~/Sync/ToDo/todo.txt ]; then
+# 	echo -e "=-=-=-=-=-=-=-=-=-=-${L_RED} todo's! ${NC}-=-=-=-=-=-=-=-=-=-==-=-=-=-="
+# 	echo -e "${L_RED}$(grep @term ~/Sync/ToDo/todo.txt)${NC}"
+# 	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+# else
+# 	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+# fi
 
 # icalBuddy (ical upcoming events)
 if [[ -f /usr/local/bin/icalBuddy ]]; then
@@ -158,3 +158,9 @@ fi
 #if [[ $(uname) = "Darwin" ]]; then
 #	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-iterm
 #fi
+
+# Get the aliases and functions
+
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
