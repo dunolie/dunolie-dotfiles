@@ -89,6 +89,21 @@ function rm-comments-mp3 () {
 	eyeD3 --remove-comments "$@" *.mp3
 }
 
+# rename (debian) http://git.debian.org/?p=perl/perl.git;a=blob_plain;f=debian/rename;hb=HEAD
+function space2underscore () {
+	rename -v 's/\ /\_/g' *
+}
+
+function underscore2space () {
+	rename -v 's/\ /\_/g' *
+}
+
+function moc () {
+	jackd -T -d coreaudio &
+	sleep 5
+	mocp
+}
+
 # use the gimage script to download images from google to the $PWD
 function gim () {
 	gimage "$@"
@@ -140,7 +155,7 @@ function vman () {
  /usr/bin/whatis "$@" >/dev/null
 
  if [ $? -eq 0 ]; then
- vim -c "Man $*" -c 'silent! only' -c 'nmap q :q<CR>'
+ vim -c 'colorscheme dunolie' -c "Man $*" -c 'silent! only' -c 'nmap q :q<CR>'
  else
  man "$@"
  fi
