@@ -78,6 +78,8 @@ alias thumb-600-jpg='jhead -cmd "mogrify -resize 600x600 -quality 100 &" *.jpg'
 alias thumb-800-jpg='jhead -cmd "mogrify -resize 800x800 -quality 100 &" *.jpg'
 alias thumb-1000-jpg='jhead -cmd "mogrify -resize 1000x1000 -quality 100 &" *.jpg'
 
+alias date-pics-exif='exiftool -d %Y_%m_%d-%H%M%S-%%.2c.%%e "-FileName<DateTimeOriginal" "$@"'
+
 alias reload='echo -e "${CYAN}Reloading your ~/.bashrc!${NC}" ;source ~/.bashrc'
 
 alias cppwd='eval "echo `pwd` | tr -d \\\\n | pbcopy"'
@@ -112,8 +114,6 @@ alias gs="git status"
 alias gi="vim .gitignore"
 alias gitrm="git stat | grep deleted | awk '{print $3}' | xargs git rm"
 
-alias add-dotfiles-git='cp "$@" /Users/robbie/git/projects/dunolie-dotfiles/dotfiles'
-alias commit-dotfiles='dotgit; git add .; git commit -m "$@"'
 ##-----------------------------------------------------------
 
 alias airport='/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport'
