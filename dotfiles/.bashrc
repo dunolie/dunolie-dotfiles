@@ -36,9 +36,6 @@ if [[ $- != *i* ]] ; then
 	return
 fi
 #
-
-# $TERM Settings in ~/.bash_profile
-
 # -------------------------------------------------------------------------------
 #                         SHELL COLOURS
 # -------------------------------------------------------------------------------
@@ -81,7 +78,6 @@ export L_YELLOW='\033[0;33m'
 export GRAY='\033[1;30m'
 export L_GRAY='\033[0;37m'
 #
-
 KERNEL_NAME=`uname -s`
 KERNEL_VERSION=`uname -r`
 
@@ -105,12 +101,6 @@ export SNOW_LEOPARD='OS X 10.6.*'
 #                       SCREEN SETTINGS
 # -------------------------------------------------------------------------------
 #
-# using my own build of screen
-#if [[ -f /usr/local/bin/screen ]]; then
-#	alias screen='/usr/local/bin/screen'
-#	alias screen256='/usr/local/bin/screen -c ~/.screen/.screenrc.256'
-#fi
-
 # Automatically reattach to a screen session after logging in via ssh - http://tlug.dnho.net/?q=node/239
 if [ $SSH_TTY ] && [ ! $WINDOW ]; then
 	SCREENLIST=`screen -ls | grep 'Attached'`
@@ -135,6 +125,11 @@ export PATH=$PATH:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
 export PATH=$PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/
 export PATH=$PATH:/System/Library/Frameworks/Python.framework/Versions/Current/bin/
 export PATH=$PATH:~/.gem/ruby/1.8/bin
+#
+# For non-root users, add the current directory to the search path:
+if [ ! "`id -u`" = "0" ]; then
+ PATH="$PATH:."
+fi
 #
 # my manual (man pages) paths
 export MANPATH=/opt/local/share/man:/usr/local/man:/usr/local/share/man:/usr/share/man:$MANPATH
@@ -256,7 +251,7 @@ export HISTTIMEFORMAT='%a, %d %b %Y %l:%M:%S%p %z '
 #
 # Safe rm, cause sometimes things fuxor up (moves things to the trash insted of rm'ing)
 # http://osxutils.sourceforge.net/http://osxutils.sourceforge.net/
-if [[ "$sw_vers -productVersion" != "10.*" && -f /usr/local/bin/trash ]]; then
+if [[ `uname` = "Darwin" && -f /usr/local/bin/trash ]]; then
 		alias rm='/usr/local/bin/trash'
 	else
 		alias rm='rm -i'
@@ -265,7 +260,11 @@ fi
 #alias tclsh='/usr/bin/tclsh8.4'
 #export TCLSH='/usr/bin/tclsh8.4'
 #
-export EDITOR='mate -w'
+if [[ `uname` = "Darwin" ]]; then
+	export EDITOR='mate -w'
+else
+	export EDITOR='vim'
+fi
 export GIT_EDITOR='vim'
 export VISUAL="vim"
 export PAGER="less"
@@ -303,7 +302,6 @@ export LC_ADDRESS="en_GB.UTF-8"
 export LC_TELEPHONE="en_GB.UTF-8"
 export LC_MEASUREMENT="en_GB.UTF-8"
 #export LC_IDENTIFICATION="C"
-
 #
 export INPUTRC="~/.inputrc"
 export EVENT_NOKQUEUE=1               # for memcached
@@ -355,7 +353,7 @@ match_lhs=""
 # If dircolors, part of the coreutils suite is installed via macports then use that,
 # otherwise use default OSX colours
 # $ sudo port install coreutils
-if [[ "$sw_vers -productVersion" != "10.*" ]]; then
+if [[ `uname` = "Darwin" ]]; then
 	if [[ -f /opt/local/bin/gls ]]; then
 		#export LS_OPTIONS='--color=auto'
 		eval `dircolors ~/.dir_colors`
@@ -418,7 +416,7 @@ if [[ "$sw_vers -productVersion" != "10.*" ]]; then
 	fi
 fi
 #
-if [[ $TERM = "Linux" ]]; then
+if [[ `uname` = "Linux" ]]; then
 	eval `dircolors ~/.dir_colors`
 	# ls aliases
 	alias l='ls --color=auto -lAhF'
@@ -441,7 +439,7 @@ fi
 #                        WATCH PROCESSES
 # -------------------------------------------------------------------------------
 #
-if [ "$sw_vers -productVersion" != "10.*" ] ; then
+if [ `uname` = "Darwin" ] ; then
 	alias top='top -o cpu' # os x
 else
 	alias processes_all='ps -aulx'
@@ -483,8 +481,8 @@ if [[ $USER = "robbie" ]]; then
 		source ~/.aliases_bash_robbie
 	fi
 fi
-# if OS = OS X then (source ~/.aliases_bash_osx)
-if [[ "$sw_vers -productVersion" != "10.*" ]]; then
+# if OS X then source ~/.aliases_bash_osx
+if [[ `uname` = "Darwin" ]]; then
 	if [[ -f ~/.aliases_bash_osx  ]]; then
 		source ~/.aliases_bash_osx
 	fi
@@ -656,7 +654,7 @@ export PIC_OPTIONS="ForceHeight=999:ForceWidth=333:removeTempPix"
 # -------------------------------------------------------------------------------
 # Xterm title bar
 case $TERM in
-	xterm*|rxvt|Eterm|eterm)
+	xterm*|rxvt|Eterm|eterm|vt100)
 		XTITLE='\[\033k\033\\\]\[\e]0;`echo $STY` [\u@\h] (\!) (\#) [\w] \@ \007\]';
 		;;
 	screen*)
@@ -687,23 +685,24 @@ fi
 # -------------------------------------------------------------------------------
 #                        AUTOJUMP
 # -------------------------------------------------------------------------------
+if [[ -f /usr/bin/autojump ]]; then
 # http://github.com/joelthelion/autojump
-_autojump() 
-{
-        local cur
-        cur=${COMP_WORDS[*]:1}
-        while read i
-        do
-            COMPREPLY=("${COMPREPLY[@]}" "${i}")
-        done  < <(autojump --bash --completion $cur)
-}
-complete -F _autojump j
-AUTOJUMP='{ (autojump -a "$(pwd -P)"&)>/dev/null 2>>${HOME}/.autojump_errors;} 2>/dev/null'
-if [[ ! $PROMPT_COMMAND =~ autojump ]]; then
-  export PROMPT_COMMAND="${PROMPT_COMMAND:-:} && $AUTOJUMP"
-fi 
-alias jumpstat="autojump --stat"
-function j { new_path="$(autojump $@)";if [ -n "$new_path" ]; then echo -e "\\033[31m${new_path}\\033[0m"; cd "$new_path";fi }
+	_autojump() {
+	        local cur
+	        cur=${COMP_WORDS[*]:1}
+	        while read i
+	        do
+	            COMPREPLY=("${COMPREPLY[@]}" "${i}")
+	        done  < <(autojump --bash --completion $cur)
+	}
+	complete -F _autojump j
+	AUTOJUMP='{ (autojump -a "$(pwd -P)"&)>/dev/null 2>>${HOME}/.autojump_errors;} 2>/dev/null'
+	if [[ ! $PROMPT_COMMAND =~ autojump ]]; then
+	  export PROMPT_COMMAND="${PROMPT_COMMAND:-:} && $AUTOJUMP"
+	fi 
+	alias jumpstat="autojump --stat"
+	function j { new_path="$(autojump $@)";if [ -n "$new_path" ]; then echo -e "\\033[31m${new_path}\\033[0m"; cd "$new_path";fi }
+fi
 #
 # ----------------------------------------------------------------------------
 #                          FINAL-CLOSING STUFF
@@ -713,22 +712,3 @@ unset use_color safe_term match_lhs
 # -------------------------------------------------------------------------------
 #               END OF BASHRC - Robbie - dunolie (at) gmail (dot) com
 # -------------------------------------------------------------------------------
-
-#autojump
-#This shell snippet sets the prompt command and the necessary aliases
-
-#Copyright Joel Schaerer 2008, 2009
-#This file is part of autojump
-
-#autojump is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
-#
-#autojump is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
-#
-#You should have received a copy of the GNU General Public License
-#along with autojump.  If not, see <http://www.gnu.org/licenses/>
