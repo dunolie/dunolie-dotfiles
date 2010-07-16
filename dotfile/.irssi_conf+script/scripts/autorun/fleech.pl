@@ -1,1 +1,0 @@
-/Users/robbie/.irssi/scripts/fleech.pl
