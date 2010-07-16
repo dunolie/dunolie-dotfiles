@@ -145,8 +145,8 @@ function set_git_branch {
   fi
 
   # Set the final branch string.
-  #BRANCH="${state}(${branch})${remote}${E_NC} "
-  BRANCH="${state}(${branch})${remote} "
+  #BRANCH="${state}(${branch})${remote} "  #original
+  BRANCH="${state}${remote}(${branch}) "
 }
 
 # Determine the branch information for this subversion repository. No support
