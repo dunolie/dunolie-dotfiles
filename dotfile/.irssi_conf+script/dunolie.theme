@@ -1,0 +1,701 @@
+#################################################################################
+## -------------------------------------------------------------------------------
+##          Author: Robbie -- dunolie (at) gmail (dot) com
+##       File name: dunolie.theme
+##         Created: TIMESTAMP
+##   Last Modified: TIMESTAMP
+## -------------------------------------------------------------------------------
+##        Comments:
+##     Description: Irssi Theme for Dark/Black Background.
+## Based on themes: cyan.theme, madcow.theme , envy.theme
+##        Use with: nm.pl (max nick length 10)
+#################################################################################
+
+#################################################################################
+#                        text            text            background
+# -----------------------------------------------------------------------
+# %k      %K      %0      black           dark grey       black
+# %r      %R      %1      red             bold red        red
+# %g      %G      %2      green           bold green      green
+# %y      %Y      %3      yellow          bold yellow     yellow
+# %b      %B      %4      blue            bold blue       blue
+# %m      %M      %5      magenta         bold magenta    magenta
+# %p      %P              magenta (think: purple)
+# %c      %C      %6      cyan            bold cyan       cyan
+# %w      %W      %7      white           bold white      white
+# %n      %N              default           --              --
+# ------------------------------------------------------------------------
+#                         Changes the color to "default color", removing
+#                         all other coloring and formatting. %N is always
+#                     the terminal's default color. %n is usually too,
+#                     except in themes it changes to "previous color",
+#                     ie. hello = "%Rhello%n" and "%G{hello} world"
+#                     would print hello in red, and %n would turn back
+#                     into %G making world green
+# ------------------------------------------------------------------------
+#################################################################################
+default_color = "-1";
+replaces = { "[]=" = "%K$*%n"; };
+
+abstracts = {
+  ##
+  ## generic
+  ##
+
+  # text to insert at the beginning of each non-message line
+  #line_start = "%b<%c<%b<%c<%b<%c<---%c>%b>%c>%b>%c>%b> ";
+  line_start = "%K-----------%K ";
+  # timestamp styling, nothing by default
+  # timestamp = "$0";
+  timestamp = "%K$0-%n";
+  #  timestamp = "%b$0-%n";
+  # any kind of text that needs hilighting, default is to bold
+  #hilight = "$0";
+  hilight = "%G$*%n";
+
+  # any kind of error message, default is bright red
+  error = "%R$0-%n";
+
+  # channel name is printed
+  channel = "%c$0-%n";
+
+  # nick is printed
+  nick = "%_$0-%_";
+
+  # nick host is printed
+  nickhost = "[$0-]";
+
+  # server name is printed
+  server = "$0-";
+
+  # some kind of comment is printed
+  comment = "[$0-]";
+
+  # reason for something is printed (part, quit, kick, ..)
+  reason = "[$0-]";
+
+  # mode change is printed ([+o nick])
+  mode = "%_($0-)%_";
+
+  ##
+  ## channel specific messages
+  ##
+
+  # highlighted nick/host is printed (joins)
+  channick_hilight = "%C$0-%n";
+  chanhost_hilight = "{nickhost %C$0-%n}";
+
+  # nick/host is printed (parts, quits, etc.)
+  channick = "%c$0-%n";
+  chanhost = "{nickhost %c$0-%n}";
+
+  # highlighted channel name is printed
+  channelhilight = "%_$0-%_";
+
+  # ban/ban exception/invite list mask is printed
+  ban = "$0-";
+
+  ##
+  ## messages
+  ##
+
+  # the basic styling of how to print message, $0 = nick mode, $1 = nick
+  msgnick = "%n%_$0%_%c$1-%n %|";
+
+  # message from you is printed. "msgownnick" specifies the styling of the
+  # nick ($0 part in msgnick) and "ownmsgnick" specifies the styling of the
+  # whole line.
+
+  # Example1: You want the message text to be green:
+  #  ownmsgnick = "{msgnick $0 $1-}%g";
+  # Example2.1: You want < and > chars to be yellow:
+  #  ownmsgnick = "%Y{msgnick $0 $1-%Y}%n";
+  #  (you'll also have to remove <> from replaces list above)
+  # Example2.2: But you still want to keep <> grey for other messages:
+  #  pubmsgnick = "%K{msgnick $0 $1-%K}%n";
+  #  pubmsgmenick = "%K{msgnick $0 $1-%K}%n";
+  #  pubmsghinick = "%K{msgnick $1 $0$2-%K}%n";
+  #  ownprivmsgnick = "%K{msgnick  $0-%K}%n";
+  #  privmsgnick = "%K{msgnick  %R$0-%K}%n";
+
+  # $0 = nick mode, $1 = nick
+  # ownmsgnick = "%W<%n%_%_%C$1%n%W>%n%c %|";
+  ownmsgnick = "%r$0-%K %|";
+  ownnick = "$0-";
+
+  # public message in channel, $0 = nick mode, $1 = nick
+  pubmsgnick = "{msgnick $0 $1-}";
+  pubnick = "$0-";
+
+  # public message in channel meant for me, $0 = nick mode, $1 = nick
+  # pubmsgmenick = "%Y<$0$1-> %|";
+  # pubmsgmenick = "$0$1-$ %|%c ";
+  pubmsgmenick = "$1$0 %|%c";
+  menick = "$0-";
+
+  # public highlighted message in channel
+  # $0 = highlight color, $1 = nick mode, $2 = nick
+  # pubmsghinick = "%Y<$1$2-> %|";
+  #pubmsghinick = "{msgnick $1 $0$2-%K}%n";
+  #pubmsghinick = "$1$2-$%c %| ";
+  pubmsghinick = "$2-$1 %|";
+
+  # channel name is printed with message
+  msgchannel = "%C|%c$0-";
+
+  # private message, $0 = nick, $1 = host
+  privmsg = "%M• %m$0%K[%C$1%K] ";
+  #privmsg = "<-%c$0%r[%C$1%r] ";
+
+  # private message from you, $0 = "msg", $1 = target nick
+  ownprivmsg = "%K----------- %G•%K [%c$1-%K] $0";
+  # ownprivmsg = "->[%c$1-%n] $0";
+
+  # own private message in query
+  # ownprivmsgnick = "%B<%n%_$0%_%C$1%B>%n%_ %|";
+
+  ownprivmsgnick = "%r%_$0%_$1%K%_ %|";
+  ownprivnick = "$0- ";
+
+  # private message in query
+  # privmsgnick = "{msgnick  %C$0-%n}";
+  privmsgnick = "{msgnick  %c$0-%K} ";
+
+  ##
+  ## Actions (/ME stuff)
+  ##
+
+  # used internally by this theme
+  # action_core = "%C $0-";
+  action_core = "$0-";
+
+  # generic one that's used by most actions
+  # action = "{action_core $0-} ";
+  action = "{action_core %B$0-} ";
+
+  # own action, both private/public
+  ownaction = "{action $0-}";
+
+  # own action with target, both private/public
+  # ownaction_target = "{action_core $0}{msgchannel $1} ";
+  ownaction_target = "{action_core $0}{msgchannel $1} ";
+
+  # private action sent by others
+  # pvtaction = " %g(*) $0- ";
+  # pvtaction_query = "{action $0-}";
+  pvtaction = " (*) $0- ";
+  pvtaction_query = "{action $0-}";
+
+  # public action sent by others
+  pubaction = "{action $0-} ";
+
+
+  ##
+  ## other IRC events
+  ##
+
+  # notices
+  # ownnotice = "-> %gnotice%n[%G$1%n] ";
+  #ownnotice = "%M• %mNotice%K -> [%b$1%K] ";
+  #notice = " %mNotice%k -> [%b$0%n] ";
+  pubnotice_channel = "{msgchannel $0}";
+  ownnotice = "%M•%K [%c$1%K] ";
+  notice = " [%c$0%K] ";
+
+
+  #pvtnotice_host = "";
+  #Servernotice = "{notice $0-}";
+  pvtnotice_host = "";
+  #Servernotice = "{notice $0-}";
+  Servernotice = "%G• %c{$0- notice}";
+  # CTCPs
+  ownctcp = "%K----------- %M• %m$0%K[%m$1-%K] ";
+  ctcp = "%m$0-";
+  #ctcp = "%M• %m$0-";
+
+  # wallops
+  wallop = "%m$0-: %n";
+  wallop_nick = "%m$0-%n";
+  wallop_action = "%m * $0-%n ";
+
+  # netsplits
+  netsplit = "%c$0-%n";
+  netjoin = "%b$0-%n";
+
+  # /names list
+  names_nick = "%c[%_$0%_$1-]%n ";
+  names_users = "[$0-]";
+  names_channel = "{channel $0-}";
+
+  # DCC
+  dcc = "$0-";
+  dccfile = "%_$0-%_";
+
+  # DCC chat, own msg/action
+  dccownmsg = "*%c=$1-%n*> %g";
+  dccownaction = "{action $0-}";
+  dccownaction_target = "{ownaction_target $0-}";
+
+  # DCC chat, others
+  dccmsg = "*%c=$1-%n* ";
+  dccquerynick = "$0-";
+  dccaction = " (*dcc*) $0- %|";
+
+  ##
+  ## statusbar
+  ##
+
+  # default background for all statusbars. You can also give
+  # the default foreground color for statusbar items.
+  # sb_background = "%4%K";
+  sb_background = "%0%0";
+
+  # default backround for "default" statusbar group
+  #sb_default_bg = "%4";
+  # background for prompt / input line
+  #sb_prompt_bg = "%0";
+  sb_prompt_bg = "%n";
+  # background for info statusbar
+  sb_info_bg = "%0";
+  # background for topicbar (same default)
+  # sb_background = "%6%k";
+  sb_topic_fg = "%C";
+
+  # text at the beginning of statusbars. sb-item already puts
+  # space there,so we don't use anything by default.
+  sbstart = "";
+  # text at the end of statusbars. Use space so that it's never
+  # used for anything.
+  sbend = " ";
+
+
+  #prompt = "%K$N%n@%c$*%n>%n";
+  prompt = "%c$*%n>";
+  # prompt = "[$*] ";
+  sb = " %P[%c$*%P]%c";
+  sbmode = "(%r+%c$*)";
+  sbaway = " (%rAWAY%c)";
+  #sbservertag = ": $4 (Change Network With,%r ^X%c) Theme: dunolie ";
+  sbservertag = ":$4%r $0%c (Change Network With,%r ^X%c) Theme:%r dunolie%n ";
+  # activity in statusbar
+  # ',' separator
+  sb_act_sep = "%m$*";
+  # normal text
+  sb_act_text = "%m$*";
+  # public message
+  sb_act_msg = "%M$*";
+  # hilight
+  sb_act_hilight = "%M$*";
+  # hilight with specified color, $0 = color, $1 = text
+  sb_act_hilight_color = "$0$1-%c";
+
+};
+formats = {
+  "fe-common/core" = {
+    query_start = "%G• %gStarting query%K in {server $1} with {nick $0}";
+    join = "%G• {channick_hilight $0} [{chanhost_hilight $1}] has %gjoined%K {channel $2}";
+    part = "%R• {channick $0} [{chanhost $1}] has %rleft%K {channel $2}";
+    quit = "%R• {channick $0} [{chanhost $1}] has %rquit%K ({reason $2})";
+    quit_once = "%R• {channick $0} [{chanhost $1}] has %rquit%K ({reason $2})";
+    nick_changed = "%B»» {channick_hilight $0} %Kis now known as {channick_hilight $1}";
+    #   own_msg = "{ownmsgnick $2 {ownnick $[-10]0}}$1";
+    #   own_msg_channel = "{ownmsgnick $3 {ownnick $[-10]0}{msgchannel $1}}$2";
+    #   pubmsg_me = "{pubmsgmenick $2 {menick $[-10]0}}$1";
+    #   pubmsg_me_channel = "{pubmsgmenick $3 {menick $[-10]0}{msgchannel $1}}$2";
+    #   pubmsg_hilight = "{pubmsghinick $0 $3 $[-10]1}$2";
+    #   pubmsg_hilight_channel = "{pubmsghinick $0 $4 $[-10]1{msgchannel $2}}$3";
+    #   pubmsg = "{pubmsgnick $2 {pubnick \0030$0}}$1";
+    #   pubmsg_channel = "{pubmsgnick $3 {pubnick $[-10]0}{msgchannel $1}}$2";
+    line_start_irssi = "{line_start}";
+    timestamp = "%K{timestamp $Z} ";
+    #   servertag = "$[-11]0 %W|%n ";
+    servertag = "";
+    #daychange = "Day changed to %%d %%b %%Y %n";
+    daychange = "%G00:00 %K----------- %G•%K %GDay changed%K to%G %%D";
+    talking_with = "%G•%K You are now talking with {nick $0}";
+    refnum_too_low = "%R•%K Window number must be greater than 1";
+    error_server_sticky = "%R•%K Window's server is %rsticky%K and it cannot be changed without -unsticky option";
+    set_server_sticky = "%R•%K Window's server %gset sticky%K";
+    unset_server_sticky = "%M•%K Window's server isn't sticky anymore";
+    window_name_not_unique = "%R•%K Window names must be unique";
+    window_level = "%M•%K Window level is now $0";
+    windowlist_header = "Ref Name                 Active item     Server          Level";
+    windowlist_line = "$[3]0 %|$[20]1 $[15]2 $[15]3 $4";
+    windowlist_footer = "";
+    windows_layout_saved = "%G•%K Layout of windows is now %gremembered%K next time you start irssi";
+    windows_layout_reset = "%M•%K Layout of windows %greset%K to defaults";
+    window_info_header = "";
+    window_info_footer = "";
+    window_info_refnum = "Window  : {hilight #$0}";
+    window_info_refnum_sticky = "Window  : {hilight #$0 (sticky)}";
+    window_info_name = "Name    : $0";
+    window_info_history = "History : $0";
+    window_info_size = "Size    : $0x$1";
+    window_info_level = "Level   : $0";
+    window_info_server = "Server  : $0";
+    window_info_server_sticky = "Server  : $0 (sticky)";
+    window_info_theme = "Theme   : $0$1";
+    window_info_bound_items_header = "Bounds  : {hilight Name                           Server tag}";
+    window_info_bound_item = "        : $[!30]0 $[!15]1 $2";
+    window_info_bound_items_footer = "";
+    window_info_items_header = "Items   : {hilight Name                           Server tag}";
+    window_info_item = " $[7]0: $[!30]1 $2";
+    window_info_items_footer = "";
+    looking_up = "%M•%K %gLooking up%K {server $0}";
+    connecting = "%G•%K %gConnecting%K to %g{server $0}%K [$1]%K port %g{hilight $2}";
+    connection_established = "%G•%g Connection%K to %g{server $0}%K is %gestablished%K";
+    cant_connect = "%R•%K %rUnable to connect%K server %r{server $0}%K port %r{hilight $1} {reason $2}";
+    connection_lost = "%R•%K %rConnection lost%K to {server $0}";
+    lag_disconnected = "%R•%K %rNo PONG reply%K from server %r{server $0}%K in %r$1%K seconds, %rdisconnecting%K";
+    disconnected = "%R•%K %rDisconnected%K from %r{server $0} {reason $1}";
+    server_quit = "%R•%K %rDisconnecting%K from server {server $0}: {reason $1}";
+    server_changed = "%M• %mChanged%K to %m{hilight $2}%K server %m{server $1}";
+    unknown_server_tag = "%R•%K %rUnknown%K server tag %R{server $0}";
+    no_connected_servers = "%R•%K %rNot connected%K to any servers";
+    server_list = "{server $0}: $1:$2 ($3)";
+    server_lookup_list = "{server $0}: $1:$2 ($3) (connecting...)";
+    server_reconnect_list = "{server $0}: $1:$2 ($3) ($5 left before reconnecting)";
+    server_reconnect_removed = "%G•%K %gRemoved reconnection%K to server {server $0} port {hilight $1}";
+    server_reconnect_not_found = "%M•%K Reconnection tag {server $0} %rnot found%K";
+    setupserver_added = "%G•%K Server {server $0} %gsaved%K";
+    setupserver_removed = "%M•%K Server {server $0} %gremoved%K";
+    setupserver_not_found = "%R•%K Server {server $0} %rnot found%K";
+    your_nick = "%G•%K Your nickname is%g {nick $0}";
+    kick = "%R•%K {channick $0} was %rkicked%K from {channel $1} by {nick $2} ({reason $3})";
+    invite = "%G•%K {channick_hilight $0} %ginvites%K you to {channel $1}";
+    not_invited = "%R• %KYou have%r not been invited%K to a %rchannel!%K";
+    new_topic = "%G•%K {channick_hilight $0} %gchanged the topic%K of {channel $1} to:%g {hilight $2}";
+    topic_unset = "%M•%K {channick_hilight $0} %munset the topic%K on {channel $1}";
+    your_nick_changed = "%G•%K You're %Know known as%G {channick_hilight $1}";
+    talking_in = "%M•%K You are now talking in {channel $0}";
+    not_in_channels = "%M•%K You are not on any channels";
+    current_channel = "%G•%K Current channel {channel $0}";
+    names = "{names_users Users {names_channel $0}} {comment $1 total}";
+    names_prefix = "{names_prefix $0}";
+    names_nick_op = "{names_nick_op $0 $1}";
+    names_nick_halfop = "{names_nick_halfop $0 $1}";
+    names_nick_voice = "{names_nick_voice $0 $1}";
+    names_nick = "{names_nick $0 $1}";
+    endofnames = "%G•%K {channel $0}: Total of {hilight $1} nicks {comment {hilight $2} ops, {hilight $3} halfops, {hilight $4} voices, {hilight $5} normal}";
+    chanlist_header = "%G•%K You are on the following channels:";
+    chanlist_line = "{channel $[-9]0} %|+$1 ($2): $3";
+    chansetup_not_found = "Channel {channel $0} not found";
+    chansetup_added = "Channel {channel $0} saved";
+    chansetup_removed = "Channel {channel $0} removed";
+    chansetup_header = "Channel         Network    Password   Settings";
+    chansetup_line = "{channel $[15]0} %|$[10]1 $[10]2 $3";
+    chansetup_footer = "";
+    channel_move_notify = "{channel $0} is already joined in window $1, use \"/WINDOW ITEM MOVE $0\" to move it to this window";
+    #   own_msg_private = "{ownprivmsg msg $0}$1";
+    #   own_msg_private_query = "{ownprivmsgnick {ownprivnick $[-9]2}}$1";
+    #   msg_private = "{privmsg $0 $1}$2";
+    #   msg_private_query = "{privmsgnick $[-9]0}$2";
+    no_msgs_got = "%M•%K You have not received a message from anyone yet";
+    no_msgs_sent = "%M•%K You have not sent a message to anyone yet";
+    query_stop = "%R•%K Closing query with {nick $0}";
+    no_query = "%M•%K No query with {nick $0}";
+    query_server_changed = "%M•%K Query with {nick $0} %mchanged%K to server %m{server $1}";
+    query_move_notify = "%M•%K Query with {nick $0} is already created to window $1, use \"/WINDOW ITEM MOVE $0\" to move it to this window";
+    hilight_header = "%G•%K Highlights:";
+    hilight_line = "$[-4]0 $1 $2 $3$4$5";
+    hilight_footer = "";
+    hilight_not_found = "%R•%K Highlight %rnot found%K: $0";
+    hilight_removed = "%M•%K Highlight %gremoved%K: $0";
+    alias_added = "%G•%K Alias $0 %gadded%K";
+    alias_removed = "%R•%K Alias $0 %gremoved%K";
+    alias_not_found = "%M•%K %rNo such%K alias: $0";
+    aliaslist_header = "%M•%K Aliases:";
+    aliaslist_line = "$[10]0 $1";
+    aliaslist_footer = "";
+    log_opened = "%G•%K Log file {hilight $0} %gopened%K";
+    log_closed = "%M•%K Log file {hilight $0} %gclosed%K";
+    log_create_failed = "%R•%K %rCouldn't create%K log file {hilight $0}: $1";
+    log_locked = "%R•%K Log file {hilight $0} is %rlocked%K, probably by another running Irssi";
+    log_not_open = "%R•%K Log file {hilight $0} %rnot open%K";
+    log_started = "%G•%K %gStarted%K logging to file {hilight $0}";
+    log_stopped = "%R•%K %rStopped%K logging to file {hilight $0}";
+    log_list_header = "%M•%K Logs:";
+    log_list = "$0 $1: $2 $3$4";
+    log_list_footer = "";
+    windowlog_file = "%M•%K Window LOGFILE set to $0";
+    windowlog_file_logging = "%M•%K %rCan't change%K window's logfile while log is on";
+    no_away_msgs = "%R•%K %rNo%K new %rmessages%K in %rawaylog";
+    away_msgs = "%G•%K {hilight $1} %gnew messages%K in awaylog:";
+    module_header = "Module               Type    Submodules";
+    module_line = "$[!20]0 $[7]1 $2";
+    module_footer = "";
+    module_already_loaded = "%M•%K Module {hilight $0/$1} already loaded";
+    module_not_loaded = "%R•%K Module {hilight $0/$1} %ris not loaded%K";
+    module_load_error = "%R•%K %rError%K loading module {hilight $0/$1}: $2";
+    module_invalid = "%M•%K {hilight $0/$1} isn't Irssi module";
+    module_loaded = "%G•%K %gLoaded%K module {hilight $0/$1}";
+    module_unloaded = "%R•%K %rUnloaded%K module {hilight $0/$1}";
+    command_unknown = "%R•%K %rUnknown%K command: $0";
+    command_ambiguous = "%R•%K %rAmbiguous%K command: $0";
+    option_unknown = "%R•%K %rUnknown%K option: $0";
+    option_ambiguous = "%R•%K %rAmbiguous%K option: $0";
+    option_missing_arg = "%R•%K %rMissing%K required argument for: $0";
+    not_enough_params = "%R•%K %rNot enough%K parameters given";
+    not_connected = "%R•%K %rNot connected%K to server";
+    not_joined = "%R•%K %rNot joined%K to any channel";
+    chan_not_found = "%R•%K %rNot joined%K to such channel";
+    chan_not_synced = "%R•%K Channel %rnot fully synchronized%K yet, try again after a while";
+    illegal_proto = "%M•%K Command isn't designed for the chat protocol of the active server";
+    not_good_idea = "%R•%K Doing this is %rnot a good idea!%K. Add -YES if you really mean it";
+    theme_saved = "%G•%K Theme %gsaved%K to%g $0";
+    theme_save_failed = "%R•%K %rError%K saving theme to%r $0%K: %r$1";
+    theme_not_found = "%R•%K Theme {hilight $0} %rnot found%K";
+    theme_changed = "%G•%K Using theme {hilight $0} ($1)";
+    window_theme = "%G•%K %gUsing%K theme {hilight $0} in this window";
+    window_theme_default = "%R•%K %rNo theme is set%K for this window";
+    window_theme_changed = "%R•%K Using theme {hilight $0} ($1) in this window";
+    window_theme_removed = "%G•%K %gRemoved theme%K from this window";
+    format_title = "%:[{hilight $0}] - [{hilight $1}]%:";
+    format_subtitle = "[{hilight $0}]";
+    format_item = "$0 = $1";
+    ignored = "%M•%K %gIgnoring%K {hilight $1} from {nick $0}";
+    unignored = "%G•%K %gUnignored%K {nick $0}";
+    ignore_not_found = "%M•%K {nick $0} %gis not%K being ignored";
+    ignore_no_ignores = "%M•%K There are no ignores";
+    ignore_header = "%M•%K Ignorance List:";
+    ignore_line = "$[-4]0 $1: $2 $3 $4";
+    ignore_footer = "";
+    unknown_chat_protocol = "%R•%K %rUnknown%K chat protocol: $0";
+    unknown_chatnet = "%R•%K %rUnknown%K chat network: $0 (create it with /IRCNET ADD)";
+    not_toggle = "%R•%K Value must be either ON, OFF or TOGGLE";
+    perl_error = "%R•%K Perl %rerror%K: $0";
+
+    bind_key = "$[!20]0 $1 $2";
+    bind_unknown_id = "%R•%K %rUnknown%K bind action: $0";
+    config_saved = "%G•%K %gSaved configuration%K to file%g $0";
+    config_reloaded = "%G•%K %gReloaded%K configuration";
+    config_modified = "%M•%K Configuration file was modified since irssi was last started - do you want to overwrite the possible changes?";
+    glib_error = "%R•%K {error GLib $0} $1";
+    overwrite_config = "%M•%K Overwrite config (%gy%K/%rN%K)?";
+    set_title = "[{hilight $0}]";
+    set_item = "$0 = $1";
+    set_unknown = "%R•%K %rUnknown%K setting $0";
+    set_not_boolean = "%M•%K Setting {hilight $0} isn't boolean, use /SET";
+    translation_not_found = "%R•%K %rError%K opening translation table file $0: $1";
+    translation_file_error = "%R•%K %rError%K parsing translation table file $0";
+    own_msg = "{ownmsgnick {ownnick $[10]0$2}}$1";
+    own_msg_channel = "{ownmsgnick {ownnick $[10]0$3}{msgchannel $1}}$2";
+    own_msg_private_query = "{ownprivmsgnick {ownprivnick $[10]2}}$1";
+
+
+    #pubmsg_me = "{pubmsgmenick {menick $[10]0}$2}$1";
+    #pubmsg_me_channel = "{pubmsgmenick {menick $[10]0$3}{msgchannel $1}}$2";
+    #pubmsg_hilight = "{pubmsghinick $0 $0 $[10]1$3%n}$2";
+    #pubmsg_hilight_channel = "{pubmsghinick $0 $[10]1$4{msgchannel $2}}$3";
+    # I want to get this like ~ nick-channel-message
+    #pubmsg_hilight = "{pubmsghinick $0 $0 $[10]1$3%n}$2";
+    #pubmsg_hilight_channel = "{pubmsghinick $0 $[10]1$4{msgchannel $2}}$3";
+    #pubmsg = "{pubmsgnick {pubnick %w$[10]0}$2}$1";
+    #pubmsg_channel = "{pubmsgnick {pubnick %w$[10]0}$2}$1";
+    #msg_private_query = "{privmsgnick $[10]0}$2";
+
+    pubmsg_me = "{pubmsgmenick {menick $[10]0}$2}$1";
+    pubmsg_me_channel = "{pubmsgmenick {menick $[10]0$3}{msgchannel $1}}$2";
+    pubmsg_hilight = "{pubmsghinick $0 $0 $[10]1$3%n}$2";
+    pubmsg_hilight_channel = "{pubmsghinick $0 $[10]1$4{msgchannel $2}}$3";
+    pubmsg = "{pubmsgnick {pubnick %c$[10]0}$2}$1";
+    pubmsg_channel = "{pubmsgnick {pubnick %c$[10]0}$2}$1";
+    msg_private_query = "{privmsgnick $[10]0}$2";
+  };
+  "fe-common/irc/dcc" = {
+    dcc_list_header = "{line_start_irssi}{dcc DCC connections:}";
+    dcc_list_footer = "{line_start_irssi}{dcc ];}";
+    #   own_dcc = "{dccownmsg dcc {dccownnick $1}}$2";
+    #   own_dcc_action = "{dccownaction_target $0 $1}$2";
+    #   own_dcc_action_query = "{dccownaction $0}$2";
+    #   own_dcc_ctcp = "{ownctcp ctcp $0}$1 $2";
+    #
+    #   dcc_msg = "{dccmsg dcc $0}$1";
+    #   action_dcc = "{dccaction $0}$1";
+    #   action_dcc_query = "{dccaction $0}$1";
+    #   own_dcc_query = "{ownmsgnick {dccownquerynick $0}}$2";
+    #   dcc_msg_query = "{privmsgnick $0}$1";
+    dcc_ctcp = "%K----------- %G•%K {dcc >>> DCC CTCP {hilight $1} %greceived%K from {hilight $0}: $2}";
+    dcc_chat = "%K----------- %G•%K {dcc DCC CHAT from {nick $0} [$1 port $2]}";
+    dcc_chat_channel = "%K----------- %G•%K {dcc DCC CHAT from {nick $0} [$1 port $2] %grequested%K in channel {channel $3}}";
+    dcc_chat_not_found = "%K----------- %R•%K {dcc No DCC CHAT %gconnection open%K to {nick $0}}";
+    dcc_chat_connected = "%K----------- %G•%K {dcc DCC CHAT connection with {nick $0} [$1 port $2] %gestablished%K}";
+    dcc_chat_disconnected = "%K----------- %R•%K {dcc DCC %rlost chat%K to {nick $0}}";
+    dcc_send = "%K----------- %G•%K {dcc DCC SEND from {nick $0} [$1 port $2]: $3 [$4 bytes]}";
+    dcc_send_channel = "%K----------- %M•%K {dcc DCC SEND from {nick $0} [$1 port $2]: $3 [$4 bytes] %grequested%K in channel {channel $5}}";
+    dcc_send_exists = "%K----------- %G•%K {dcc DCC %ralready sending%K file {dccfile $0} for {nick $1}}";
+    dcc_send_not_found = "%K----------- %R•%K {dcc DCC %rnot sending%K file {dccfile $1} to {nick $0}}";
+    dcc_send_file_open_error = "%K----------- %R•%K {dcc DCC %rcan't open%K file {dccfile $0}: $1}";
+    dcc_send_connected = "%K----------- %G•%K {dcc DCC %gsending%K file {dccfile $0} for {nick $1} [$2 port $3]}";
+    dcc_send_complete = "%K----------- %G•%K {dcc DCC %gsent%K file {dccfile $0} [{hilight $1}kB] for {nick $2} in {hilight $3} secs [{hilight $4kB/s}]}";
+    dcc_send_aborted = "%K----------- %R•%K {dcc DCC %raborted%K sending file {dccfile $0} for {nick $1}}";
+    dcc_get_not_found = "%K----------- %M•%K {dcc DCC no file offered by {nick $0}}";
+    dcc_get_connected = "%K----------- %G•%K {dcc DCC %greceiving%K file {dccfile $0} from {nick $1} [$2 port $3]}";
+    dcc_get_complete = "%K----------- %G•%K {dcc DCC %greceived%K file {dccfile $0} [$1kB] from {nick $2} in {hilight $3} secs [$4kB/s]}";
+    dcc_get_aborted = "%K----------- %R•%K {dcc DCC %raborted%K receiving file {dccfile $0} from {nick $1}}";
+    dcc_unknown_ctcp = "%K----------- %M•%K {dcc DCC unknown ctcp {hilight $0} from {nick $1} [$2]}";
+    dcc_unknown_reply = "%K----------- %M•%K {dcc DCC unknown reply {hilight $0} from {nick $1} [$2]}";
+    dcc_unknown_type = "%K----------- %M•%K {dcc DCC unknown type {hilight $0}}";
+    dcc_invalid_ctcp = "%K----------- %R•%K {dcc DCC received CTCP {hilight $0} with %rinvalid%K parameters from {nick $1}}";
+    dcc_connect_error = "%K----------- %R•%K {dcc DCC %rcan't connect%K to {hilight $0} port {hilight $1}}";
+    dcc_cant_create = "%K----------- %R•%K {dcc DCC %rcan't create%K file {dccfile $0}}";
+    dcc_rejected = "%K----------- %R•%K {dcc DCC $0 was %rrejected%K by {nick $1} [{hilight $2}]}";
+    dcc_request_send = "%K----------- %G•%K {dcc DCC $0 %grequest sent%K to {nick $1}: $2";
+    dcc_close = "{dcc DCC $0 close for {nick $1} [{hilight $2}]}";
+    dcc_lowport = "{dcc Warning: Port sent with DCC request is a lowport ({hilight $0, $1}) - this isn't normal. It is possible the address/port is faked (or maybe someone is just trying to bypass firewall)}";
+    dcc_list_line_chat = "%WChat ->%n {dcc $0 $1}";
+    dcc_list_line_file = "%WFile ->%n {dcc $0 $1 : $2k of $3k ($4%%) - $5kB/s - $6}";
+  };
+  "fe-text" = {
+    lastlog_too_long = "%R•%K %r/LASTLOG%K would print %r$0%K lines. If you really want to print all these lines use %r-force%K option.";
+    lastlog_count = "{hilight Lastlog}: $0 lines";
+    lastlog_start = "{hilight Lastlog}:";
+    lastlog_end = "{hilight End of Lastlog}";
+    refnum_not_found = "%R•%K Window number $0 %rnot found%K";
+    window_too_small = "%R•%K %rNot enough room%K to resize this window";
+    cant_hide_last = "%R•%K You %rcan't hide%K the last window";
+    cant_hide_sticky_windows = "%R•%K You %rcan't hide%K sticky windows (use /WINDOW STICK OFF)";
+    cant_show_sticky_windows = "%R•%K You %rcan't show%K sticky windows (use /WINDOW STICK OFF)";
+    window_not_sticky = "%R•%K Window %ris not%K sticky";
+    window_set_sticky = "%G•%K Window %gset%K sticky";
+    window_unset_sticky = "%G•%K Window %gis not%K sticky anymore";
+    window_info_sticky = "Sticky  : $0";
+    window_scroll = "%G•%K Window scroll mode is now $0";
+    window_scroll_unknown = "%R•%K %rUnknown%K scroll mode $0, must be ON, OFF or DEFAULT";
+  };
+  "fe-common/irc" = {
+    netsplit = "%R•%K %r{netsplit netsplit}%K %|{server $0} <-> {server $1} %rquits%K: $2";
+    netsplit_more = "%R•%K %r{netsplit netsplit}%K %|{server $0} <-> {server $1} %rquits:%K $2 (+$3 more, use /NETSPLIT to show all of them)";
+    netsplit_join = "%%G•%K %g{netjoin netsplit}%K - %|%gjoins:%K $0";
+    netsplit_join_more = "%G•%K %g{netjoin netsplit}%K - %|over, %gjoins:%K $0 (+$1 more)";
+    no_netsplits = "%%G•%K There are no netsplits";
+    netsplits_header = "Nick      Channel    Server               Splitted server";
+    netsplits_line = "$[9]0 $[10]1 $[20]2 $3";
+    netsplits_footer = "";
+    ircnet_added = "%G•%K Ircnet $0 %gsaved%K";
+    ircnet_removed = "%G•%K Ircnet $0 %gremoved%K";
+    ircnet_not_found = "%R•%K Ircnet $0 %rnot found%K";
+    ircnet_header = "%G•%K Ircnets:";
+    ircnet_line = "$0: $1";
+    ircnet_footer = "";
+    setupserver_header = "Server               Port  Network    Settings";
+    setupserver_line = "%|$[!20]0 $[5]1 $[10]2 $3";
+    setupserver_footer = "";
+    joinerror_toomany = "%R•%K %_M%_ax Channels Exceeded! Cannot join {channel $0}";
+    joinerror_full = "%R•%K %_C%_hannel Limit Reached... Cannot join {channel $0}";
+    joinerror_invite = "%R•%K %_C%_annot join {channel $0} without an %_I%_nvite";
+    joinerror_banned = "%R•%K %_Y%_ou are %rBANNED%n from {channel $0}";
+    joinerror_bad_key = "%R•%K %_K%_ey required to join {channel $0}";
+    joinerror_bad_mask = "%R•%K %_C%_annot join to channel {channel $0} (Bad channel mask)";
+    joinerror_unavail = "%R•%K {channel $0} is %_JUPED%_ %:%K>%r>%R>%n %_R%_epeated attempts to join {channel $0} could result in a %_k-line%_";
+    channel_rejoin = "%R•%K Channel {channel $0} is temporarily %runavailable%K. Setting up a rejoin, to not rejoin, use /rmrejoins.";
+    inviting = "%G•%K %gInviting%K {nick $0} to {channel $1}";
+    channel_created = "%M•%K Channel {channel $0} created %_$1%_";
+    url = "%G•%K Home page for %g{channelhilight $0}%K:$g $1";
+    topic = "%M•%K %mTopic %Kfor %m{channel $0}%K: %_$1%_";
+    no_topic = "%M•%K No topic set for %_$0%_";
+    topic_info = "%M•%K Topic set by {channick_hilight $0} {mode $1}";
+    chanmode_change = "%M•%K %Mmode%K/{channel $0} [{mode $1}] by {nick $2}";
+    server_chanmode_change = "%R•%K%g {netsplit ServerMode}%K/{channelhilight $0}: {mode $1} by {nick $2}";
+    channel_mode = "%M•%K %Mmode%K/{channelhilight $0} [{mode $1}]";
+    bantype = "%M•%K Ban type %Mchanged%K to {channel $0}";
+    no_bans = "%M•%K No bans in channel {channel $0}";
+    banlist = "$0 - {channel $1}: ban {ban $2}";
+    banlist_long = "$0 - {channel $1}: ban {ban $2} {comment by {nick $3}, $4 secs ago}";
+    ebanlist = "{channel $0}: ban exception {ban $1}";
+    ebanlist_long = "{channel $0}: ban exception {ban $1} {comment by {nick $2}, $3 secs ago}";
+    no_invitelist = "%M•%K Invite list is empty in channel {channel $0}";
+    invitelist = "{channel $0}: invite {ban $1}";
+    no_such_channel = "%R•%K {channel $0}: %rNo such%K channel";
+    channel_change = "%M•%K %Mmode%K/{channel $0} [{mode $1}]";
+    channel_synced = "%M•%K Join to {channel $0} was synced in {hilight $1} secs";
+    usermode_change = "%M•%K %Mmode%K/{channel $0} [{mode $0}] by {channick_hilight $1}";
+    user_mode = "%M•%K Your user mode is {mode $0}";
+    away = "%R•%K You have been %gmarked%K as being %raway";
+    unaway = "%G•%K You are %gno longer marked%K as being %gaway";
+    nick_away = "%R•%K {nick $0} is %raway%K: $1";
+    no_such_nick = "%R•%K {nick $0}: %rNo such%K nick/channel";
+    nick_in_use = "%R•%K Nick {nick $0} is %ralready in use%K";
+    nick_unavailable = "%R•%K Nick {nick $0} is temporarily %runavailable%K";
+    your_nick_owned = "%R•%K Your nick is %rowned%K by {nick $3} {comment $1@$2}";
+    whois = "%G•%K %g%U{nick $0}%U%K ({nickhost $1@$2})%:%M•%K %Mircname:%K $3";
+    whowas = "%M•%K {nick $0} {nickhost $1@$2}%: {whois ircname$3}";
+    whois_idle = "%M• Idle:%K %|since $1 days $2 hours $3 mins $4 secs";
+    whois_idle_signon = "%M• Idle:%K %|since $1 days $2 hours $3 mins $4 secs {comment Signed on: $5}";
+    whois_server = "%M•%K %MServer:%K %|$1 {comment $2}";
+    whois_oper = "%M•%K %MInfo:%K %|{hilight $1}";
+    whois_registered = "%M•%K %MInfo:%K %|has registered this nick";
+    whois_help = "%M•%K %MInfo:%K %|available for help";
+    whois_modes = "%M•%K %MModes:%K %|{mode $1}";
+    whois_realhost = "%M•%K %MHostname:%K %|{hilight $1-}";
+    whois_usermode = "%M•%K %MUsermode:%K %|{mode $1}";
+    whois_channels = "%M•%K %MChannels:%K %|{channel $1}";
+    whois_away = "%R•%K %MAway:%K %|$1";
+    whois_special = "%M•%K %MInfo:%K %|$1";
+    whois_extra = "%M•%K %MInfo:%K %|$1";
+    end_of_whois = "%R•%K %rEnd%K of %rWHOIS%K";
+    end_of_whowas = "%R•%K End of WHOWAS";
+    whois_not_found = "%R•%K There is %rno such%K nick {channick_hilight $0}";
+    who = "{channelhilight $[-10]0} %|{nick $[!9]1} $[!3]2 $[!2]3 $4@$5 {comment {hilight $6}}";
+    end_of_who = "%R•%K End of /WHO list";
+    own_notice = "{ownnotice notice $0}$1";
+    #   own_action = "{nick $[-11]0}%n $1";
+    #   own_action_target = "{ownaction_target $0 $2}$1";
+    own_ctcp = "{ownctcp ctcp $0}$1 $2";
+    notice_server = "%K----------- %M•%K{servernotice $0}$1";
+    notice_public = "%K----------- %M•%K{notice $0{pubnotice_channel $1}}$2";
+    notice_private = "%K----------- %M•%K{notice $0{pvtnotice_host $1}}$2";
+    #   action_private = "{pvtaction $0}$2";
+    #   action_private_query = "{pvtaction_query $0}$2";
+    #   action_public = " {nick $[-11]0}%n $1";
+    #   action_public_channel = "{pubaction $0{msgchannel $1}}$2";
+    ctcp_reply = "%G•%K %gCTCP%K {hilight $0} reply from {channick_hilight $1}: $2";
+    ctcp_reply_channel = "%G•%K %gCTCP {hilight $0} reply%K from {channick_hilight $1} in channel {channel $3}: $2";
+    ctcp_ping_reply = "%G•%K %gCTCP {hilight PING} reply%K from {channick_hilight $0}: $1.$[-3.0]2 seconds";
+    #ctcp_requested = "%K----------- %G•%K %K{ctcp {hilight $0} {comment $1} %grequested%K {hilight $2} from %gyou%K{nick $3}}";
+    ctcp_requested = "%K----------- %G•%K %K{ctcp {hilight $0} {comment $1} %grequested%K {hilight $2} from %gyou%K{nick $3}}";
+    ctcp_requested_unknown = "";
+    online = "%G•%K Users online: {hilight $0}";
+    pong = "%G•%K PONG %greceived%K from $0: $1";
+    wallops = "%K----------- %G•%K {wallop WALLOP {wallop_nick $0}} $1";
+    action_wallops = "%K----------- %G•%K {wallop WALLOP {wallop_action $0}} $1";
+    kill = "%R•%K You were %r{error killed}%K by {nick $0} {nickhost $1} {reason $2} {comment Path: $3}";
+    kill_server = "%R•%K You were %r{error killed}%K by {server $0} {reason $1} {comment Path: $2}";
+    error = "%R•%K %r{error ERROR}%K $0";
+    unknown_mode = "%R•%K %rUnknown%K mode character $0";
+    not_chanop = "%R•%K You're %rnot channel operator%K in {channel $0}";
+    silenced = "%K• %gSilenced%K {nick $0}";
+    unsilenced = "%G•%K %gUnsilenced%K {nick $0}";
+    silence_line = "{nick $0}: silence {ban $1}";
+    ask_oper_pass = "%M•%K Operator password:";
+    own_action = "{ownaction $[10]0} $1";
+    action_private = "{pvtaction $[10]0}$1";
+    action_private_query = "{pvtaction_query $[10]0} $2";
+    action_public = "{pubaction $[10]0}$1";
+
+
+  };
+  "fe-common/perl" = {
+    script_not_found = "%R•%K Script %r{hilight $0} %rnot found%K";
+    script_not_loaded = "%R•%K Script %r{hilight $0} %ris not%K loaded";
+    script_loaded = "%G•%K %gLoaded%K script %g{hilight $0}";
+    script_unloaded = "%R•%K %rUnloaded%K script %r{hilight $0}";
+    no_scripts_loaded = "%R•%K No scripts are loaded";
+    script_list_header = "%G•%K Loaded scripts:";
+    script_list_line = "$[!15]0 $1";
+    script_list_footer = "";
+    script_error = "{error %R•%K %rError%K in script %r{hilight $0}:}";
+  };
+  #  "fe-common/irc/notifylist" = {
+  #    notify_join = "{nick $0} [$1@$2] [{hilight $3}] has joined to $4";
+  #    notify_part = "{nick $0} has left $4";
+  #    notify_away = "{nick $0} [$5] [$1@$2] [{hilight $3}] is now away: $4";
+  #    notify_unaway = "{nick $0} [$4] [$1@$2] [{hilight $3}] is now unaway";
+  #    notify_unidle = "{nick $0} [$5] [$1@$2] [{hilight $3}] just stopped idling";
+  #    notify_online = "On $0: {hilight $1}";
+  #    notify_offline = "Offline: $0";
+  #    notify_list = "$0: $1 $2 $3";
+  #    notify_list_empty = "The notify list is empty";
+  #  };
+};
+

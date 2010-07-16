@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+#########################################################################
+# By Robbie -- dunolie@gmail.com
+# Created on: Wednesday,09 April, 2008
+# Last modified:
+# Description: My Bash Aliases (~/.bash_aliases_osx)
+# Snipped from website :
+# Snipped from IRC channel :
+# Snipped from : Loads of thanks to all i've snipped from :)
+# http://www.dotfiles.com/files/3/441_dot.bashrc
+# http://qwert.us/content/bash_rc.php
+# http://www.novell.com/coolsolutions/tools/downloads/bashrc.txt
+# http://hayne.net/MacDev/Bash/
+# http://hayne.net/MacDev/Bash/aliases.bash
+#########################################################################
+# Script Comments if needed : try and keep it clean & commented :)
+#########################################################################
+
+# chit cheat sheets
+alias chitpa='chit "$1"  --add'
+alias chitpe='chit "$1" --edit'
+alias chitf='chit "$1" --find'
+alias chits='chit "$1" --search'
+alias chitpu='cd ~/.chit/private;git push origin master'
+alias chitu='cd ~/.chit/public; git clone'
+# git://github.com/robin/chitsheet.git
+
+###################### OS X ONLY ALIASES
+# os x system info
+alias www='open -a Firefox $1'
+alias webserv='cd /Library/WebServer/Documents/'
+
+alias osx='echo -e "=-=-=-=-= Running OS X:\033[1;31m $(sw_vers -productVersion)\033[0m"'
+
+alias sysinfo-mini='system_profiler -detailLevel mini'
+alias sysinfo-basic='system_profiler -detailLevel basic'
+alias sysinfo-full='system_profiler -detailLevel full'
+
+alias firefox-cli='/Applications/Firefox.app/Contents/MacOS/firefox'
+# http://hayne.net/MacDev/Bash/aliases.bash
+# numFiles: number of (non-hidden) files in current directory
+alias numFiles='echo $(ls -1 | wc -l)'
+alias lnum='echo $(ls -1 | wc -l)'
+
+#wan ip
+alias wip="curl -s checkip.dyndns.org | grep -Eo '[0-9>]+'"
+alias isi='sips -g pixelWidth -g pixelHeight $@'
+
+
+alias abook='open -a Address\ Book $1'
+alias adium='open -a Adium $1'
+alias mailapp='open -a Mail'
+alias burnapp='open -a Burn $1'
+alias dictionary='open -a Dictionary $1'
+alias f='open -a "Finder" $1'
+alias firefox='open -a Firefox "$@"'
+alias ffox='open -a Firefox "$@"'
+alias browser='open -a Firefox "$@"'
+alias gearth='open -a Google\ Earth $1'
+alias iphoto='open -a iPhoto'
+alias monitor='open -a Activity\ Monitor'
+alias noffice='NeoOffice "$@"'
+alias pages='Pages "$@"'
+alias thunderbird='open -a Thunderbird'
+alias updatedb-locate='sudo /usr/libexec/locate.updatedb'
+alias x11='open -a X11'
+alias ical='open -a iCal'
+alias nnw='open -a NetNewsWire'
+alias siteclone='open -a WebGrabber'
+
+##------------------------------------------------------------
+
+# empty OSX trash
+alias etrash='rm -fr ~/.Trash'
+
+alias showme='find . -name *'
+
+alias k='killall'
+
+##------------------------------------------------------------
+
+alias SHUTDOWN='shutdown now -h'
+alias RESTART='sudo /sbin/shutdown -r now'
+alias ARDSTART="sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -users admin -privs -all -restart -agent -menu"
+
+##------------------------------------------------------------
+
+##-- SCREEN CAPTURE  -----------
+alias sc-window='screencapture -iW "~/Desktop/screen`date +(%H.%M,%d-%m-%Y)`.png"'
+alias sc-all='screencapture -S ~/Desktop/screen`date +(%H.%M,%d-%m-%Y)`.png'
+alias sc-bit='screencapture -ic ~/Desktop/screen`date +(%H.%M,%d-%m-%Y)`.png'
+
+alias sc-no-shadows='defaults write com.apple.screencapture disable-shadow -bool true'
+alias sc-shadows='defaults delete com.apple.screencapture disable-shadow'
+
+##------------------------------------------------------------
+
+alias gfi='GetFileInfo'
+
+# disable and re-enable Dashboard Widgets
+alias disabledashb='defaults write com.apple.dashboard mcx-disabled -bool YES; killall Dock'
+alias enabledashb='defaults delete com.apple.dashboard mcx-disabled; killAll Dock'
+
+# lsregister: utility for looking at the Launch Services database
+# e.g. 'lsregister -dump' to display database contents
+# use 'lsregister -h' to get usage info
+alias lsregister='/System/Library/Frameworks/ApplicationServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
+
+# show hidden files in Finder
+alias showdots='defaults write com.apple.finder ShowAllFiles TRUE'
+alias hidedots='defaults write com.apple.finder ShowAllFiles FALSE'
+
+# hidden command line utilities: networksetup & systemsetup
+alias networksetup='/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/networksetup'
+alias systemsetup='/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Support/systemsetup'
+
+# swapinfo: to display info on swap
+alias swapinfo='sysctl vm.swapusage'
+
+# use vsdbutil to show/change the permissions ignoring on external drives
+# To ignore ownerships on a volume, do: sudo vsdbutil -d /VolumeName
+# To restore ownerships on a volume, do: sudo vsdbutil -a /VolumeName
+# To check the status of ownerships, do: sudo vsdbutil -c /VolumeName
+alias ignorepermissions='sudo vsdbutil -d'
+
+# install all software updates from the command line
+alias updateallosx='COMMAND_LINE_INSTALL=1 export COMMAND_LINE_INSTALL; sudo softwareupdate -i -a'
+
+# show_optical_disk_info - e.g. what type of CD & DVD media is supported
+alias cdinfo='drutil info'
+alias dvdinfo='drutil info'
+
+# repair permissions
+alias repairpermissions='sudo diskutil repairpermissions /'
+
+# numbered permissions eg 755 777 666
+alias perm='stat --printf "%a %n \n "'
+
+# consoleapp: launch the Console app from Terminal
+alias consoleapp='/Applications/Utilities/Console.app/Contents/MacOS/Console &'
+alias vlogs='/Applications/Utilities/Console.app/Contents/MacOS/Console &'
+
+# third_party_kexts: to check for non-Apple kernel extensions
+alias 3rdkexts='kextstat | grep -v com.apple'
+
+# ip_info: to get info on DHCP server, router, DNS server, etc (for en0 or en1)
+alias ipinfo2='ipconfig getpacket en1'
+
+# browse_bonjour: browse services advertised via Bonjour
+# Note: need to supply a "type" argument- e.g. "_http._tcp"
+# See http://www.dns-sd.org/ServiceTypes.html for more types
+# Optionally supply a "domain" argument
+alias b_bonjour='dns-sd -B'
+
+# lsock: to display open sockets (the -P option to lsof disables port names)
+alias sudo-lsock='sudo /usr/sbin/lsof -i -P'
+
+alias count-all-apps='system_profiler SPApplicationsDataType | egrep ":$" | wc -l'
+
+# locatemd: to search for a file using Spotlight's metadata
+# function locatemd {  mdfind "kMDItemDisplayName == '$@'wc"; }
+
+# numFiles: number of (non-hidden) files in current directory
+alias numfiles='echo $(ls -1 | wc -l)'
+
+# rm_DS_Store_files: removes all .DS_Store file from the current dir and below
+alias rmDSstorefiles='find . -name .DS_Store -exec rm {} \;'
+
+alias opt-cpan='sudo /opt/local/bin/cpan $1'
+
+alias dls='cd ~/Downloads'
+alias obin='cd /opt/local/bin'
+alias cpani='sudo cpan $1'
+alias cpani-opt='sudo /opt/local/bin/cpan $1'
+
+# new tab in Terminal.app
+alias nt='tab -t $@'

@@ -1,0 +1,64 @@
+"----------------------------------------------------------------------
+"              My Abbreviations
+"----------------------------------------------------------------------
+
+"----------------------------------------------------------------------
+"Headers
+iab _vh "Robbie Terris (dunolie@gmail.com) <C-R>=strftime("%c")<CR>
+iab _bh #Robbie Terris (dunolie@gmail.com) <C-R>=strftime("%c")<CR>
+iab _vlm " Last modified: <C-R>=strftime("%c")<CR>
+iab _blm # Last modified: <C-R>=strftime("%c")<CR>
+iab _env #!/usr/bin/env xxxx
+"----------------------------------------------------------------------
+" Various
+iab _AR alpha release
+iab _WD working draft
+iab _BS build system
+iab _TS target system
+iab OtF of the form
+
+"----------------------------------------------------------------------
+" my details
+iab _me Robbie Terris
+iab _pgp robbie@ruralinternet.co.uk (Robbie Terris) { PGP Key Fingerprint =  D2C1 3875 C226 81DB 70DC  7BEB F461 618D 2249 A56B }
+
+iab _blog http://www.dunolie.wordpress.com
+iab _dmail dunolie@gmail.com (Robbie)
+iab _rmail robbie@ruralinternet.co.uk (Robbie Terris)
+
+"----------------------------------------------------------------------
+"time and date ;)
+iab _dts <C-R>=strftime("%c")<CR>
+iab _date <C-R>=strftime("%d/%m/%y")<CR>
+iab _dt <C-R>=strftime("%T")<CR>
+
+iab _created Created on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime("%T")<CR>
+iab _lm Last Modified on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime("%T")<CR>
+iab _modified Last Modified on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime("%T")<CR>
+
+"----------------------------------------------------------------------
+"             Multiple line abbreviations
+"  There must be a space following the abbreviation name
+"----------------------------------------------------------------------
+" Bash Script Header with Date & Time Stamp
+iab _bash #!/usr/bin/env bash
+\<CR># -------------------------------------------------------------------------------
+\<CR>#         Author: Robbie -- dunolie (at) gmail (dot) com
+\<CR>#      File name:
+\<CR>#        Created: TIMESTAMP
+\<CR>#  Last Modified: TIMESTAMP
+\<CR># -------------------------------------------------------------------------------
+\<CR>#       Comments:
+\<CR>#    Description:
+\<CR># -------------------------------------------------------------------------------
+
+
+iab _doc # -------------------------------------------------------------------------------
+\<CR>#         Author: Robbie -- dunolie (at) gmail (dot) com
+\<CR>#      File name:
+\<CR>#        Created: TIMESTAMP
+\<CR>#  Last Modified: TIMESTAMP
+\<CR># -------------------------------------------------------------------------------
+\<CR>#       Comments:
+\<CR>#    Description:
+\<CR># -------------------------------------------------------------------------------

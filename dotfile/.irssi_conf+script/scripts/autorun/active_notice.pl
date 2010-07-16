@@ -1,0 +1,1 @@
+/Users/robbie/.irssi/scripts/active_notice.pl
