@@ -1,0 +1,55 @@
+#!/bin/bash
+# System Information Apple MacBook
+# http://m-redd.com
+# By: MreDD
+
+#----------------------
+#clear
+#echo ""
+#---------------
+aver=$(sw_vers | awk '{print $3 $4}')
+version=$(system_profiler | grep "System\ Version" | awk '{print $3 $4 $5 $6 $7 $8}')
+mname=$(system_profiler | grep "Model\ Name" | awk '{print $3}')
+hname=$(uname -n)
+who=$(whoami)
+lwho=$(logname)
+hardware=$(uname -m)
+cpumodel=$(system_profiler | grep "Processor\ Name" | awk '{print $3 $4 $5}')
+cpu=$(system_profiler | grep "Processor\ Speed" | awk '{print $3 $4}')
+ram=$(system_profiler | grep "Memory" | awk '{print $2 $3}')
+busped=$(system_profiler | grep "Bus\ Speed" | awk '{print $3}')
+name=$(uname -s)
+release=$(uname -r)
+uptime=$(uptime |sed 's/,.*$//')
+vidcard=$(system_profiler | grep "Chipset\ Model" | awk '{print $3 $4}')
+scrnrez=$(system_profiler | grep "Resolution" | awk '{print $2 $3 $4}')
+disk=$(df -lh)
+mem=$(vm_stat)
+#clear
+
+#------------------------------
+#Display information to user...
+#------------------------------
+echo "OS                      : $aver"
+echo "Version                 : $version"
+echo "Model                   : $mname"
+echo "Hostname                : $hname"
+echo "Currently logged in as  : $who"
+echo "Originally logged in as : $lwho"
+echo "Hardware Architecture   : $hardware"
+echo "CPU Model               : $cpumodel"
+echo "CPU Speed               : $cpu"
+echo "Memory                  : $ram"
+echo "Bus Speed               : $busped"
+echo "Kernel Version          : $name"
+echo "Kernel Release          : $release"
+echo "System Uptime           : $uptime"
+echo "Video Card              : $vidcard"
+echo "Screen Resolution       : $scrnrez"
+echo 
+echo "Hard Disk(s)"
+echo "$disk"
+echo
+echo "System Memory" 
+echo "$mem"
+#echo
