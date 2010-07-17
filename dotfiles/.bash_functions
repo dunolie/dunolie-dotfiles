@@ -18,8 +18,13 @@ else
 fi
 }
 
+# Find a file with pattern $1 in name and Execute $2 on it:
+function fe () {
+ find . -type f -iname '*'${1:-}'*' -exec ${2:-file} {} \;  ; 
+}
+
 # fuzzy 'cd': cd into first directory matching the substring, case insensitive
-function cf {
+function cdff {
 	shopt -q nocasematch || resetcase=1
 	shopt -s nocasematch
 	for i in *; do [ -d "$i" ] && [[ "$i" == *"$1"* ]] && cd "$i" && echo "$i" && break; done
@@ -99,6 +104,13 @@ function underscore2space () {
 }
 
 function moc () {
+	jackd -T -d coreaudio &
+	sleep 5
+	mocp
+}
+
+function moc-screen () {
+	TERM=xterm # gets the titles working in moc
 	jackd -T -d coreaudio &
 	sleep 5
 	mocp

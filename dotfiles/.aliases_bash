@@ -85,12 +85,18 @@ alias reload='echo -e "${CYAN}Reloading your ~/.bashrc!${NC}" ;source ~/.bashrc'
 alias cppwd='eval "echo `pwd` | tr -d \\\\n | pbcopy"'
 
 # burn to iso
+alias bin2iso='bchunk'  # http://gavin.mclelland.ca/tag/osx-shell-utility-tools/
 alias burn-iso='drutil burn'
 alias burn-dvd='drutil burn -noverify'
 
 # growl song change info for mocp
 alias gmoc='mocstat -f'
 
+# http://get-flash-videos.googlecode.com
+# get the flash video and play it automatically (set in the ~/.*rc file)
+alias gf='get_flash_videos "$@"'
+# Play the URL on the clipboard (OS X)
+alias gfp='pbpaste | xargs get_flash_videos -y -p'
 
 ##-----------------------------------------------------------
 # GIT Stuff
@@ -482,9 +488,12 @@ alias tarc='tar -c'
 
 # Alias's to modified commands
 alias pgrep="pgrep -l"
-alias path='echo $PATH'
 alias dirsize='du -skh | cut -f1'
 alias mounted='df -hT'
+alias path='echo -e ${PATH//:/\\n}'
+alias libpath='echo -e ${LD_LIBRARY_PATH//:/\\n}'
+alias manpath='echo -e ${MAN_PATH//:/\\n}'
+alias mkdir='mkdir -p'
 
 ##------------------------------------------------------------
 
