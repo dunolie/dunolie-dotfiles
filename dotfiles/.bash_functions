@@ -7,6 +7,29 @@
 #    Description: my bash functions ~/.bash_functions
 #       Comments: also sourcing ~/.fff for more functions
 # -------------------------------------------------------------------------------
+
+# google image search & dl, with the folder name as query, good for album art :)
+function gart {
+	echo `basename -a $PWD` | pbcopy; gimage `pbpaste`
+}
+
+# Search with awk
+function s () {
+  ack $@ --color-match=green --color-filename=blue --smart-case
+}
+function sw () {
+  ack $@ --color-match=green --color-filename=blue --word-regexp --smart-case
+}
+#alias f='find . -iname'
+function sf () {
+  ack -i -g .*$@[^\/]*$ | highlight blue ".*/" green "$@[^/]"
+}
+
+# print all paths in perlpath
+function perl-path () {
+perl -e 'print join "\n", @INC'
+}
+
 # open app = $ oa textedit foo.txt
 function oa () {
 if [[ -f ~/bin/launch ]]; then
@@ -15,6 +38,15 @@ else
 	$app=`find /Applications/ -name “*.app” | grep $1`;
 	shift;
 	open -a “$app/” “$2″;
+fi
+}
+
+# use the growl notification to alert on completed make
+function make () {
+if [[ -f ~/bin/gns ]]; then
+	gns make
+else
+	make
 fi
 }
 
@@ -96,21 +128,14 @@ function rm-comments-mp3 () {
 
 # rename (debian) http://git.debian.org/?p=perl/perl.git;a=blob_plain;f=debian/rename;hb=HEAD
 function space2underscore () {
-	rename -v 's/\ /\_/g' *
+	rename -v 's/\ /\_/g' "$@"
 }
 
 function underscore2space () {
-	rename -v 's/\ /\_/g' *
+	rename -v 's/\_/\ /g' "$@"
 }
 
 function moc () {
-	jackd -T -d coreaudio &
-	sleep 5
-	mocp
-}
-
-function moc-screen () {
-	TERM=xterm # gets the titles working in moc
 	jackd -T -d coreaudio &
 	sleep 5
 	mocp
@@ -809,18 +834,18 @@ function locategrep () {
 function extract () {
 		if [ -f $1 ] ; then
 			case $1 in
-             *.tar.bz2)   tar xjf $1     ;;
-             *.tar.gz)    tar xzf $1     ;;
-             *.bz2)       bunzip2 $1     ;;
-             *.rar)       unrar e -ad $1 ;;
-             *.gz)        gunzip $1      ;;
-             *.tar)       tar xf $1      ;;
-             *.tbz2)      tar xjf $1     ;;
-             *.tgz)       tar -xvf $1    ;;
-             *.zip)       unzip $1       ;;
-             *.Z)         uncompress $1  ;;
-             *.7z)        7z x $1        ;;
-             *)           echo "'$1' cannot be extracted via extract()" ;;
+             *.tar.bz2)   tar xjf "$@"     ;;
+             *.tar.gz)    tar xzf "$@"     ;;
+             *.bz2)       bunzip2 "$@"     ;;
+             *.rar)       unrar e -ad "$@" ;;
+             *.gz)        gunzip "$@"      ;;
+             *.tar)       tar xf "$@"      ;;
+             *.tbz2)      tar xjf "$@"     ;;
+             *.tgz)       tar -xvf "$@"    ;;
+             *.zip)       unzip "$@"       ;;
+             *.Z)         uncompress "$@"  ;;
+             *.7z)        7z x "$@"        ;;
+             *)           echo "'$1' cannot be extracted via extract ()" ;;
          esac
      else
          echo "'$1' is not a valid file"

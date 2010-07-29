@@ -45,20 +45,14 @@ GRAY='\033[1;30m'
 L_GRAY='\033[0;37m'
 #
 
-
 # source ~/.bashrc-dterm for the Dterm app
 if [[ $TERM_PROGRAM = "DTerm" ]]; then
 ▷⋅⋅⋅source ~/.dunolie-dotfiles/dotfiles/.bashrc-dterm
 ▷⋅⋅⋅return
 fi
 
-# so I get my xterm titles working in screen.
-if [ "$TERM" = "screen" ]; then
-▷⋅⋅⋅export TERM=xterm-color
-fi
-
 # so iTerm likes the dircolors output
-export TERM=xterm-color
+#export TERM=xterm-color
 #if [[ $TERM_PROGRAM == "iTerm.app" ]]; then
 #▷⋅⋅⋅export TERM=xterm-color
 #fi
@@ -94,43 +88,19 @@ echo -e   "  \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m      User:${L_GRE
 echo -e   "   \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m       Time:${L_GREEN} $(date +%H:%M)${NC} on ${L_GREEN}$(date +%A) $(date +%d\ %B\,\ %G)${NC} "
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 #
-# My welcome message with my @terminal todo's from my todo.txt, see lifehacker.com for more info on todo.txt
-# if [  -f ~/Sync/ToDo/todo.txt ]; then
-# 	echo -e "=-=-=-=-=-=-=-=-=-=-${L_RED} todo's! ${NC}-=-=-=-=-=-=-=-=-=-==-=-=-=-="
-# 	echo -e "${L_RED}$(grep @term ~/Sync/ToDo/todo.txt)${NC}"
-# 	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-# else
-# 	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-# fi
 
-# icalBuddy (ical upcoming events)
-if [[ -f /usr/local/bin/icalBuddy ]]; then
-	/usr/local/bin/icalBuddy -f -ec Weeknumbers eventsToday+1
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+# only show ical data if the term is xterm-color
+if [ "$TERM" = "xterm-color" ]; then
+	if [[ -f /usr/local/bin/icalBuddy ]]; then
+		/usr/local/bin/icalBuddy -f -ec Weeknumbers eventsToday+1
+		echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+	fi
 fi
 
-#if [[ -f ~/bin/weather-report ]]; then
-#	if [ "ping -c 2 www.google.com > /dev/null -eq 0" ]; then
-#		#echo -e "\033[1;32m The weather in Oban is currently, $(oban-forecast "EUR|UK|UK604|Oban")\033[0m"
-#		echo -e "${GREEN}$(weather-report)${NC}"
-#		echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#	else
-#		echo  -e "Internet connection is${RED} down${NC} ~ No weather report :("
-#		echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#	fi
-#else
-#	echo  -e "=-=-=-=-=${RED} No weather report file"${NC}
-#	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#fi
 echo -e "$(screenON)"
 echo -e "Bash Version: ${L_CYAN}${BASH_VERSION%.*}${NC} ~ ${L_CYAN}`which bash`${NC} Term: ${L_CYAN}`echo $TERM`${NC}"
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 #
-
-# disable crashreporter. I find it hogs CPU usage
-#if [[ $(uname) = "Darwin" ]]; then
-#	launchctl unload /System/Library/LaunchDaemons/com.apple.ReportCrash.plist
-#fi
 
 # if ~/.bashrc then source it
 if [ -f ~/.bashrc ]; then
@@ -146,21 +116,12 @@ else
 	echo -e "Using the global ${GREEN}bashrc${NC} file from ${GREEN}/etc/bashrc${NC}"
 fi
 
-# if ~/.bashrc then source it
-#if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "Apple_Terminal" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/Terminal/.bashrc-terminal
-#fi
-
-#if [[ $(uname) = "Darwin" && $TERM_PROGRAM = "DTerm" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-dterm
-#fi
-
-#if [[ $(uname) = "Darwin" ]]; then
-#	source ~/.dunolie-dotfiles/dotfiles/.bash/OS/OSX/iTerm/.bashrc-iterm
-#fi
-
-# Get the aliases and functions
-
-if [ -f ~/.bashrc ]; then
-  . ~/.bashrc
+# set gnu-screen term to xterm-color so I get good titles in mocp and vim
+if [ "$TERM" = "screen" ]; then
+	export TERM=xterm-color
 fi
+
+# disable crashreporter. I find it hogs CPU usage
+#if [[ `uname` = "Darwin" ]]; then
+#	launchctl unload /System/Library/LaunchDaemons/com.apple.ReportCrash.plist
+#fi

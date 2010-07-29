@@ -320,17 +320,17 @@ fi
 #  You might need to compile with this option too if you get errors.
 #  ./configure --disable-dependency-tracking
 # Compile for ppc
-if [[ $(uname -p) = "powerpc" ]]; then
-	export CFLAGS='-arch ppc'
-	export LDFLAGS='-arch ppc'
-fi
-# Compiling code with GCC enabled for Core 2 Duo only
-if [[ $(uname -p) = "i386" ]]; then
-	export ARCHFLAGS='-arch i386'
-	export CFLAGS=' -march=nocona -O2 -pipe -mtune=nocona '
-	# some binaries need both arch's
-	# export ARCHFLAGS='-arch i386 -arch ppc'
-fi
+# if [[ $(uname -p) = "powerpc" ]]; then
+# 	export CFLAGS='-arch ppc'
+# 	export LDFLAGS='-arch ppc'
+# fi
+# # Compiling code with GCC enabled for Core 2 Duo only
+# if [[ $(uname -p) = "i386" ]]; then
+# 	export ARCHFLAGS='-arch i386'
+# 	export CFLAGS=' -march=nocona -O2 -pipe -mtune=nocona '
+# 	# some binaries need both arch's
+# 	# export ARCHFLAGS='-arch i386 -arch ppc'
+# fi
 #
 # -------------------------------------------------------------------------------
 #                       COLOUR ~ LS -- SETTINGS
@@ -475,11 +475,8 @@ if [[ -f ~/.aliases_bash  ]]; then
 fi
 #
 # source my aliases for files on my computer (desktop or laptop)
-# my private (local comp and pivate aliases)
-if [[ $USER = "robbie" ]]; then
-	if [[ -f ~/.aliases_bash_robbie  ]]; then
-		source ~/.aliases_bash_robbie
-	fi
+if [[ -f ~/.aliases_bash_robbie  ]]; then
+	source ~/.aliases_bash_robbie
 fi
 # if OS X then source ~/.aliases_bash_osx
 if [[ `uname` = "Darwin" ]]; then
@@ -607,7 +604,8 @@ complete -A file {,z}cat pico nano vi {,{,r}g,e,r}vi{m,ew} vimdiff elvis emacs {
 complete -F _todo_sh -o default todo
 complete -F _todo_sh -o default t
 complete -F _todo_sh -o default td
-#
+
+# Compression
 complete -f -o default -X '*.+(zip|ZIP)'  zip
 complete -f -o default -X '!*.+(zip|ZIP)' unzip
 complete -f -o default -X '*.+(z|Z)'      compress
@@ -617,6 +615,203 @@ complete -f -o default -X '!*.+(gz|GZ)'   gunzip
 complete -f -o default -X '*.+(bz2|BZ2)'  bzip2
 complete -f -o default -X '!*.+(bz2|BZ2)' bunzip2
 complete -f -o default -X '!*.+(zip|ZIP|z|Z|gz|GZ|bz2|BZ2)' extract
+
+# Documents - Postscript,pdf,dvi.....
+complete -f -o default -X '!*.+(ps|PS)'  gs ghostview ps2pdf ps2ascii
+complete -f -o default -X '!*.+(dvi|DVI)' dvips dvipdf xdvi dviselect dvitype
+complete -f -o default -X '!*.+(pdf|PDF)' acroread pdf2ps
+complete -f -o default -X \
+'!*.@(@(?(e)ps|?(E)PS|pdf|PDF)?(.gz|.GZ|.bz2|.BZ2|.Z))' gv ggv
+complete -f -o default -X '!*.texi*' makeinfo texi2dvi texi2html texi2pdf
+complete -f -o default -X '!*.tex' tex latex slitex
+complete -f -o default -X '!*.lyx' lyx
+complete -f -o default -X '!*.+(htm*|HTM*)' lynx html2ps
+complete -f -o default -X \
+'!*.+(doc|DOC|xls|XLS|ppt|PPT|sx?|SX?|csv|CSV|od?|OD?|ott|OTT)' soffice
+
+# Multimedia
+complete -f -o default -X \
+'!*.+(gif|GIF|jp*g|JP*G|bmp|BMP|xpm|XPM|png|PNG)' xv gimp ee gqview
+complete -f -o default -X '!*.+(mp3|MP3)' mpg123 mpg321
+complete -f -o default -X '!*.+(ogg|OGG)' ogg123
+complete -f -o default -X \
+'!*.@(mp[23]|MP[23]|ogg|OGG|wav|WAV|pls|m3u|xm|mod|s[3t]m|it|mtm|ult|flac)' xmms
+complete -f -o default -X \
+'!*.@(mp?(e)g|MP?(E)G|wma|avi|AVI|asf|vob|VOB|bin|dat|vcd|\
+ps|pes|fli|viv|rm|ram|yuv|mov|MOV|qt|QT|wmv|mp3|MP3|ogg|OGG|\
+ogm|OGM|mp4|MP4|wav|WAV|asx|ASX)' xine
+
+complete -f -o default -X '!*.pl'  perl perl5
+
+########
+# This is a 'universal' completion function - it works when commands have
+# a so-called 'long options' mode , ie: 'ls --all' instead of 'ls -a'
+# Needs the '-o' option of grep
+#  (try the commented-out version if not available).
+
+# First, remove '=' from completion word separators
+# (this will allow completions like 'ls --color=auto' to work correctly).
+
+COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
+
+
+_get_longopts() 
+{ 
+    #$1 --help | sed  -e '/--/!d' -e 's/.*--\([^[:space:].,]*\).*/--\1/'| \
+#grep ^"$2" |sort -u ;
+    $1 --help | grep -o -e "--[^[:space:].,]*" | grep -e "$2" |sort -u 
+}
+
+_longopts()
+{
+    local cur
+    cur=${COMP_WORDS[COMP_CWORD]}
+
+    case "${cur:-*}" in
+       -*)      ;;
+        *)      return ;;
+    esac
+
+    case "$1" in
+      \~*)      eval cmd="$1" ;;
+        *)      cmd="$1" ;;
+    esac
+    COMPREPLY=( $(_get_longopts ${1} ${cur} ) )
+}
+complete  -o default -F _longopts configure bash
+complete  -o default -F _longopts wget id info a2ps ls recode
+
+_tar()
+{
+    local cur ext regex tar untar
+
+    COMPREPLY=()
+    cur=${COMP_WORDS[COMP_CWORD]}
+
+    # If we want an option, return the possible long options.
+    case "$cur" in
+        -*)     COMPREPLY=( $(_get_longopts $1 $cur ) ); return 0;;
+    esac
+
+    if [ $COMP_CWORD -eq 1 ]; then
+        COMPREPLY=( $( compgen -W 'c t x u r d A' -- $cur ) )
+        return 0
+    fi
+
+    case "${COMP_WORDS[1]}" in
+        ?(-)c*f)
+            COMPREPLY=( $( compgen -f $cur ) )
+            return 0
+            ;;
+            +([^Izjy])f)
+            ext='tar'
+            regex=$ext
+            ;;
+        *z*f)
+            ext='tar.gz'
+            regex='t\(ar\.\)\(gz\|Z\)'
+            ;;
+        *[Ijy]*f)
+            ext='t?(ar.)bz?(2)'
+            regex='t\(ar\.\)bz2\?'
+            ;;
+        *)
+            COMPREPLY=( $( compgen -f $cur ) )
+            return 0
+            ;;
+
+    esac
+
+    if [[ "$COMP_LINE" == tar*.$ext' '* ]]; then
+        # Complete on files in tar file.
+        #
+        # Get name of tar file from command line.
+        tar=$( echo "$COMP_LINE" | \
+               sed -e 's|^.* \([^ ]*'$regex'\) .*$|\1|' )
+        # Devise how to untar and list it.
+        untar=t${COMP_WORDS[1]//[^Izjyf]/}
+
+        COMPREPLY=( $( compgen -W "$( echo $( tar $untar $tar \
+                    2>/dev/null ) )" -- "$cur" ) )
+        return 0
+
+    else
+        # File completion on relevant files.
+        COMPREPLY=( $( compgen -G $cur\*.$ext ) )
+
+    fi
+
+    return 0
+
+}
+
+complete -F _tar -o default tar
+
+_make()
+{
+    local mdef makef makef_dir="." makef_inc gcmd cur prev i;
+    COMPREPLY=();
+    cur=${COMP_WORDS[COMP_CWORD]};
+    prev=${COMP_WORDS[COMP_CWORD-1]};
+    case "$prev" in
+        -*f)
+            COMPREPLY=($(compgen -f $cur ));
+            return 0
+        ;;
+    esac;
+    case "$cur" in
+        -*)
+            COMPREPLY=($(_get_longopts $1 $cur ));
+            return 0
+        ;;
+    esac;
+
+    # make reads `GNUmakefile', then `makefile', then `Makefile'
+    if [ -f ${makef_dir}/GNUmakefile ]; then
+        makef=${makef_dir}/GNUmakefile
+    elif [ -f ${makef_dir}/makefile ]; then
+        makef=${makef_dir}/makefile
+    elif [ -f ${makef_dir}/Makefile ]; then
+        makef=${makef_dir}/Makefile
+    else
+        makef=${makef_dir}/*.mk        # Local convention.
+    fi
+
+
+    # Before we scan for targets, see if a Makefile name was
+    # specified with -f ...
+    for (( i=0; i < ${#COMP_WORDS[@]}; i++ )); do
+        if [[ ${COMP_WORDS[i]} == -f ]]; then
+           # eval for tilde expansion
+           eval makef=${COMP_WORDS[i+1]}
+           break
+        fi
+    done
+    [ ! -f $makef ] && return 0
+
+    # deal with included Makefiles
+    makef_inc=$( grep -E '^-?include' $makef | \
+    sed -e "s,^.* ,"$makef_dir"/," )
+    for file in $makef_inc; do
+        [ -f $file ] && makef="$makef $file"
+    done
+
+
+    # If we have a partial word to complete, restrict completions to
+    # matches of that word.
+    if [ -n "$cur" ]; then gcmd='grep "^$cur"' ; else gcmd=cat ; fi
+
+    COMPREPLY=( $( awk -F':' '/^[a-zA-Z0-9][^$#\/\t=]*:([^=]|$)/ \
+                                {split($1,A,/ /);for(i in A)print A[i]}' \
+                                $makef 2>/dev/null | eval $gcmd  ))
+
+}
+
+complete -F _make -X '+($*|*.[cho])' make gmake pmake
+
+
+
+
 # ----------------------------------------------------------------------------
 #                          SYMBOLS
 # ----------------------------------------------------------------------------
@@ -704,6 +899,46 @@ if [[ -f /usr/bin/autojump ]]; then
 	function j { new_path="$(autojump $@)";if [ -n "$new_path" ]; then echo -e "\\033[31m${new_path}\\033[0m"; cd "$new_path";fi }
 fi
 #
+## http://jeetworks.org/node/52
+gcd() {
+    if [[ $(which git 2> /dev/null) ]]
+    then
+        STATUS=$(git status 2>/dev/null)
+        if [[ -z $STATUS ]]
+        then
+            return
+        fi
+        TARGET="./$(git rev-parse --show-cdup)$1"
+        #echo $TARGET
+        cd $TARGET
+    fi
+}
+_gcd()
+{
+    if [[ $(which git 2> /dev/null) ]]
+    then
+        STATUS=$(git status 2>/dev/null)
+        if [[ -z $STATUS ]]
+        then
+            return
+        fi
+        TARGET="./$(git rev-parse --show-cdup)"
+        if [[ -d $TARGET ]]
+        then
+            TARGET="$TARGET/"
+        fi
+        COMPREPLY=()
+        cur="${COMP_WORDS[COMP_CWORD]}"
+        prev="${COMP_WORDS[COMP_CWORD-1]}$2"
+        dirnames=$(cd $TARGET; compgen -o dirnames $2)
+        opts=$(for i in $dirnames; do  if [[ $i != ".git" ]]; then echo $i/; fi; done)
+        if [[ ${cur} == * ]] ; then
+            COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+            return 0
+        fi
+    fi
+}
+complete -o nospace -F _gcd gcd
 # ----------------------------------------------------------------------------
 #                          FINAL-CLOSING STUFF
 # ----------------------------------------------------------------------------
