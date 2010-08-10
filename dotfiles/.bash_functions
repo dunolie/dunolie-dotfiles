@@ -8,6 +8,27 @@
 #       Comments: also sourcing ~/.fff for more functions
 # -------------------------------------------------------------------------------
 
+# restart an OS X application
+function relaunch () {
+    for app in $*; do
+        osascript -e 'quit app "'$app'"';
+        sleep 2;
+        open -a $app
+    done
+}
+
+# Quit an OS X application
+function quit () {
+    for app in $*; do
+        osascript -e 'quit app "'$app'"'
+    done
+}
+
+# textmate manpage 
+function tman () {
+  MANWIDTH=160 MANPAGER='col -bx' man $@ | mate
+}
+
 # google image search & dl, with the folder name as query, good for album art :)
 function gart {
 	echo `basename -a $PWD` | pbcopy; gimage `pbpaste`
@@ -401,17 +422,13 @@ function go {
 }
 
 # ---------------------------------------------
-#function pushd () {
-    #builtin pushd "$@" > /dev/null
-#}
-
 
 # Automatically do an ls after each cd
 function cd () {
 	if [ -n "$1" ]; then
-		builtin cd "$@" && ls && pushd . > /dev/null
+		builtin cd "$@" && ls
 	else
-		builtin cd ~ && ls && pushd . > /dev/null
+		builtin cd ~ && ls
 	fi
 }
 
