@@ -16,7 +16,9 @@
 ##------------------------------------------------------------
 ## Script Comments if needed : try and keep it clean & commented :)
 ##-----------------------------------------------------------
+alias dl='curl -O'
 
+alias sha1='openssl sha1 "$@"'
 alias xrar='unrar e -ad "$@"'
 
 alias dsync='rsync -avzq "$1" "$2"'
@@ -77,8 +79,8 @@ alias cppwd='eval "echo `pwd` | tr -d \\\\n | pbcopy"'
 
 # burn to iso
 alias bin2iso='bchunk'  # http://gavin.mclelland.ca/tag/osx-shell-utility-tools/
-alias burn-iso='drutil burn'
-alias burn-dvd='drutil burn -noverify'
+alias burn-iso='drutil burn -noverify "$@"'
+alias burn-dvd='drutil burn -noverify "$@"'
 
 # growl song change info for mocp
 alias gmoc='mocstat -f'
@@ -219,7 +221,8 @@ alias iplay-history='iplayer --nocopyright --nopurge --category=History --exclud
 
 alias iplayi='iplayer --nopurge --nocopyright -i $1'
 
-alias iplayd='iplayer --nopurge --nocopyright --fields=desc -i $1'
+alias iplayd='iplayi "$@" | grep desc:'
+#alias iplayd='iplayer --nopurge --nocopyright -i "$1" | grep desc:'
 
 alias iplay='iplayer --nopurge --nocopyright --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
 
@@ -407,7 +410,7 @@ alias mkdir='mkdir -p'
 ##------------------------------------------------------------
 # Various alias's
 
-alias da='echo `date "%A +%d-%m-%Y   %T %Z"`'
+alias da='echo `date "+%A - %d-%m-%Y - %T %Z"`'
 
 alias pgrep="pgrep -l"
 alias path='echo $PATH'
@@ -452,8 +455,8 @@ alias netstat_osx='sudo lsof -i -P'
 
 ##------------------------------------------------------------
 #get your WAN IP (external modem/router IP)
-
-alias wanip='echo -e "This is your WAN-IP address:\033[1;32m$(curl -s checkip.dyndns.org|cut -d ":" -f2|cut -d "<" -f1)\033[0m"'
+alias wanip='dig +short @resolver1.opendns.com myip.opendns.com'
+#alias wanip='echo -e "This is your WAN-IP address:\033[1;32m$(curl -s checkip.dyndns.org|cut -d ":" -f2|cut -d "<" -f1)\033[0m"'
 
 ##------------------------------------------------------------
 # web deamons
