@@ -8,6 +8,12 @@
 #       Comments: also sourcing ~/.fff for more functions
 # -------------------------------------------------------------------------------
 
+# find the location of an IP
+geoip() { wget -qO - http://freegeoip.net/xml/$1 | sed '3,12!d;s/<//g;s/>/: /g;s/\/.*//g' ; }
+
+
+
+
 # restart an OS X application
 function relaunch () {
     for app in $*; do
@@ -185,7 +191,7 @@ function helpme () { "$@" --help 2>&1 |less -S;}
 # http://openmonkey.com/articles/2009/07/fast-github-clone-bash-function
 function ghclone () {
   gh_url=${1:-`pbpaste`}
-  co_dir=${HOME}/Code/sources/$(echo $gh_url | sed -e 's/^http:\/\/github.com\///; s/\//-/; s/\.git$//')
+  co_dir=${HOME}/Code/sources/$(echo $gh_url | sed -e 's/^https:\/\/github.com\///; s/\//-/; s/\.git$//')
   if [ -d $co_dir ]; then
     cd $co_dir && git pull origin master
   else
@@ -432,7 +438,57 @@ function cd () {
 	fi
 }
 
+# Add note to Notes.app (OS X 10.8)
+# Usage: `note 'foo'` or `echo 'foo' | note`
+function note() {
+local text
+if [ -t 0 ]; then # argument
+text="$1"
+else # pipe
+text=$(cat)
+fi
+body=$(echo "$text" | sed -E 's|$|<br>|g')
+osascript >/dev/null <<EOF
+tell application "Notes"
+tell account "iCloud"
+tell folder "Notes"
+make new note with properties {name:"$text", body:"$body"}
+end tell
+end tell
+end tell
+EOF
+}
+
+# Add reminder to Reminders.app (OS X 10.8)
+# Usage: `remind 'foo'` or `echo 'foo' | remind`
+function remind() {
+local text
+if [ -t 0 ]; then
+text="$1" # argument
+else
+text=$(cat) # pipe
+fi
+osascript >/dev/null <<EOF
+tell application "Reminders"
+tell the default list
+make new reminder with properties {name:"$text"}
+end tell
+end tell
+EOF
+}
+
+
+
 # ---------------------------------------------
+
+
+function fix-slow-wifi-transfers () {
+	sudo bash -c "echo 'net.inet.tcp.delayed_ack=0' >> /etc/sysctl.conf"
+	read -s -p "Password: " passw
+	sudo bash -c "echo 'net.inet.tcp.recvspace=40960' >> /etc/sysctl.conf"
+	sudo bash -c "echo 'net.inet.tcp.rfc1323=0' >> /etc/sysctl.conf"
+	echo "Change ip6 in Sys Prefs - Network to: Link-local only"
+}
 
 # Copy and paste from the command line
 function ccopy () {
@@ -1487,10 +1543,10 @@ function add-to-path ()
 # ---------------------------------------------
 function yt () {
 	if [[ "$PWD" = ~/Desktop ]]; then
-    	youtube-dl -t -b "$@"
+    	youtube-dl -t "$@"
 		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
 	else 
-    	cd ~/Desktop; youtube-dl -t -b "$@"
+    	cd ~/Desktop; youtube-dl -t "$@"
 		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
 	fi
 }
