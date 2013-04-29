@@ -97,7 +97,10 @@ export OSX='OS X 10.*'
 export TIGER='OS X 10.4.*'
 export LEOPARD='OS X 10.5.*'
 export SNOW_LEOPARD='OS X 10.6.*'
-# -------------------------------------------------------------------------------
+export LION='OS X 10.7.*'
+export MOUNTAIN_LION='OS X 10.8.*'
+# --------------------------------------
+
 #                       SCREEN SETTINGS
 # -------------------------------------------------------------------------------
 #
@@ -115,35 +118,41 @@ fi
 #                       PATH SETTINGS
 # -------------------------------------------------------------------------------
 ### Set important Libs
-LD_LIBRARY_PATH="/opt/local/lib:/usr/lib:/usr/local/lib"
-export LD_LIBRARY_PATH
+#LD_LIBRARY_PATH="/opt/local/lib:/usr/lib:/usr/local/lib"
+#export LD_LIBRARY_PATH
 # my paths
-export PATH=/opt/local/bin:/opt/local/sbin:/opt/local/lib/mysql5/bin:/usr/X11/bin:~/bin:~/pbin:$PATH
-export PATH=${PATH}:/bin:/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/games/:/usr/share/games
-export PATH=$PATH:/Developer/usr/bin:/Developer/usr/sbin:/usr/local/mysql/bin
-export PATH=$PATH:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
-export PATH=$PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/
-export PATH=$PATH:/System/Library/Frameworks/Python.framework/Versions/Current/bin/
-export PATH=$PATH:~/.gem/ruby/1.8/bin
+
+export PATH=/usr/local/bin:/usr/X11/bin:~/bin:~/pbin:/usr/local/sbin:$PATH
+export PATH=${PATH}:/bin:/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/games:/usr/share/games
+export PATH=$PATH:/Developer/usr/bin:/Developer/usr/sbin:/usr/local/mysql/bin:/opt/X11/bin
+#export PATH=$PATH:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
+#export PATH=$PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin
+#export PATH=$PATH:/System/Library/Frameworks/Python.framework/Versions/Current/bin
+export PATH=$PATH:~/.gem/ruby/1.8/bin:~/.rvm/bin
 #
 # For non-root users, add the current directory to the search path:
 if [ ! "`id -u`" = "0" ]; then
  PATH="$PATH:."
 fi
 #
+#
+# Ruby Version Manager
+source /Users/robbie/.rvm/scripts/rvm
+#
 # my manual (man pages) paths
-export MANPATH=/opt/local/share/man:/usr/local/man:/usr/local/share/man:/usr/share/man:$MANPATH
+export MANPATH=/usr/local/share/man:$MANPATH
+export MANPATH=/opt/X11/share/man:/usr/local/man:/usr/share/man:$MANPATH
 export MANPATH=$MANPATH:/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11/man:~/Sync/Bash/man
 #
 # perl paths
-PERL5LIB="/opt/local/lib/perl5/5.8.9:/opt/local/lib/perl5/5.8.8:/usr/bin/perl5.8.8:/Library/Perl/Updates/5.10.0:/opt/local/lib/perl5/site_perl/5.8.9/:/opt/local/lib/perl5/vendor_perl/5.8.9"
-export PERL5LIB
+#PERL5LIB="/Users/robbie/perl5/lib/perl5/:/System/Library/Perl/5.12"
+#export PERL5LIB
 #
 # Setting PATH for MacPython 2.5
 # The orginal version is saved in .bash_profile.pysave
 # PATH="/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}"
-export PYTHONPATH="/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/"
-export PYTHONPATH=$PYTHONPATH":/System/Library/Frameworks/Python.framework/Versions/Current/bin/"
+#export PYTHONPATH="/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/"
+#export PYTHONPATH=$PYTHONPATH"/System/Library/Frameworks/Python.framework/Versions/2.7/bin/:/System/Library/Frameworks/Python.framework/Versions/Current/bin/"
 
 ## Ruby Paths
 # unset RUBYOPT
@@ -200,7 +209,7 @@ function _ssh() {
 complete -F _ssh ssh sftp scp
 complete -A hostname ssh sftp scp
 #
-if [ -f /opt/local/share/doc/git-core/contrib/completion/git-completion.bash ]; then
+if [ -f /usr/local/share/doc/git-core/contrib/completion/git-completion.bash ]; then
 	source /opt/local/share/doc/git-core/contrib/completion/git-completion.bash
 fi
 #
@@ -208,7 +217,7 @@ if [ -f /usr/local/git/contrib/completion/git-completion.bash ]; then
 	source /usr/local/git/contrib/completion/git-completion.bash
 fi
 #
-if [ -f /opt/local/etc/bash_completion.d/git ]; then
+if [ -f /usr/local/etc/bash_completion.d/git ]; then
 	source /opt/local/etc/bash_completion.d/git
 fi
 #
@@ -283,6 +292,9 @@ export LESS_TERMCAP_se=$'\E[0m'           # end standout-mode
 export LESS_TERMCAP_so=$'\E[38;5;246m'    # begin standout-mode - info box
 export LESS_TERMCAP_ue=$'\E[0m'           # end underline
 export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
+
+#Set my Default Browser
+export BROWSER=FireFox.app
 # --------------------------------------------------------------------------------
 #
 # set LC & LANG , iTerm does not handle UTF-8 fully otherwise :{
@@ -354,9 +366,9 @@ match_lhs=""
 # otherwise use default OSX colours
 # $ sudo port install coreutils
 if [[ `uname` = "Darwin" ]]; then
-	if [[ -f /opt/local/bin/gls ]]; then
+	if [[ -f /usr/local/bin/gls ]]; then
 		#export LS_OPTIONS='--color=auto'
-		eval `dircolors ~/.dir_colors`
+		eval `/usr/local/bin/gdircolors ~/.dir_colors`
 		#ls aliases for use with dircolors
 		alias l='gls --color=auto -lAhF'
 		alias l.='gls --color=auto -d .*'
@@ -491,6 +503,9 @@ if [[ "$ipconfig getifaddr en0" != "192.168.2.1*" ]]; then
 	fi
 fi
 #
+# brew / homebrew completions
+. $(brew --repository)/Library/Contributions/brew_bash_completion.sh
+
 # -------------------------------------------------------------------------------
 #                          Make $HOME comfy
 # -------------------------------------------------------------------------------
@@ -939,6 +954,8 @@ _gcd()
     fi
 }
 complete -o nospace -F _gcd gcd
+
+
 # ----------------------------------------------------------------------------
 #                          FINAL-CLOSING STUFF
 # ----------------------------------------------------------------------------
