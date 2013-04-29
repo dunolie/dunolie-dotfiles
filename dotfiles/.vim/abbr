@@ -6,8 +6,8 @@
 "Headers
 iab _vh "Robbie Terris (dunolie@gmail.com) <C-R>=strftime("%c")<CR>
 iab _bh #Robbie Terris (dunolie@gmail.com) <C-R>=strftime("%c")<CR>
-iab _vlm " Last modified: <C-R>=strftime("%c")<CR>
-iab _blm # Last modified: <C-R>=strftime("%c")<CR>
+iab _lmv " Last modified: <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
+iab _lm <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
 iab _env #!/usr/bin/env xxxx
 "----------------------------------------------------------------------
 " Various
@@ -31,9 +31,9 @@ iab _rmail robbie@ruralinternet.co.uk (Robbie Terris)
 iab _dts <C-R>=strftime("%c")<CR>
 iab _date <C-R>=strftime("%d/%m/%y")<CR>
 iab _dt <C-R>=strftime("%T")<CR>
+iab _ft <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
 
 iab _created Created on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime("%T")<CR>
-iab _lm Last Modified on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime("%T")<CR>
 iab _modified Last Modified on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime("%T")<CR>
 
 "----------------------------------------------------------------------
@@ -44,9 +44,9 @@ iab _modified Last Modified on: <C-R>=strftime("%d/%m/%y")<CR> @ <C-R>=strftime(
 iab _bash #!/usr/bin/env bash
 \<CR># -------------------------------------------------------------------------------
 \<CR>#         Author: Robbie -- dunolie (at) gmail (dot) com
-\<CR>#      File name:
-\<CR>#        Created: TIMESTAMP
-\<CR>#  Last Modified: TIMESTAMP
+\<CR>#      File name: <C-R>%
+\<CR>#        Created: <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
+\<CR>#  Last Modified: <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
 \<CR># -------------------------------------------------------------------------------
 \<CR>#       Comments:
 \<CR>#    Description:
@@ -55,10 +55,30 @@ iab _bash #!/usr/bin/env bash
 
 iab _doc # -------------------------------------------------------------------------------
 \<CR>#         Author: Robbie -- dunolie (at) gmail (dot) com
-\<CR>#      File name:
-\<CR>#        Created: TIMESTAMP
-\<CR>#  Last Modified: TIMESTAMP
+\<CR>#      File name: <C-R>%
+\<CR>#        Created: <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
+\<CR>#  Last Modified: <C-R>=strftime("%a %d %b %Y %T %p %Z")<CR>
 \<CR># -------------------------------------------------------------------------------
 \<CR>#       Comments:
 \<CR>#    Description:
 \<CR># -------------------------------------------------------------------------------
+
+iab _cols # colour values for use in scripts. Usage:  text 
+\<CR>NC='\033[0m' # No Color
+\<CR>WHITE='\033[1;37m'
+\<CR>BLACK='\033[0;30m'
+\<CR>BLUE='\033[0;34m'
+\<CR>L_BLUE='\033[1;34m'
+\<CR>GREEN='\033[0;32m'
+\<CR>L_GREEN='\033[1;32m'
+\<CR>CYAN='\033[0;36m'
+\<CR>L_CYAN='\033[1;36m'
+\<CR>RED='\033[0;31m'
+\<CR>L_RED='\033[1;31m'
+\<CR>PURPLE='\033[0;35m'
+\<CR>L_PURPLE='\033[1;35m'
+\<CR>YELLOW='\033[1;33m'
+\<CR>L_YELLOW='\033[0;33m'
+\<CR>GRAY='\033[1;30m'
+\<CR>L_GRAY='\033[0;37m'
+

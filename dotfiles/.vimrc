@@ -1,13 +1,13 @@
-" -------------------------------------------------------------------------------
+" ----------------------------------------------------------------------------
 "         Author: Robbie -- dunolie (at) gmail (dot) com
 "      File Name: vimrc ($HOME/.vimrc)
 "        Created: Thu 26 Feb 2006 03:15:54 PM GMT
-"  Last Modified: Wed 25 Nov 2009 09:08:27 pm GMT
-" -------------------------------------------------------------------------------
+"  Last Modified: Fri 16 Jul 2010 23:31:49 pm BST
+" ----------------------------------------------------------------------------
 "       Comments: mainly used on mac OS X
 "    Description:
-" -------------------------------------------------------------------------------
-
+" ----------------------------------------------------------------------------
+" TODO ~ fix the colorscheme!! it does not want to load automatically >:s
 " ----------------------------------------------------------------------------
 "                              REFERENCES
 " ----------------------------------------------------------------------------
@@ -25,6 +25,8 @@
 "This must be first, because it changes other options as a side effect.
 set nocompatible
 "-----------------------------------------------------------------------
+colorscheme dunolie
+
 "store lots of :cmdline history
 set history=500
 
@@ -41,7 +43,7 @@ set cursorline
 " Timestamps and modification dates
 " --------------------------------------------------------------------------
 " Exclude these
-""let g:timestamp_automask = "~/.vim/abbr"
+let g:timestamp_automask = "~/.vim/abbr"
 
 "<!-- Timestamp: Thu 26/02/2004 05:49:33 PM gautam@math:timestamp.txt -->
 augroup TimeStampHtml
@@ -66,22 +68,37 @@ let timestamp_regexp = '\v\C%(<Last %([cC]hanged?|[Mm]odified):\s+)@<=.*$'
 " NOTE: You will need to replace ^[ with a raw Escape character, which you
 " can type by typing Ctrl-V and then (after releaseing Ctrl-V) the Escape key.
 if has("terminfo")
-  set t_Co=16
-  set t_AB=[%?%p1%{8}%<%t%p1%{40}%+%e%p1%{92}%+%;%dm
-  set t_AF=[%?%p1%{8}%<%t%p1%{30}%+%e%p1%{82}%+%;%dm
+	set t_Co=16
+	set t_AB=[%?%p1%{8}%<%t%p1%{40}%+%e%p1%{92}%+%;%dm
+	set t_AF=[%?%p1%{8}%<%t%p1%{30}%+%e%p1%{82}%+%;%dm
 else
-  set t_Co=16
-  set t_Sf=[3%dm
-  set t_Sb=[4%dm
+	set t_Co=16
+	set t_Sf=[3%dm
+	set t_Sb=[4%dm
 endif
 
-" my colour scheme
-colorscheme dunolie
-
-"dont load csapprox if we have no gui support - silences an annoying warning
+"---------------------------------------------------------------------------
+" Colorscheme
+" --------------------------------------------------------------------------
+"dont load csapprox if no gui support - silences an annoying warning
 if !has("gui")
-    let g:CSApprox_loaded = 1
+		let g:CSApprox_loaded = 1
+		colorscheme dunolie
+	else
+	if has("gui_gnome")
+		set term=gnome-256color
+		colorscheme 256_ir_black
+	endif
+	if has("gui_mac") || has("gui_macvim")
+		colorscheme 256_ir_black
+		set guifont=Menlo:h13
+	endif
+		if has("gui_win32") || has("gui_win32s")
+		set guifont=Consolas:h12
+		colorscheme 256_ir_black
+	endif
 endif
+
 "---------------------------------------------------------------------------
 " Statusline
 " --------------------------------------------------------------------------
@@ -90,7 +107,7 @@ endif
 " define 3 custom highlight group
 
 hi User1 ctermbg=darkgray ctermfg=lightred cterm=NONE guibg=NONE guifg=lightred gui=NONE
-hi User2 ctermbg=darkgray  ctermfg=lightyellow cterm=NONE guibg=NONE   guifg=lightyellow gui=NONE
+hi User2 ctermbg=darkgray  ctermfg=magenta cterm=NONE guibg=NONE   guifg=magenta gui=NONE
 hi User3 ctermbg=darkgray ctermfg=lightgreen cterm=NONE guibg=NONE  guifg=lightgreen gui=NONE
 
 " --------------------------------------------------------------------------
@@ -103,7 +120,7 @@ set statusline+=%*
 
 set statusline+=%y "filetype
 set statusline+=%#search#
-set statusline+=\ %.20F       "tail of the filename
+set statusline+=\ %.20F       "tail of the file name
 " set statusline+=%1*  "switch to User1 highlight (lightred on darkgr
 " set statusline+=%#modemsg#  "switch to User3 highlight (lightgreen on darkgray)
 set statusline+=%*
@@ -319,23 +336,6 @@ endif
 "map <MouseMiddle> <esc>"*p
 "
 "-----------------------------------------------------------------------
-"dont load csapprox if no gui support - silences an annoying warning
-"if !has("gui")
-"		let g:CSApprox_loaded = 1
-"	else
-"	if has("gui_gnome")
-"		set term=gnome-256color
-"		colorscheme 256_ir_black
-"	endif
-"	if has("gui_mac") || has("gui_macvim")
-"		colorscheme 256_ir_black
-"		set guifont=Menlo:h13
-"	endif
-"	if has("gui_win32") || has("gui_win32s")
-"		set guifont=Consolas:h12
-"		colorscheme 256_ir_black
-"	endif
-"endif
 
 "-----------------------------------------------------------------------
 "display tabs and trailing spaces
@@ -441,7 +441,15 @@ if &term =~ "xterm"
 " use xterm titles
 if has('title')
 	set title
+	set titlestring=%t%(\ %M%)%(\ (%{expand(\"%:p:h\")})%)%(\ %a%)\ -\ %{v:servername}
 endif
+
+" ---------------------------------------------------------------------------
+"  Set title in screen sessions
+" ---------------------------------------------------------------------------
+" http://vim.wikia.com/wiki/Automatically_set_screen_title
+""set titlestring=%t%(\ %M%)%(\ (%{expand(\"%:p:h\")})%)%(\ %a%)\ -\ %{v:servername}
+
 " change cursor colour depending upon mode
 if exists('&t_SI')
 		let &t_SI = "\<Esc>]12;lightgoldenrod\x7"
@@ -483,14 +491,12 @@ endfunction
 "                           SYSTEM & RUN-TIME-PATHS
 " ----------------------------------------------------------------------------
 
-" http://mix.dk/blog/viewEntry/162
-" Can be: linux, mac, windows
+" http://mix.dk/blog/viewEntry/162 --  linux, mac, windows
 fun! MySys()
-return "unix"
+return "mac"
 endfun
 
 set bs=2 " backspacing over everything in insert mode
-
 
 "load ftplugins and indent files
 filetype plugin on
@@ -500,7 +506,7 @@ set ai " Auto indenting
 " we like security/
 set nomodeline
 
-" min num of lines to keep above/below the cursor/
+" minimum number of lines to keep above/below the cursor/
 set scrolloff=2
 
 " ----------------------------------------------------------------------------
@@ -545,17 +551,18 @@ endif
 " for ctrl-P and ctrl-N completion, get things from syntax file
 autocmd BufEnter * exec('setlocal complete+=k$VIMRUNTIME/syntax/'.&ft.'.vim')
 
-
 "mark syntax errors with :signs
 let g:syntastic_enable_signs=1
 
 " ----------------------------------------------------------------------------
 "                                  VARIOUS
 " ----------------------------------------------------------------------------
+
+" Syntax highlighting for subtitle files (srt/sub)
+au BufNewFile,BufRead *.srt setf srt
+au BufNewFile,BufRead *.sub setf sub
+
 "
-
-
-" Prevents Vim 7.0 from setting filetype to 'plaintex'
 let g:tex_flavor='LaTeX'
 " When editing a file, always jump to the last cursor position
 
@@ -570,7 +577,7 @@ autocmd BufReadPost *
 " Always show the menu, insert longest match
 set completeopt=menuone,longest
 
-"auto-detect the filetype
+"auto-detect the file type
 filetype plugin indent on
 
 map ¬Ω $
@@ -643,13 +650,10 @@ set noignorecase
 " show which mode we're in (insert, replace, etc)
 set showmode
 
-" display title in X.
-set title
-
 " do not keep a search highlighted.
 "set nohlsearch  "OFF as i have it set in my syntax settings
 
-" for in search patterns .. no clue what it does.
+" for in search patterns. I have no clue what it does.
 set magic
 
 " keep cursor in the present column with page commands.
@@ -676,7 +680,7 @@ set vb t_vb=
 " set the print options.
 set printoptions=header:0
 
-" suffixes that get lower priority when doing tab completion for filenames.
+" suffixes that get lower priority when doing tab completion for file names.
 set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
 
 " Speed optimizations
@@ -690,7 +694,7 @@ set ttyfast
 "  F01 = NerdTree - toggle
 "  F02 = Taglist - toggle
 "  F03 = Search history - toggle
-"  F04 = add a commente line
+"  F04 = add a comment line
 "  F05 = Line numbers, on/off
 "  F06 = Uncomment lines - Visual mode
 "  F07 = Paste mode - ON
@@ -713,12 +717,10 @@ nmap <silent> <F1> :NERDTreeToggle<CR>
 map <silent> <F2> :TlistToggle<CR>
 
 " Toggle highligted search results
-"
 map <silent> <F3> :set invhlsearch<CR>
 
 " Toggle line numbers
 " map <silent> <F4> :set invnumber<CR>
-
 
 " syntax on/off
 map <F6> :if exists("syntax_on") <Bar>
@@ -754,6 +756,90 @@ map <F14> gqap
 
 " ----------------------------------------------------------------------------
 
+" Update vim plugins automatically
+" http://jetpackweb.com/blog/2010/01/12/how-to-keep-your-vim-plugins-up-to-date/
+""let g:GetLatestVimScripts_allowautoinstall=1
+""set runtimepath+=~/.vim/vim-addon-manager
+""call vam#ActivateAddons([Nerdtree ctags])
+"
+"put thiss line first in ~/.vimrc
+        set nocompatible | filetype indent plugin on | syn on
+
+        fun! EnsureVamIsOnDisk(plugin_root_dir)
+          " windows users may want to use http://mawercer.de/~marc/vam/index.php
+          " to fetch VAM, VAM-known-repositories and the listed plugins
+          " without having to install curl, 7-zip and git tools first
+          " -> BUG [4] (git-less installation)
+          let vam_autoload_dir = a:plugin_root_dir.'/vim-addon-manager/autoload'
+          if isdirectory(vam_autoload_dir)
+            return 1
+          else
+            if 1 == confirm("Clone VAM into ".a:plugin_root_dir."?","&Y\n&N")
+              " I'm sorry having to add this reminder. Eventually it'll pay off.
+              call confirm("Remind yourself that most plugins ship with ".
+                          \"documentation (README*, doc/*.txt). It is your ".
+                          \"first source of knowledge. If you can't find ".
+                          \"the info you're looking for in reasonable ".
+                          \"time ask maintainers to improve documentation")
+              call mkdir(a:plugin_root_dir, 'p')
+              execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.
+                          \       shellescape(a:plugin_root_dir, 1).'/vim-addon-manager'
+              " VAM runs helptags automatically when you install or update 
+              " plugins
+              exec 'helptags '.fnameescape(a:plugin_root_dir.'/vim-addon-manager/doc')
+            endif
+            return isdirectory(vam_autoload_dir)
+          endif
+        endfun
+
+        fun! SetupVAM()
+          " Set advanced options like this:
+          " let g:vim_addon_manager = {}
+          " let g:vim_addon_manager.key = value
+          "     Pipe all output into a buffer which gets written to disk
+          " let g:vim_addon_manager.log_to_buf =1
+
+          " Example: drop git sources unless git is in PATH. Same plugins can
+          " be installed from www.vim.org. Lookup MergeSources to get more control
+          " let g:vim_addon_manager.drop_git_sources = !executable('git')
+          " let g:vim_addon_manager.debug_activation = 1
+
+          " VAM install location:
+          let c = get(g:, 'vim_addon_manager', {})
+          let g:vim_addon_manager = c
+          let c.plugin_root_dir = expand('$HOME/.vim/vim-addons')
+          if !EnsureVamIsOnDisk(c.plugin_root_dir)
+            echohl ErrorMsg | echomsg "No VAM found!" | echohl NONE
+            return
+          endif
+          let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
+
+          " Tell VAM which plugins to fetch & load:
+          call vam#ActivateAddons([], {'auto_install' : 0})
+          " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
+
+          " Addons are put into plugin_root_dir/plugin-name directory
+          " unless those directories exist. Then they are activated.
+          " Activating means adding addon dirs to rtp and do some additional
+          " magic
+
+          " How to find addon names?
+          " - look up source from pool
+          " - (<c-x><c-p> complete plugin names):
+          " You can use name rewritings to point to sources:
+          "    ..ActivateAddons(["github:foo", .. => github://foo/vim-addon-foo
+          "    ..ActivateAddons(["github:user/repo", .. => github://user/repo
+          " Also see section "2.2. names of addons and addon sources" in VAM's documentation
+        endfun
+        call SetupVAM()
+        " experimental [E1]: load plugins lazily depending on filetype, See
+        " NOTES
+        " experimental [E2]: run after gui has been started (gvim) [3]
+        " option1:  au VimEnter * call SetupVAM()
+        " option2:  au GUIEnter * call SetupVAM()
+        " See BUGS sections below [*]
+        " Vim 7.0 users see BUGS section [3]
+
 " Use SQL Server syntax file for .sql files
 let g:sql_type_default = "sqlserver"
 " Functions for cleaning up tabs and spaces
@@ -784,15 +870,34 @@ nmap # #zz
 nmap g* g*zz
 nmap g# g#zz
 
-" Fix my <Backspace> key (in Mac OS X Terminal)
+" fix my <Backspace> key (in Mac OS X Terminal)
 "set t_kb=fixdel
 
-let Tlist_GainFocus_On_ToggleOpen=1
-let Tlist_Process_File_Always=1
-let Tlist_Show_Menu=1
-let Tlist_Enable_Fold_Column=0
+" ---------------------------------------------------------------------------
+"                          Ctags
+"
+" ---------------------------------------------------------------------------
+"
+let Tlist_GainFocus_On_ToggleOpen = 1
+let Tlist_Process_File_Always = 1
+let Tlist_Show_Menu = 1
+let Tlist_Enable_Fold_Column = 0
+let Tlist_Use_Right_Window = 1
+let Tlist_WinWidth = 25
+let Tlist_Inc_WinWidth = 1
+let Tlist_Exit_OnlyWindow = 1
+let Tlist_Auto_Open = 0
+let Tlist_Use_SingleClick = 1
+let Tlist_Compact_Format = 1
+let Tlist_Ctags_Cmd = '/usr/local/bin/ctags'
 
-"map to fuzzy finder text mate stylez
+map <leader>l :TlistToggle<CR>
+
+" ---------------------------------------------------------------------------
+"                          FuzzyFinder
+" ---------------------------------------------------------------------------
+"
+"map to fuzzy finder text mate style
 nnoremap <c-f> :FuzzyFinderTextMate<CR>
 "map <leader>t :FuzzyFinderTextMate<CR>
 "map <leader>b :FuzzyFinderBuffer<CR>
@@ -814,7 +919,6 @@ let g:fuzzy_ignore = "*.bak;*.dmg;*.flac;*.part;*.torrent"
 
 map <leader>R :RunSpecs<CR>
 map <leader>f :Ack
-map <leader>l :TlistToggle<CR>
 
 " ---------------------------------------------------------------------------
 "                          NERDTree
@@ -891,8 +995,6 @@ autocmd BufRead mutt*[0-9] set formatoptions=tcqn
 " set up syntax highlighting for my e-mail
 au BufRead,BufNewFile .followup,.article,.letter,/tmp/pico*,nn.*,snd.*,/tmp/mutt* :set ft=mail
 
-
-
 " for cvs commit logs
 autocmd BufRead cvs*[a-zA-Z0-9] set tw=64
 autocmd BufRead cvs*[a-zA-Z0-9] set formatoptions=tqn
@@ -911,17 +1013,17 @@ au BufWritePost * if getline(1) =~ "^#!" | if getline(1) =~ "/bin/" | silent !ch
 
 " Spell Checking in VIM from - http://hacktux.com/
 " Enable
-"set spell
+set nospell
 
 " Enable Spellfile
-"set spell spelllang=en_gb
+set spelllang=en_gb
 " zg to add word to word list
 " zw to reverse
 " zug to remove word from word list
 " z= to get list of possibilities
-"set spellfile=~/.vim/spellfile.add
+set spellfile=~/.vim/spellfile.add
 
-" Set Colours For Spelling
+" Set Colours For Spelling #moved to my default theme
 "highlight clear SpellBad
 "highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
 "highlight SpellBad term=underline ctermfg=1 term=underline cterm=underline
@@ -931,15 +1033,16 @@ au BufWritePost * if getline(1) =~ "^#!" | if getline(1) =~ "/bin/" | silent !ch
 "highlight clear SpellLocal
 "highlight SpellLocal term=underline cterm=underline
 
-"map <leader>sn ]s
-"map <leader>sp [s
-"map <leader>sa zg
-"map <leader>s? z=
+map <leader>sn ]s
+map <leader>sp [s
+map <leader>sa zg
+map <leader>s? z=
 
 " Alternative Spelling options
 "set spelllang=en
 "set spellfile=~/.vim/en.utf-8.spl.add
-"let loaded_spellfile_plugin = 1
+let loaded_spellfile_plugin = 1
+
 "-----------------------------------------------------------------------
 " completion
 "-----------------------------------------------------------------------
@@ -954,7 +1057,7 @@ vmap <silent> <Leader>i, <ESC>:AlignPush<CR>:AlignCtrl lp0P1<CR>:'<,'>Align ,<CR
 vmap <silent> <Leader>i( <ESC>:AlignPush<CR>:AlignCtrl lp0P0<CR>:'<,'>Align (<CR>:AlignPop<CR>
 
 "-----------------------------------------------------------------------
-" Buffer Sellection
+" Buffer Selection
 "-----------------------------------------------------------------------
 " http://djcraven5.blogspot.com/2006/10/faster-buffer-switches-in-vim_21.html
 function! BufSel(pattern)
@@ -1004,6 +1107,10 @@ if filereadable(expand("~/.vim/abbr"))
 	source ~/.vim/abbr
 endif
 
+" ----------------------------------------------------------------------------
+"                              Search
+" ----------------------------------------------------------------------------
+
 "Ignore case when searching
 set ignorecase
 set incsearch
@@ -1040,7 +1147,7 @@ map <leader>cd :cd %:p:h<cr>
 " ----------------------------------------------------------------------------
 " Files and backups
 " ----------------------------------------------------------------------------
-
+"
 "Turn backup off
 set nobackup
 set nowb
@@ -1049,7 +1156,7 @@ set noswapfile
 " ----------------------------------------------------------------------------
 " Folding
 " ----------------------------------------------------------------------------
-set nofoldenable        "dont fold by default
+set nofoldenable        "don't fold by default
 
 "Enable folding, I find it very useful
 ""set enable folds
@@ -1062,15 +1169,11 @@ set nofoldenable        "dont fold by default
 " ----------------------------------------------------------------------------
 " MISC
 " ----------------------------------------------------------------------------
-let Tlist_Ctags_Cmd='/opt/local/bin/ctags'
 "Remove the Windows ^M
 noremap <Leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 
 " Paste toggle - when pasting something in, don't indent.
 " set pastetoggle=<F3>
-
-"Remove indenting on empty lines
-" map <F2> :%s/\s*$//g<cr>:noh<cr>''
 
 "Super paste
 inoremap <C-v> <esc>:set paste<cr>mui<C-R>+<esc>mv'uV'v=:set nopaste<cr>
@@ -1136,8 +1239,8 @@ nmap <c-right> <c-w>l
 " ----------------------------------------------------------------------------
 " Task list - http://www.vim.org/scripts/script.php?script_id=2607
 " ----------------------------------------------------------------------------
-map T :TaskList<CR>
-map P :TlistToggle<CR>
+""map T :TaskList<CR>
+"map P :TlistToggle<CR>
 " ----------------------------------------------------------------------------
 
 "jump to last cursor position when opening a file
@@ -1228,7 +1331,7 @@ inoremap <s-tab> <c-r>=InsertTabWrapper ("back")<cr>
 "edit json and make more readable - uses cpan JSON::XS - (mapleader ,jt)
 map <leader>jt  <Esc>:%!json_xs -f json -t json-pretty<CR>
 
-"" edit fiile as sudo
+"" edit file as sudo
 command! -bar -nargs=0 SudoW   :silent exe "write !sudo tee % >/dev/null" | silent edit!
 
 "paste in vim without moving the cursor
@@ -1238,15 +1341,9 @@ noremap P P` [
 " ---------------------------------------------------------------------------
 
 function! StripWhitespace ()
-	exec ':%s/ \+$//gc'
+	exec ':%s/ \+$//g'
 endfunction
 map ,s :call StripWhitespace ()<CR>
-
-" ---------------------------------------------------------------------------
-"  Set title in screen sessions
-" ---------------------------------------------------------------------------
-" http://vim.wikia.com/wiki/Automatically_set_screen_title
-set titlestring=%t%(\ %M%)%(\ (%{expand(\"%:p:h\")})%)%(\ %a%)\ -\ %{v:servername}
 
 " ----------------------------------------------------------------------------
 "                  File Types

@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/Users/robbie/git/projects/dunolie-dotfiles/html/dotfiles'
+let g:netrw_dirhist_2='/Users/robbie/.vim/snippets'
+let g:netrw_dirhist_3='/Users/robbie/.vim/snippets/bash'
+let g:netrw_dirhist_4='/Users/robbie/foo'
+let g:netrw_dirhist_5='/Users/robbie/Code/sources/robinst-brainztag/.git'
+let g:netrw_dirhist_6='/Users/robbie/git/projects/dunolie-dotfiles/dotfiles/.irssi'
+let g:netrw_dirhist_7='/Users/robbie/git/projects/dunolie-dotfiles/dotfiles/.moc'
+let g:netrw_dirhist_8='/private/etc/apache2/users'
