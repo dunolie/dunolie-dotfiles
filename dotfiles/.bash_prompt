@@ -1,11 +1,10 @@
 #        Author: Robbie - dunolie (at) gmail (dot) com
 #      Filename: bash_prompt  ($HOME/.bash_prompt)
 #       Created: Fri 11 Dec 2009 14:31:39 pm GMT
-# Last Modified: Thu 24 Dec 2009 00:41:20 am GMT
+# Last Modified: Sat 17 Jul 2010 02:03:33 am BST
 #   Description: My bash prompt
 #      Comments: my fork of the prompt @  http://gist.github.com/31967
 ################################################################################
-#   DESCRIPTION:
 #
 #   Set the bash prompt according to:
 #    * the branch/status of the current git repository
@@ -19,25 +18,11 @@
 #        . ~/.git_svn_bash_prompt
 #
 #      AUTHORS:
-#
 #   Scott Woods <scott@westarete.com>     --     West Arete Computing
-#
 #   Based on work by halbtuerke and lakiolen.
-#
 #   http://gist.github.com/31967
-# The various escape codes that we can use to color our prompt.
-# What I have in my ~/.bashrc to work with the prompt
 ################################################################################
-# Xterm title bar
-#case $TERM in
-#	xterm*)
-#		XTITLE='\[\033k\033\\\]\[\e]0; (\!) (\#) [\u@\h] [\w] \@ \007\]';
-#		;;
-#	*)
-#		XTITLE="";
-#	;;
-#esac
-
+# What I have in my ~/.bashrc to work with the prompt
 #if [[ -f ~/.bash_prompt ]]; then
 #	. ~/.bash_prompt
 #else
@@ -45,10 +30,10 @@
 #	PS2='[http://bit.ly/4wngdq]\u@\h \W » '
 #	SUDO_PS1='SUDO - \u@\h \W ☯ '
 #fi
-
-# so I get my xterm titles working in screen.
+#
+# so I get my xterm titles working in screen. (mocp, vim, etc)
 #if [ "$TERM" = "screen" ]; then
-#    export TERM=xterm
+#    export TERM=xterm-color
 #fi
 ################################################################################
 # \a     an ASCII bell character (07)
@@ -81,7 +66,6 @@
 ################################################################################
 # fully escaped color values for use in prompts
 # color_name='\[\033[ color_code m\]'
-
 E_WHITE='\[\033[1;37m\]'
 E_BLACK='\[\033[0;30m\]'
 E_BLUE='\[\033[0;34m\]'
@@ -133,20 +117,18 @@ function set_git_branch {
       remote="↓"
     fi
   fi
+  # Check if branch has diverged
   diverge_pattern="# Your branch and (.*) have diverged"
   if [[ ${git_status} =~ ${diverge_pattern} ]]; then
     remote="↕"
   fi
-
   # Get the name of the branch.
   branch_pattern="^# On branch ([^${IFS}]*)"
   if [[ ${git_status} =~ ${branch_pattern} ]]; then
     branch=${BASH_REMATCH[1]}
   fi
-
   # Set the final branch string.
-  #BRANCH="${state}(${branch})${remote} "  #original
-  BRANCH="${state}${remote}(${branch}) "
+  BRANCH="${state}(${branch})${remote} "
 }
 
 # Determine the branch information for this subversion repository. No support
@@ -154,7 +136,6 @@ function set_git_branch {
 function set_svn_branch {
   # Capture the output of the "git status" command.
   svn_info="$(svn info | egrep '^URL: ' 2> /dev/null)"
-
   # Get the name of the branch.
   branch_pattern="^URL: .*/(branches|tags)/([^/]+)"
   trunk_pattern="^URL: .*/trunk(/.*)?$"
@@ -163,7 +144,6 @@ function set_svn_branch {
   elif [[ ${svn_info} =~ $trunk_pattern ]]; then
     branch='trunk'
   fi
-
   # Set the final branch string.
   BRANCH="${E_L_YELLOW}(${branch})${E_NC} "
 }
@@ -193,21 +173,11 @@ function set_bash_prompt () {
   else
     BRANCH=''
   fi
-
-function battcharge () {
-	batterypromptbash=`batterystat -p plugged`
-	if [[ -f ~/bin/batterystat ]] && [[ $batterypromptbash == "0" ]]; then
-		BATT='echo -e "${E_PURPLE}[${E_RED} $(batterystat -p charge)%${E_PURPLE}]"'
-	fi
-}
   # Set the bash prompt variable.
-  #PS1="\u@\h \w ${BRANCH}${PROMPT_SYMBOL} "
-  #PS1="${XTITLE}${E_PURPLE}[\!][\A][\u@\h]${E_GREEN} \W ${BRANCH}${E_L_RED}\$ ${E_NC}"
-  #PS1="${XTITLE}${E_PURPLE}[\!][\A]${BATT}[\u@\h]${E_GREEN} \W ${BRANCH}${PROMPT_SYMBOL}"
   PS1="${XTITLE}${E_PURPLE}[\!][\A][\u@\h]${E_GREEN} \W ${BRANCH}${PROMPT_SYMBOL}"
   PS2="${XTITLE}${E_PURPLE}[\!][\A][\u@\h]${E_GREEN} \W ${BRANCH}${E_L_RED}» ${E_NC}"
   SUDO_PS1="${XTITLE}${E_PURPLE}[\!][\A]${E_RED}[\u@\h] \W ${BRANCH}${E_L_RED}\$ ${E_NC}"
 }
 
 # Tell bash to execute this function just before displaying its prompt.
-PROMPT_COMMAND=set_bash_prompt
+PROMPT_COMMAND="set_bash_prompt history -a"

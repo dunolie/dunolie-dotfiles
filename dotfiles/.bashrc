@@ -243,6 +243,9 @@ fi
 #if [ -x /usr/libexec/path_helper ]; then
 #	eval `/usr/libexec/path_helper -s`
 #fi
+
+# brew / homebrew completions
+. $(brew --repository)/Library/Contributions/brew_bash_completion.sh
 # -------------------------------------------------------------------------------
 #                        HISTORY
 # -------------------------------------------------------------------------------
@@ -326,6 +329,12 @@ export MYSQL_DEFAULT_DB=mysql
 if [[ -z "${TZ}" ]] ; then
     export TZ='Europe/London'
 fi
+
+
+export RBENV_ROOT=/usr/local/var/rbenv
+
+#To enable shims and autocompletion add to your profile:
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 # -------------------------------------------------------------------------------
 #                       COMPILING FLAGS
 # -------------------------------------------------------------------------------
@@ -478,6 +487,8 @@ fi
 # source my netrc (for FTP connections)
 # source ~/.netrc
 #
+# auto jump https://github.com/joelthelion/Autojump
+[[ -s `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 # -------------------------------------------------------------------------------
 #                          Sourcing Aliases
 # -------------------------------------------------------------------------------
@@ -503,8 +514,7 @@ if [[ "$ipconfig getifaddr en0" != "192.168.2.1*" ]]; then
 	fi
 fi
 #
-# brew / homebrew completions
-. $(brew --repository)/Library/Contributions/brew_bash_completion.sh
+
 
 # -------------------------------------------------------------------------------
 #                          Make $HOME comfy

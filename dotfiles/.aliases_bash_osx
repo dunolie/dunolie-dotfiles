@@ -1,34 +1,31 @@
 #!/usr/bin/env bash
-#########################################################################
-# By Robbie -- dunolie@gmail.com
-# Created on: Wednesday,09 April, 2008
-# Last modified:
-# Description: My Bash Aliases (~/.bash_aliases_osx)
-# Snipped from website :
-# Snipped from IRC channel :
-# Snipped from : Loads of thanks to all i've snipped from :)
+#
+#        Author: Robbie - dunolie (at) gmail (dot) com
+#     File name: .aliases_bash_osx
+#       Created: TIMESTAMP        
+# Last Modified: TIMESTAMP
+#   Description: bash aliases for osx (loaded if `uname` = "Darwin")
+#      Comments: Loads of thanks to all i've snipped from :)
+################################################################################
 # http://www.dotfiles.com/files/3/441_dot.bashrc
 # http://qwert.us/content/bash_rc.php
 # http://www.novell.com/coolsolutions/tools/downloads/bashrc.txt
 # http://hayne.net/MacDev/Bash/
 # http://hayne.net/MacDev/Bash/aliases.bash
-#########################################################################
+################################################################################
 # Script Comments if needed : try and keep it clean & commented :)
-#########################################################################
+################################################################################
 
-# chit cheat sheets
-alias chitpa='chit "$1"  --add'
-alias chitpe='chit "$1" --edit'
-alias chitf='chit "$1" --find'
-alias chits='chit "$1" --search'
-alias chitpu='cd ~/.chit/private;git push origin master'
-alias chitu='cd ~/.chit/public; git clone'
-# git://github.com/robin/chitsheet.git
+# Speed up terminal by deleting old logs
+alias terminal-logs-delete='sudo rm -f /private/var/log/asl/*.asl'
 
-###################### OS X ONLY ALIASES
-# os x system info
-alias www='open -a Firefox $1'
-alias webserv='cd /Library/WebServer/Documents/'
+alias ffp='/Applications/Firefox.app/Contents/MacOS/firefox-bin -profilemanager'
+alias systail='tail -f /var/log/system.log'
+
+alias restart-osx='sudo shutdown -r +1 Restarting computer in 1 minute'
+alias shutdown-osx='sudo shutdown +1 Restarting computer in 1 minute'
+
+alias flush-dns='dscacheutil -flushcache'
 
 alias osx='echo -e "=-=-=-=-= Running OS X:\033[1;31m $(sw_vers -productVersion)\033[0m"'
 
@@ -36,7 +33,7 @@ alias sysinfo-mini='system_profiler -detailLevel mini'
 alias sysinfo-basic='system_profiler -detailLevel basic'
 alias sysinfo-full='system_profiler -detailLevel full'
 
-alias firefox-cli='/Applications/Firefox.app/Contents/MacOS/firefox'
+
 # http://hayne.net/MacDev/Bash/aliases.bash
 # numFiles: number of (non-hidden) files in current directory
 alias numFiles='echo $(ls -1 | wc -l)'
@@ -44,15 +41,21 @@ alias lnum='echo $(ls -1 | wc -l)'
 
 #wan ip
 alias wip="curl -s checkip.dyndns.org | grep -Eo '[0-9>]+'"
+
+# http://bit.ly/6QuTrM
+alias thumb800='sips -Z 800 "$@" --out 800-resized.png png'
+alias thumb600='sips -Z 600 "$@" --out 600x-resized.png png'
+alias thumb400='sips -Z 400 "$@" --out 400-resized.png png'
+alias thumb200='sips -Z 200 "$@" --out 200-resized.png png'
+alias isize='sips -g pixelWidth -g pixelHeight "$@"'
 alias isi='sips -g pixelWidth -g pixelHeight $@'
 
-
+alias tunes='ncmpcpp'
 alias abook='open -a Address\ Book $1'
 alias adium='open -a Adium $1'
 alias mailapp='open -a Mail'
 alias burnapp='open -a Burn $1'
-alias dictionary='open -a Dictionary $1'
-alias f='open -a "Finder" $1'
+#alias dictionary='open dict://"$@"'
 alias firefox='open -a Firefox "$@"'
 alias ffox='open -a Firefox "$@"'
 alias browser='open -a Firefox "$@"'
@@ -67,22 +70,32 @@ alias x11='open -a X11'
 alias ical='open -a iCal'
 alias nnw='open -a NetNewsWire'
 alias siteclone='open -a WebGrabber'
+alias www='open -a Firefox $1'
+alias vlc='open -a vlc $1'
+alias torrent-add='open -a Transmission $1'
+alias brainz='open -a "MusicBrainz Picard"'
 
 ##------------------------------------------------------------
 
 # empty OSX trash
-alias etrash='rm -fr ~/.Trash'
+alias trash-empty='/bin/rm -Rf ~/.Trash/*'
 
 alias showme='find . -name *'
 
-alias k='killall'
+alias k='killall "$@"'
 
+alias twit='termtter'
 ##------------------------------------------------------------
 
-alias SHUTDOWN='shutdown now -h'
-alias RESTART='sudo /sbin/shutdown -r now'
-alias ARDSTART="sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -users admin -privs -all -restart -agent -menu"
+alias lcl='launchctl list'
+alias lcs='launchctl start'
+##------------------------------------------------------------
 
+alias ard-start="sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -users admin -privs -all -restart -agent -menu"
+
+
+alias clear-flash-cache='rm -rf ~/Library/Preferences/Macromedia/*'
+alias rkhunter='rkhunter --versioncheck --update --propupd --check'
 ##------------------------------------------------------------
 
 ##-- SCREEN CAPTURE  -----------
@@ -118,10 +131,9 @@ alias systemsetup='/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Co
 alias swapinfo='sysctl vm.swapusage'
 
 # use vsdbutil to show/change the permissions ignoring on external drives
-# To ignore ownerships on a volume, do: sudo vsdbutil -d /VolumeName
-# To restore ownerships on a volume, do: sudo vsdbutil -a /VolumeName
-# To check the status of ownerships, do: sudo vsdbutil -c /VolumeName
-alias ignorepermissions='sudo vsdbutil -d'
+alias ignore-remote-disk-permissions='sudo vsdbutil -d "$@"'
+alias restore-remote-disk-permissions='sudo vsdbutil -a "$@"'
+alias check-remote-disk-permissions='sudo vsdbutil -c "$@"'
 
 # install all software updates from the command line
 alias updateallosx='COMMAND_LINE_INSTALL=1 export COMMAND_LINE_INSTALL; sudo softwareupdate -i -a'
@@ -166,12 +178,27 @@ alias numfiles='echo $(ls -1 | wc -l)'
 # rm_DS_Store_files: removes all .DS_Store file from the current dir and below
 alias rmDSstorefiles='find . -name .DS_Store -exec rm {} \;'
 
-alias opt-cpan='sudo /opt/local/bin/cpan $1'
-
-alias dls='cd ~/Downloads'
-alias obin='cd /opt/local/bin'
 alias cpani='sudo cpan $1'
-alias cpani-opt='sudo /opt/local/bin/cpan $1'
 
 # new tab in Terminal.app
 alias nt='tab -t $@'
+
+alias sgithub='ruby ~/bin/github.rb'
+
+# Merge dirs (OSX) mgdir dir1 dir2
+alias merge-dirs='ditto -V "$1" "$2"'
+alias goto="osascript -e 'open location \!'"
+# os x gnu plot
+alias gnuplot='/Applications/Gnuplot.app/Contents/Resources/bin/gnuplot-4.2.3'
+
+alias week='month; icalBuddy -f -ec Weeknumbers eventsToday+7'
+
+alias music-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=/Users/robbie/Desktop/music-info-`date +%d_%m_%y-%H:%M`.txt "$@"'
+alias music-dir-catalogue='/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin/dnuos --list-files -S --file=Album-Info.txt --output="[Y,4]| [n,-50]|[f,6]| [l,6] | [s,7] | [t,-4] | [q]" --file=Album-Info.txt "$@"'
+## ~---------------------------------------------------------------------------~
+## MACPORTS
+## ~---------------------------------------------------------------------------~
+alias spup='gns sudo port -u upgrade'
+alias spins='gns sudo port install'
+alias spde='sudo port deactivate'
+alias cpani-opt='sudo /opt/local/bin/cpan $1'
