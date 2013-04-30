@@ -477,7 +477,16 @@ end tell
 EOF
 }
 
-
+visual cp using pv
+function cpv ()
+{
+#pv -p "$1" > "$2"
+if [ -d $2 ]; then
+pv -p $1 > $2/$1
+else
+pv -p $1 > $2
+fi
+}
 
 # ---------------------------------------------
 
