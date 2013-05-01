@@ -2,12 +2,12 @@
 "         Author: Robbie -- dunolie (at) gmail (dot) com
 "      File Name: vimrc ($HOME/.vimrc)
 "        Created: Thu 26 Feb 2006 03:15:54 PM GMT-
-"  Last Modified: Tue Apr 30, 2013  03:42pm
+"  Last Modified: Wed May 01, 2013  02:11am
 " ----------------------------------------------------------------------------
 "       Comments: mainly used on mac OS X
 "    Description: vim ftw
 " ----------------------------------------------------------------------------
-" TODO ~ fix the colorscheme!! it does not want to load automatically >:s
+" TODO ~ learn more 
 " ----------------------------------------------------------------------------
 "                              REFERENCES
 " ----------------------------------------------------------------------------
@@ -26,7 +26,6 @@
 set nocompatible
 "-----------------------------------------------------------------------
 set term=xterm-256color
-colorscheme dunolie
 
 "store lots of :cmdline history
 set history=500
@@ -83,37 +82,39 @@ autocmd BufWritePre * call LastModified()
 " the plain colors, using these settings, are the same as the light ones
 " NOTE: You will need to replace ^[ with a raw Escape character, which you
 " can type by typing Ctrl-V and then (after releaseing Ctrl-V) the Escape key.
-if has("terminfo")
-	set t_Co=16
-	set t_AB=[%?%p1%{8}%<%t%p1%{40}%+%e%p1%{92}%+%;%dm
-	set t_AF=[%?%p1%{8}%<%t%p1%{30}%+%e%p1%{82}%+%;%dm
-else
-	set t_Co=16
-	set t_Sf=[3%dm
-	set t_Sb=[4%dm
-endif
+""if has("terminfo"
+""	set t_Co=16
+""	set t_AB=[%?%p1%{8}%<%t%p1%{40}%+%e%p1%{92}%+%;%dm
+""	set t_AF=[%?%p1%{8}%<%t%p1%{30}%+%e%p1%{82}%+%;%dm
+""else
+""	set t_Co=16
+""	set t_Sf=[3%dm
+""	set t_Sb=[4%dm
+""endif
 
 "---------------------------------------------------------------------------
 " Colorscheme
 " --------------------------------------------------------------------------
 "dont load csapprox if no gui support - silences an annoying warning
-if !has("gui")
-		let g:CSApprox_loaded = 1
-		colorscheme dunolie
-	else
-	if has("gui_gnome")
-		set term=gnome-256color
-		colorscheme 256_ir_black
-	endif
-	if has("gui_mac") || has("gui_macvim")
-		colorscheme 256_ir_black
-		set guifont=Menlo:h13
-	endif
-		if has("gui_win32") || has("gui_win32s")
-		set guifont=Consolas:h12
-		colorscheme 256_ir_black
-	endif
-endif
+"if !has("gui")
+"		let g:CSApprox_loaded = 1
+"		colorscheme dunolie
+"	else
+"	if has("gui_gnome")
+"		set term=gnome-256color
+"		colorscheme 256_ir_black
+"	endif
+"	if has("gui_mac") || has("gui_macvim")
+"		colorscheme 256_ir_black
+"
+"		set guifont=Menlo:h13
+"	endif
+"		if has("gui_win32") || has("gui_win32s")
+"		set guifont=Consolas:h12
+"		colorscheme 256_ir_black
+"	endif
+""endif
+
 
 "---------------------------------------------------------------------------
 " Statusline
@@ -1376,6 +1377,8 @@ au FileType make                set noexpandtab shiftwidth=8
 au FileType perl                set smartindent
 au FileType sh,make,perl,python let b:comment_leader = '# '
 au FileType tex                 let b:comment_leader = '% '
+
+colorscheme xoria256
 " ----------------------------------------------------------------------------
 " ~/.vimrc ends here
 " ----------------------------------------------------------------------------
