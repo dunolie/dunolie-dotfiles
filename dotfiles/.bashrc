@@ -272,12 +272,13 @@ fi
 #alias tclsh='/usr/bin/tclsh8.4'
 #export TCLSH='/usr/bin/tclsh8.4'
 #
-if [[ `uname` = "Darwin" ]]; then
-	export EDITOR='mate -w'
-else
-	export EDITOR='vim'
-fi
-export GIT_EDITOR='vim'
+#if [[ `uname` = "Darwin" ]]; then
+#	export EDITOR='mate -w'
+#else
+#	export EDITOR='vim'
+#fi
+export EDITOR="vim -c 'colorscheme xoria256'"
+export GIT_EDITOR="vim"
 export VISUAL="vim"
 export PAGER="less"
 export LESS="-erX"
@@ -487,8 +488,6 @@ fi
 # source my netrc (for FTP connections)
 # source ~/.netrc
 #
-# auto jump https://github.com/joelthelion/Autojump
-[[ -s `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 # -------------------------------------------------------------------------------
 #                          Sourcing Aliases
 # -------------------------------------------------------------------------------
@@ -897,15 +896,19 @@ fi
 if [[ -f ~/.bash_prompt ]]; then
 	. ~/.bash_prompt
 else
-	PS1='[http://bit.ly/4wngdq]\u@\h \W \$ '
-	PS2='[http://bit.ly/4wngdq]\u@\h \W » '
-	SUDO_PS1='SUDO - \u@\h \W ☯ '
+	PS1='\u@\h \W \$ '
+	PS2='\u@\h \W » '
+	SUDO_PS1='SUDO - \u@\h \W \$ '
 fi
 #
 # -------------------------------------------------------------------------------
 #                        AUTOJUMP
 # -------------------------------------------------------------------------------
-if [[ -f /usr/bin/autojump ]]; then
+#
+# auto jump https://github.com/joelthelion/Autojump
+[[ -s `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
+
+if [[ -f /usr/local/bin/autojump ]]; then
 # http://github.com/joelthelion/autojump
 	_autojump() {
 	        local cur
@@ -923,7 +926,8 @@ if [[ -f /usr/bin/autojump ]]; then
 	alias jumpstat="autojump --stat"
 	function j { new_path="$(autojump $@)";if [ -n "$new_path" ]; then echo -e "\\033[31m${new_path}\\033[0m"; cd "$new_path";fi }
 fi
-#
+ 
+# -------------------------------------------------------------------------------
 ## http://jeetworks.org/node/52
 gcd() {
     if [[ $(which git 2> /dev/null) ]]
