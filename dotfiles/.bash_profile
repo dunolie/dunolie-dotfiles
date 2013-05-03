@@ -44,63 +44,21 @@ L_YELLOW='\033[0;33m'
 GRAY='\033[1;30m'
 L_GRAY='\033[0;37m'
 #
-
-# source ~/.bashrc-dterm for the Dterm app
-if [[ $TERM_PROGRAM = "DTerm" ]]; then
-▷⋅⋅⋅source ~/.dunolie-dotfiles/dotfiles/.bashrc-dterm
-▷⋅⋅⋅return
-fi
-
-# so iTerm likes the dircolors output
-#export TERM=xterm-color
-#if [[ $TERM_PROGRAM == "iTerm.app" ]]; then
-#▷⋅⋅⋅export TERM=xterm-color
-#fi
-
 # -------------------------------------------------------------------------------
 #                        MY WELCOME MESSAGE
 # -------------------------------------------------------------------------------
-# List screen sessions. Attached or dettached
-function screenON () {
-SERVICEUP="screen"
-if ps ax | grep -v grep | grep $SERVICEUP > /dev/null
-then
-	echo -e "=-=-=-=-= ${GREEN} $(screen -ls)${NC}"
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-else
-	echo -e "=-=-=-=-= ${L_RED} There are no screen sessions on.${NC}"
-	echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-fi
-}
-# Shows what the name of the bootup disk is
-function bootdisk () {
-/usr/sbin/disktool -l | awk -F"'" '$4 == "/" {print $8}'
-}
-#
-#
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-echo -e   "    \033[1;37m.\033[1;30m~\033[1;37m.\033[0;0m        OS X:${L_CYAN} $(sw_vers -productVersion)${NC}"
-echo -en  "    \033[1;30m/\033[1;33mV\033[1;30m\\\\\033[0;0m    Computer:${L_CYAN} $(hostname) ${NC}"
-echo ""
-echo -en  "   \033[1;30m//\033[1;37m&\033[1;30m\\\\\\\\\033[0;0m   BootDisk:${L_CYAN} $(bootdisk)${NC}"
-echo ""
-echo -e   "  \033[1;30m/(\033[1;37m(@)\033[1;30m)\\\\\033[0;0m      User:${L_GREEN} $USER ${NC}"
-echo -e   "   \033[1;33m^\033[1;30m\`~'\033[1;33m^\033[0;0m       Time:${L_GREEN} $(date +%H:%M)${NC} on ${L_GREEN}$(date +%A) $(date +%d\ %B\,\ %G)${NC} "
+echo -e   "OS X:    ${L_GREEN} $(sw_vers -productVersion)${NC}"
+echo -e  "Computer:${L_GREEN} $(scutil --get ComputerName) ${NC}"
 echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#
 
 # only show ical data if the term is xterm-color
-if [ "$TERM" = "xterm-color" ]; then
+if [ "$TERM" = "xterm-256color" ]; then
 	if [[ -f /usr/local/bin/icalBuddy ]]; then
-		/usr/local/bin/icalBuddy -f -ec Weeknumbers eventsToday+1
-		echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+		/usr/local/bin/icalBuddy -f -ec F1 -ec Weeknumbers -eep notes eventsToday+2
 	fi
 fi
-
-echo -e "$(screenON)"
-echo -e "Bash Version: ${L_CYAN}${BASH_VERSION%.*}${NC} ~ ${L_CYAN}`which bash`${NC} Term: ${L_CYAN}`echo $TERM`${NC}"
-echo -e "=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-#
+# -------------------------------------------------------------------------------
 
 # if ~/.bashrc then source it
 if [ -f ~/.bashrc ]; then
@@ -117,11 +75,14 @@ else
 fi
 
 # set gnu-screen term to xterm-color so I get good titles in mocp and vim
-if [ "$TERM" = "screen" ]; then
-	export TERM=xterm-color
-fi
+#if [ "$TERM" = "screen" ]; then
+#	export TERM=xterm-color
+#fi
 
 # disable crashreporter. I find it hogs CPU usage
 #if [[ `uname` = "Darwin" ]]; then
 #	launchctl unload /System/Library/LaunchDaemons/com.apple.ReportCrash.plist
 #fi
+
+# Ruby Version manager
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*

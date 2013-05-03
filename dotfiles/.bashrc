@@ -2,7 +2,7 @@
 #         Author: Robbie -- dunolie (at) gmail (dot) com
 #      File name: my bashrc ($HOME/.bashrc)
 #        Created: Fri 11 Dec 2009 14:33:12 pm GMT
-#  Last Modified: Mon 18 Jan 2010 06:12:10 am GMT
+#  Last Modified: Wed May 01, 2013  05:19am
 # -------------------------------------------------------------------------------
 #       Comments: my bashrc, mainly osx centric
 #    Description:
@@ -128,7 +128,7 @@ export PATH=$PATH:/Developer/usr/bin:/Developer/usr/sbin:/usr/local/mysql/bin:/o
 #export PATH=$PATH:/System/library/Frameworks/Ruby.framework/Versions/1.8/usr/bin
 #export PATH=$PATH:/opt/local/Library/Frameworks/Python.framework/Versions/2.6/bin
 #export PATH=$PATH:/System/Library/Frameworks/Python.framework/Versions/Current/bin
-export PATH=$PATH:~/.gem/ruby/1.8/bin:~/.rvm/bin
+
 #
 # For non-root users, add the current directory to the search path:
 if [ ! "`id -u`" = "0" ]; then
@@ -142,12 +142,19 @@ source /Users/robbie/.rvm/scripts/rvm
 # my manual (man pages) paths
 export MANPATH=/usr/local/share/man:$MANPATH
 export MANPATH=/opt/X11/share/man:/usr/local/man:/usr/share/man:$MANPATH
-export MANPATH=$MANPATH:/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11/man:~/Sync/Bash/man
+export MANPATH=/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11/man:~/Sync/Bash/man
 #
+
+#export DYLD_LIBRARY_PATH="/usr/local/mysql/lib:$DYLD_LIBRARY_PATH"
 # perl paths
-#PERL5LIB="/Users/robbie/perl5/lib/perl5/:/System/Library/Perl/5.12"
-#export PERL5LIB
+export ARCHFLAGS="-arch i386 -arch x86_64"
+export VERSIONER_PERL_PREFER_32_BIT=no
+# OSX Default perl paths. installed via sudo 
+export PERL5LIB="/System/Library/Perl/5.12:/System/Library/Perl/5.10:/Library/Perl/5.12"
+# My perl paths installed via homebrew
+#export PERL5LIB="/Users/robbie/perl5/lib/perl5"
 #
+
 # Setting PATH for MacPython 2.5
 # The orginal version is saved in .bash_profile.pysave
 # PATH="/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}"
@@ -155,6 +162,13 @@ export MANPATH=$MANPATH:/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11
 #export PYTHONPATH=$PYTHONPATH"/System/Library/Frameworks/Python.framework/Versions/2.7/bin/:/System/Library/Frameworks/Python.framework/Versions/Current/bin/"
 
 ## Ruby Paths
+export PATH=$PATH:~/.gem/ruby/1.8/bin:~/.rvm/bin
+
+export RBENV_ROOT=/usr/local/var/rbenv
+
+#To enable shims and autocompletion add to your profile:
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+	
 # unset RUBYOPT
 # export GEM_HOME=/usr/local/lib/ruby/gems/1.8:/Library/Ruby/Gems/1.8
 # export RUBYLIB=/usr/local/lib/ruby:/usr/local/lib/ruby/site_ruby/1.8
@@ -277,6 +291,12 @@ fi
 #else
 #	export EDITOR='vim'
 #fi
+
+# vim aliases as I can't get it loaded in .vimrc :/
+alias vim='vim -c "colorscheme xoria256"'
+alias vi='vim -c "colorscheme xoria256"'
+alias v='vim -c "colorscheme xoria256"'
+
 export EDITOR="vim -c 'colorscheme xoria256'"
 export GIT_EDITOR="vim"
 export VISUAL="vim"
@@ -298,7 +318,7 @@ export LESS_TERMCAP_ue=$'\E[0m'           # end underline
 export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 
 #Set my Default Browser
-export BROWSER=FireFox.app
+export BROWSER="open -a FireFox.app"
 # --------------------------------------------------------------------------------
 #
 # set LC & LANG , iTerm does not handle UTF-8 fully otherwise :{
@@ -331,11 +351,6 @@ if [[ -z "${TZ}" ]] ; then
     export TZ='Europe/London'
 fi
 
-
-export RBENV_ROOT=/usr/local/var/rbenv
-
-#To enable shims and autocompletion add to your profile:
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 # -------------------------------------------------------------------------------
 #                       COMPILING FLAGS
 # -------------------------------------------------------------------------------
@@ -518,25 +533,25 @@ fi
 # -------------------------------------------------------------------------------
 #                          Make $HOME comfy
 # -------------------------------------------------------------------------------
-#
-if [ ! -d "${HOME}/bin" ]; then
-	mkdir ${HOME}/bin
-	chmod 700 ${HOME}/bin
-	echo -e "${CYAN}${ARROW19} ${HOME}/bin${NC} was missing. I created it for you. ${CYAN}:)${NC}"
-fi
-if [ ! -d "${HOME}/Documents" ]; then
-	if ! [  -d "${HOME}/data" ]; then
-		mkdir ${HOME}/data
-		chmod 700 ${HOME}/data
-		echo -e "${CYAN}${ARROW19} ${HOME}/data${NC} was missing. I created it for you. ${CYAN}:)${NC}"
-	fi
-fi
-if [ ! -d "${HOME}/tmp" ]; then
-	mkdir ${HOME}/tmp
-	chmod 700 ${HOME}/tmp
-	echo -e "${CYAN}${ARROW19} ${HOME}/tmp${NC} was missing. I created it for you. ${CYAN}:)${NC}"
-fi
-#
+#if [[ $USER = "robbie" ]]; then
+# 	if [ ! -d "${HOME}/bin" ]; then
+# 		mkdir ${HOME}/bin
+# 		chmod 700 ${HOME}/bin
+# 		echo -e "${CYAN}${ARROW19} ${HOME}/bin${NC} was missing. I created it for you. ${CYAN}:)${NC}"
+# 	fi
+# 	if [ ! -d "${HOME}/Documents" ]; then
+# 		if ! [  -d "${HOME}/data" ]; then
+# 			mkdir ${HOME}/data
+# 			chmod 700 ${HOME}/data
+# 			echo -e "${CYAN}${ARROW19} ${HOME}/data${NC} was missing. I created it for you. ${CYAN}:)${NC}"
+# 		fi
+# 	fi
+# 	if [ ! -d "${HOME}/tmp" ]; then
+# 		mkdir ${HOME}/tmp
+# 		chmod 700 ${HOME}/tmp
+# 		echo -e "${CYAN}${ARROW19} ${HOME}/tmp${NC} was missing. I created it for you. ${CYAN}:)${NC}"
+# 	fi
+#fi
 # -------------------------------------------------------------------------------
 #                        GPG
 # -------------------------------------------------------------------------------
@@ -833,9 +848,6 @@ _make()
 
 complete -F _make -X '+($*|*.[cho])' make gmake pmake
 
-
-
-
 # ----------------------------------------------------------------------------
 #                          SYMBOLS
 # ----------------------------------------------------------------------------
@@ -904,29 +916,9 @@ fi
 # -------------------------------------------------------------------------------
 #                        AUTOJUMP
 # -------------------------------------------------------------------------------
-#
-# auto jump https://github.com/joelthelion/Autojump
-[[ -s `brew --prefix`/etc/autojump.sh ]] && . `brew --prefix`/etc/autojump.sh
 
-if [[ -f /usr/local/bin/autojump ]]; then
-# http://github.com/joelthelion/autojump
-	_autojump() {
-	        local cur
-	        cur=${COMP_WORDS[*]:1}
-	        while read i
-	        do
-	            COMPREPLY=("${COMPREPLY[@]}" "${i}")
-	        done  < <(autojump --bash --completion $cur)
-	}
-	complete -F _autojump j
-	AUTOJUMP='{ (autojump -a "$(pwd -P)"&)>/dev/null 2>>${HOME}/.autojump_errors;} 2>/dev/null'
-	if [[ ! $PROMPT_COMMAND =~ autojump ]]; then
-	  export PROMPT_COMMAND="${PROMPT_COMMAND:-:} && $AUTOJUMP"
-	fi 
-	alias jumpstat="autojump --stat"
-	function j { new_path="$(autojump $@)";if [ -n "$new_path" ]; then echo -e "\\033[31m${new_path}\\033[0m"; cd "$new_path";fi }
-fi
- 
+#set $_Z_NO_PROMPT_COMMAND
+source /usr/local/bin/z.sh
 # -------------------------------------------------------------------------------
 ## http://jeetworks.org/node/52
 gcd() {

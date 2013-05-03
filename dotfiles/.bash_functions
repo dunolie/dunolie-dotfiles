@@ -1551,13 +1551,8 @@ function add-to-path ()
 
 # ---------------------------------------------
 function yt () {
-	if [[ "$PWD" = ~/Desktop ]]; then
-    	youtube-dl -t "$@"
-		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
-	else 
-    	cd ~/Desktop; youtube-dl -t "$@"
-		growlnotify -s -t "youtube DL's Finished" -m "~/Desktop"
-	fi
+	youtube-dl -o '/Volumes/Visual/YouTubes/New/%(title)s.%(ext)s' -f 22/35/34 --console-title --no-part --restrict-filenames "$@";
+	growlnotify -t "Youtube DL's Finished" -m "/Volumes/Visual/YouTubes/New"
 }
 
 # ---------------------------------------------
