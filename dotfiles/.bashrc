@@ -174,6 +174,12 @@ if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 # export RUBYLIB=/usr/local/lib/ruby:/usr/local/lib/ruby/site_ruby/1.8
 # export GEMDIR=`gem env gemdir`
 # export GEMDIR=/opt/local/lib/ruby/gems/1.8
+
+#git settings
+# http://defunkt.io/hub/
+if [[ -f /usr/local/bin/hub ]]; then
+	alias git='/usr/local/bin/hub'
+fi
 # -------------------------------------------------------------------------------
 #                        AUTO COMPLETION
 # -------------------------------------------------------------------------------
