@@ -141,8 +141,9 @@ source /Users/robbie/.rvm/scripts/rvm
 #
 # my manual (man pages) paths
 export MANPATH=/usr/local/share/man:$MANPATH
-export MANPATH=/opt/X11/share/man:/usr/local/man:/usr/share/man:$MANPATH
-export MANPATH=/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11/man:~/Sync/Bash/man
+export MANPATH=${MANPATH}/opt/X11/share/man:/usr/local/man:/usr/share/man
+export MANPATH=${MANPATH}/Developer/usr/share/man:/Developer/usr/X11/man:/usr/X11/man:~/Sync/Bash/man
+
 #
 
 #export DYLD_LIBRARY_PATH="/usr/local/mysql/lib:$DYLD_LIBRARY_PATH"
