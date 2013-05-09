@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
 #        Author: Robbie - dunolie (at) gmail (dot) com
-#     File name: 
-#       Created: TIMESTAMP        
-# Last Modified: TIMESTAMP
+#     File name: .aliases _bash
+#       Created:
+# Last Modified:
 #   Description: my bash aliases ~/.aliases_bash
 #      Comments: os x centered ~ a work in progress :)
 ################################################################################
@@ -16,6 +16,29 @@
 ##------------------------------------------------------------
 ## Script Comments if needed : try and keep it clean & commented :)
 ##-----------------------------------------------------------
+
+# http://rhnh.net/2011/08/20/vim-and-tmux-on-osx
+alias tmux="TERM=screen-256color-bce tmux"
+
+alias mz='mate ~/.zshrc'
+alias diff-side-by-side='diff --side-by-side -W"`tput cols`"'
+alias diff-side-by-side-changes='diff --side-by-side --suppress-common-lines -W"`tput cols`"'
+
+# clears isight from app to allow other to use it (imessages/skype)
+alias isight='sudo killall VDCAssistant'
+# bbc radio live streaming
+alias radio-bbc-scotland='iplayer --stream 80141 | mplayer -cache 256 -'
+alias radio-bbc-gael='iplayer --stream 80140 | mplayer -cache 256 -'
+alias radio-bbc-1='iplayer --stream 80131 | mplayer -cache 256 -'
+alias radio-bbc-2='iplayer --stream 80132 | mplayer -cache 256 -'
+alias radio-bbc-3='iplayer --stream 80133 | mplayer -cache 256 -'
+alias radio-bbc-4='iplayer --stream 80135 | mplayer -cache 256 -'
+alias radio-bbc-4extra='iplayer --stream 80134 | mplayer -cache 256 -'
+alias radio-bbc-london='iplayer --stream 80123 | mplayer -cache 256 -'
+
+alias modver="perl -e\"eval qq{use \\\$ARGV[0];\\\\\\\$v=\\\\\\\$\\\${ARGV[0]}::VERSION;};\ print\\\$@?qq{No module found\\n}:\\\$v?qq{Version \\\$v\\n}:qq{Found.\\n};\"\$1"
+# alias iplayg='get_iplayer -g "$1"'
+
 alias dl='curl -O'
 
 alias sha1='openssl sha1 "$@"'
@@ -46,15 +69,15 @@ alias slink='link -s "$1" "$2"'
 #alias ruby="/usr/bin/ruby"
 
 # gems
-alias addgem="sudo gem install \$1"
-alias updategems="sudo gem update"
-alias updategem="sudo gem update --system"
-alias cleangems="sudo gem clean"
-alias deletegem="sudo gem uninstall \$1"
-alias listgems="sudo gem list"
-alias gemin='sudo gem install'
-alias gems='gem search'
-alias gemsr='gem search --remote'
+#alias addgem="sudo gem install \$1"
+#alias updategems="sudo gem update"
+#alias updategem="sudo gem update --system"
+#alias cleangems="sudo gem clean"
+#alias deletegem="sudo gem uninstall \$1"
+#alias listgems="sudo gem list"
+#alias gemin='sudo gem install'
+#alias gems='gem search'
+#alias gemsr='gem search --remote'
 
 # VLC aliases
 alias vlcc='/Applications/VLC.app/Contents/MacOS/VLC'
@@ -137,6 +160,8 @@ alias rename-mp3s='eyeD3 --rename="%n - %t" *.mp3'
 
 alias nfo='eyeD3 --nfo .'
 
+# fixes the duplicate apps listed in open with osx menubar
+alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
 # http://hans.fugal.net/src/creme/ #timer with growl
 alias timer='/opt/local/bin/creme'
 
@@ -205,47 +230,45 @@ alias drmwma='mplayer -demuxer lavf -lavfdopts cryptokey=drm_sid_in_hex_format'
 alias drmwmv='mplayer -demuxer lavf -lavfdopts cryptokey=drm_sid_in_hex_format'
 
 ##-- IPLAYER  -----------
-alias iplayh='iplay --long-help > ~/Desktop/iplay-help.txt; vim ~/Desktop/iplay-help.txt'
+alias iplayh="get_iplayer --long-help > ~/Desktop/iplay-help.txt; vim ~/Desktop/iplay-help.txt"
 
-alias iplayu='iplay --update; iplay --manpage=/usr/local/share/man/man1/iplayer.1'
+#Using brew updates
+#alias iplayu="get_iplayer --update; iplay --manpage=/usr/local/share/man/man1/iplayer.1"
 
-alias iplay-film='iplay  --nocopyright --nopurge --category=Film'
+alias iplay-film="get_iplayer  --nocopyright --nopurge --category=Film | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-science='iplayer --nocopyright --nopurge --category=Science --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-science="get_iplayer --nocopyright --nopurge --category=Science | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-nature='iplayer --nocopyright --nopurge --category=Nature --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-nature="get_iplayer --nocopyright --nopurge --category=Nature | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-drama='iplayer --nocopyright --nopurge --category=Drama --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-drama="get_iplayer --nocopyright --nopurge --category=Drama | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-history='iplayer --nocopyright --nopurge --category=History --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-history="get_iplayer --nocopyright --nopurge --category=History | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplayi='iplayer --nopurge --nocopyright -i $1'
+alias iplayi="get_iplayer --nopurge --nocopyright -i $1"
 
-alias iplayd='iplayi "$@" | grep desc:'
+alias iplayd='get_iplayer $0 | grep desc:'
 #alias iplayd='iplayer --nopurge --nocopyright -i "$1" | grep desc:'
 
-alias iplay='iplayer --nopurge --nocopyright --exclude-category="Soaps|Entertainment|Games & Quizzes|News|Children|Antiques|Learning|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay="get_iplayer --nopurge --nocopyright | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-24='iplayer --nopurge --nocopyright --type=tv --since=24 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-24="get_iplayer --nopurge --nocopyright --type=tv --since=24 | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-48='iplayer --nopurge --nocopyright --since=48 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-48="get_iplayer --nopurge --nocopyright --since=48 | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-168='iplayer --nopurge --nocopyright --since=48 --exclude-category="Soaps|Entertainment|Games & Quizzes|Learning|News|Children|Antiques|Sitcoms|Rugby|Equestrian" --exclude-channel="BBC Parliament|BBC Alba|CBBC|CBeebies"'
+alias iplay-168="get_iplayer --nopurge --nocopyright --since=48 | grcat conf.iplayer | sed 's/BBC.*//p' | uniq -d"
 
-alias iplay-tv='iplayer --nopurge --nocopyright --type=livetv --pid "tv:$1" --stream | mplayer -cache 512 -'
+alias iplay-tv='get_iplayer --nopurge --nocopyright --type=livetv --pid "tv:$1" --stream | mplayer -cache 512 -'
 
-alias iplay-ltv='iplayer --nopurge --nocopyright --type=livetv'
+alias iplay-ltv='get_iplayer --nopurge --nocopyright --type=livetv'
 
-alias iplay-stv='iplayer --pid tv:$1 --stdout --nowrite | mplayer -cache 512 -'
+alias iplay-stv='get_iplayer --pid tv:$1 --stdout --nowrite | mplayer -cache 512 -'
 
-alias iplay-r='iplayer --nopurge --nocopyright --type=radio'
+alias iplay-r='get_iplayer --nopurge --nocopyright --type=radio'
 
-alias iplay-lr='iplayer --nopurge --nocopyright --type=liveradio'
+alias iplay-lr='get_iplayer --nopurge --nocopyright --type=liveradio'
 
-alias iplay-slr='iplayer --pid radio:$1 --amode=flashaac --stdout --nowrite | mplayer -cache 128 -'
-##-----------------------------------------------------------
-
-alias scrabble='java -jar /Applications/WordBiz/wordbiz.jar'
+alias iplay-slr='get_iplayer --pid radio:$1 --amode=flashaac --stdout --nowrite | mplayer -cache 128 -'
 
 ##-----------------------------------------------------------
 ##### RADIO
@@ -431,7 +454,6 @@ alias root='sudo su'
 # alias +1='popd -2'
 # alias +2='popd -3'
 # alias b='pushd +1'
-# alias d='dirs -v'
 # 
 # alias 1='popd +2'
 # alias 2='popd +3'
@@ -534,10 +556,10 @@ alias manv='open -a Man Viewer "$1"'
 ##------------------------------------------------------------
 # TEXT EDITOR ALIASES
 # Textmate alias'
-alias mate='/usr/bin/mate -r'
-alias matew='/usr/bin/mate -rw'
-alias m='/usr/bin/mate -r'
-alias mw='/usr/bin/mate -rw'
+alias mate='/usr/local/bin/mate -r'
+alias matew='/usr/local/bin/mate -rw'
+alias m='/usr/local/bin/mate -r'
+alias mw='/usr/local/bin/mate -rw'
 alias tm-bundle='cd /Library/Application\ Support/TextMate/ && svn up'
 ##------------------------------------------------------------
 # VIM
@@ -639,7 +661,7 @@ alias mycnf-h='m ~/.my.cnf'
 
 ##------------------------------------------------------------
 #list all source files
-listsource="ls *.c *.h"
+alias listsource="ls *.c *.h"
 
 ##------------------------------------------------------------
 alias mtr='sudo mtr'
