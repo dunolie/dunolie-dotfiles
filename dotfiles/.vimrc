@@ -2,12 +2,12 @@
 "         Author: Robbie -- dunolie (at) gmail (dot) com
 "      File Name: vimrc ($HOME/.vimrc)
 "        Created: Thu 26 Feb 2006 03:15:54 PM GMT-
-"  Last Modified: Wed May 01, 2013  04:03am
+"  Last Modified: Tue Mar 04, 2014  03:19am
 " ----------------------------------------------------------------------------
 "       Comments: mainly used on mac OS X
 "    Description: vim ftw
 " ----------------------------------------------------------------------------
-" TODO ~ learn more 
+" TODO ~ learn more
 " ----------------------------------------------------------------------------
 "                              REFERENCES
 " ----------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 "This must be first, because it changes other options as a side effect.
 set nocompatible
 "-----------------------------------------------------------------------
-set term=xterm-256color
+"set term=xterm-256color
 
 "store lots of :cmdline history
 set history=500
@@ -72,9 +72,9 @@ autocmd BufWritePre * call LastModified()
 "---------------------------------------------------------------------------
 " Colours
 " --------------------------------------------------------------------------
-"if &term =~# '^\(screen\|xterm\)$'
-"    set t_Co=256
-"endif
+if &term =~# '^\(screen\|xterm\)$'
+    set t_Co=256
+endif
 
 " This .vimrc file should be placed in your home directory
 " The Terminal app supports (at least) 16 colors
@@ -366,6 +366,13 @@ set listchars=tab:▷⋅,trail:•,nbsp:•
 "set lcs=tab:>-
 "set lcs+=trail:.
 " nmap <silent> <leader>s :set nolist!<CR>
+
+" Removes trailing spaces
+function! TrimWhiteSpace()
+    %s/\s\+$//e
+endfunction
+
+nnoremap <silent> <Leader>rts :call TrimWhiteSpace()<CR>
 "-----------------------------------------------------------------------
 " Window's and Buffers
 " Switch to alternate file
@@ -493,15 +500,15 @@ function! SeekIndentWarningOccurrence()
 endfunction
 
 function! SeekTrailingWhiteSpace()
-let [nws_line, nws_col] = searchpos('\s\+$', 'nw')
-if ( nws_line != 0 )
-exe "normal ".nws_line."G"
-" This would be nicer, but | doesn't seem to collapse \t in to 1 col?
-" exe "normal ".nws_col."|"
-" so i'll do this instead :( Might be a better way
-exe "normal 0"
-exe "normal ".(nws_col-1)."l"
-endif
+	let [nws_line, nws_col] = searchpos('\s\+$', 'nw')
+	if ( nws_line != 0 )
+		exe "normal ".nws_line."G"
+		" This would be nicer, but | doesn't seem to collapse \t in to 1 col?
+		" exe "normal ".nws_col."|"
+		" so i'll do this instead :( Might be a better way
+		exe "normal 0"
+		exe "normal ".(nws_col-1)."l"
+	endif
 endfunction
 
 " ----------------------------------------------------------------------------
@@ -585,10 +592,10 @@ let g:tex_flavor='LaTeX'
 
 " http://amix.dk/blog/viewEntry/162
 autocmd BufReadPost *
-\ if ! exists("g:leave_my_cursor_position_alone") |
-\ if line("'\"") > 0 && line ("'\"") <= line("$") |
-\ exe "normal g'\"" |
-\ endif |
+		\ if ! exists("g:leave_my_cursor_position_alone") |
+		\ if line("'\"") > 0 && line ("'\"") <= line("$") |
+		\ exe "normal g'\"" |
+	\ endif |
 \ endif
 
 " Always show the menu, insert longest match
@@ -772,91 +779,6 @@ map <F9> :exe ":!dict ".expand("<cword>")
 map <F14> gqap
 
 " ----------------------------------------------------------------------------
-
-" Update vim plugins automatically
-" http://jetpackweb.com/blog/2010/01/12/how-to-keep-your-vim-plugins-up-to-date/
-""let g:GetLatestVimScripts_allowautoinstall=1
-""set runtimepath+=~/.vim/vim-addon-manager
-""call vam#ActivateAddons([Nerdtree ctags])
-"
-"put thiss line first in ~/.vimrc
-set nocompatible | filetype indent plugin on | syn on
-
-fun! EnsureVamIsOnDisk(plugin_root_dir)
-  " windows users may want to use http://mawercer.de/~marc/vam/index.php
-  " to fetch VAM, VAM-known-repositories and the listed plugins
-  " without having to install curl, 7-zip and git tools first
-  " -> BUG [4] (git-less installation)
-  let vam_autoload_dir = a:plugin_root_dir.'/vim-addon-manager/autoload'
-  if isdirectory(vam_autoload_dir)
-    return 1
-  else
-    if 1 == confirm("Clone VAM into ".a:plugin_root_dir."?","&Y\n&N")
-      " I'm sorry having to add this reminder. Eventually it'll pay off.
-      call confirm("Remind yourself that most plugins ship with ".
-                  \"documentation (README*, doc/*.txt). It is your ".
-                  \"first source of knowledge. If you can't find ".
-                  \"the info you're looking for in reasonable ".
-                  \"time ask maintainers to improve documentation")
-      call mkdir(a:plugin_root_dir, 'p')
-      execute '!git clone --depth=1 git://github.com/MarcWeber/vim-addon-manager '.
-                  \       shellescape(a:plugin_root_dir, 1).'/vim-addon-manager'
-      " VAM runs helptags automatically when you install or update 
-      " plugins
-      exec 'helptags '.fnameescape(a:plugin_root_dir.'/vim-addon-manager/doc')
-    endif
-    return isdirectory(vam_autoload_dir)
-  endif
-endfun
-
-fun! SetupVAM()
-  " Set advanced options like this:
-  " let g:vim_addon_manager = {}
-  " let g:vim_addon_manager.key = value
-  "     Pipe all output into a buffer which gets written to disk
-  " let g:vim_addon_manager.log_to_buf =1
-
-  " Example: drop git sources unless git is in PATH. Same plugins can
-  " be installed from www.vim.org. Lookup MergeSources to get more control
-  " let g:vim_addon_manager.drop_git_sources = !executable('git')
-  " let g:vim_addon_manager.debug_activation = 1
-
-  " VAM install location:
-  let c = get(g:, 'vim_addon_manager', {})
-  let g:vim_addon_manager = c
-  let c.plugin_root_dir = expand('$HOME/.vim/vim-addons')
-  if !EnsureVamIsOnDisk(c.plugin_root_dir)
-    echohl ErrorMsg | echomsg "No VAM found!" | echohl NONE
-    return
-  endif
-  let &rtp.=(empty(&rtp)?'':',').c.plugin_root_dir.'/vim-addon-manager'
-
-  " Tell VAM which plugins to fetch & load:
-  call vam#ActivateAddons([], {'auto_install' : 0})
-  " sample: call vam#ActivateAddons(['pluginA','pluginB', ...], {'auto_install' : 0})
-
-  " Addons are put into plugin_root_dir/plugin-name directory
-  " unless those directories exist. Then they are activated.
-  " Activating means adding addon dirs to rtp and do some additional
-  " magic
-
-  " How to find addon names?
-  " - look up source from pool
-  " - (<c-x><c-p> complete plugin names):
-  " You can use name rewritings to point to sources:
-  "    ..ActivateAddons(["github:foo", .. => github://foo/vim-addon-foo
-  "    ..ActivateAddons(["github:user/repo", .. => github://user/repo
-  " Also see section "2.2. names of addons and addon sources" in VAM's documentation
-endfun
-call SetupVAM()
-" experimental [E1]: load plugins lazily depending on filetype, See
-" NOTES
-" experimental [E2]: run after gui has been started (gvim) [3]
-" option1:  au VimEnter * call SetupVAM()
-" option2:  au GUIEnter * call SetupVAM()
-" See BUGS sections below [*]
-" Vim 7.0 users see BUGS section [3]
-
 " Use SQL Server syntax file for .sql files
 let g:sql_type_default = "sqlserver"
 " Functions for cleaning up tabs and spaces
@@ -1259,6 +1181,11 @@ nmap <c-right> <c-w>l
 ""map T :TaskList<CR>
 "map P :TlistToggle<CR>
 " ----------------------------------------------------------------------------
+" ----------------------------------------------------------------------------
+" Update plugins with pathogen from ~/.vim/bundles
+" https://github.com/tpope/vim-pathogen
+execute pathogen#infect()
+" ----------------------------------------------------------------------------
 
 "jump to last cursor position when opening a file
 "dont do it when writing a commit log entry
@@ -1357,11 +1284,15 @@ noremap P P` [
 "  Strip all trailing whitespace in file
 " ---------------------------------------------------------------------------
 
-function! StripWhitespace ()
-	exec ':%s/ \+$//g'
-endfunction
-map ,s :call StripWhitespace ()<CR>
 
+""function! TrimWhiteSpace()
+""		%s/\s\+$//e
+""endfunction
+""map ,s :call TrimWhiteSpace ()<CR>
+
+set showbreak=↪
+nnoremap Q <nop>
+nnoremap <silent> <Leader>/ :nohlsearch<CR>
 " ----------------------------------------------------------------------------
 "                  File Types
 " ----------------------------------------------------------------------------
@@ -1378,7 +1309,11 @@ au FileType perl                set smartindent
 au FileType sh,make,perl,python let b:comment_leader = '# '
 au FileType tex                 let b:comment_leader = '% '
 
- colorscheme xoria256
+colorscheme xoria256
+
+autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+" set title in tmux
+
 " ----------------------------------------------------------------------------
 " ~/.vimrc ends here
 " ----------------------------------------------------------------------------
